@@ -13,6 +13,7 @@ import {
   TransactionPage
 } from "./features/shared";
 import UserDashboard from "./features/shared/UserDashboard";
+import CombinedDashboard from "./features/shared/CombinedDashboard";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import { LandingPage } from "./features/landing";
@@ -20,10 +21,12 @@ import {
   AllListings as ListingsPage,
   CreateListingPage,
 } from "./features/seller";
+import ProducerDashboard from "./features/seller/ProducerDashboard";
 import { 
   Marketplace,
   TransactionListing,
 } from "./features/buyer";
+import ConsumerDashboard from "./features/buyer/ConsumerDashboard";
 import { AdminDashboard } from "./features/admin";
 import BuyerAnalytics from "./features/buyer/pages/BuyerAnalytics";
 import SellerAnalytics from "./features/seller/pages/SellerAnalytics";
@@ -56,51 +59,78 @@ const App = () => {
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
-                {/* User Dashboard - accessible by all users except admin */}
+                {/* Producer Dashboard - for PRODUCER and BOTH roles */}
+                <Route path="/dashboard/producer" element={
+                  <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
+                    <ProducerDashboard />
+                  </RoleBasedRoute>
+                } />
+                
+                {/* Consumer Dashboard - for CONSUMER and BOTH roles */}
+                <Route path="/dashboard/consumer" element={
+                  <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
+                    <ConsumerDashboard />
+                  </RoleBasedRoute>
+                } />
+                
+                {/* Combined Dashboard - for BOTH role only */}
                 <Route path="/dashboard" element={
+                  <RoleBasedRoute allowedRoles={["BOTH"]}>
+                    <CombinedDashboard />
+                  </RoleBasedRoute>
+                } />
+                
+                {/* Legacy User Dashboard - kept for backward compatibility */}
+                <Route path="/dashboard/legacy" element={
                   <RoleBasedRoute allowedRoles={["user"]}>
                     <UserDashboard />
                   </RoleBasedRoute>
                 } />
                 
-                {/* User Routes - for buying and selling */}
+                {/* Marketplace - accessible by CONSUMER and BOTH */}
                 <Route path="/marketplace" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
+                  <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
                     <Marketplace />
                   </RoleBasedRoute>
                 } />
                 <Route path="/market" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
+                  <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
                     <Marketplace />
                   </RoleBasedRoute>
                 } />
+                
+                {/* Listings - accessible by PRODUCER and BOTH */}
                 <Route path="/listings" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
+                  <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
                     <ListingsPage />
                   </RoleBasedRoute>
                 } />
                 <Route path="/form" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
+                  <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
                     <CreateListingPage />
                   </RoleBasedRoute>
                 } />
+                
+                {/* Payment and Transactions - accessible by all energy trading roles */}
                 <Route path="/payment" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
+                  <RoleBasedRoute allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}>
                     <TransactionPage />
                   </RoleBasedRoute>
                 } />
                 <Route path="/transaction-listing" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
+                  <RoleBasedRoute allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}>
                     <TransactionListing />
                   </RoleBasedRoute>
                 } />
+                
+                {/* Analytics */}
                 <Route path="/buyer-analytics" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
+                  <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
                     <BuyerAnalytics />
                   </RoleBasedRoute>
                 } />
                 <Route path="/seller-analytics" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
+                  <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
                     <SellerAnalytics />
                   </RoleBasedRoute>
                 } />

@@ -48,6 +48,8 @@ const Navbar = () => {
           >
             Blog
           </Link>
+          
+          {/* Role-based navigation */}
           {user?.role === "admin" && (
             <Link
               to="/admin"
@@ -56,9 +58,34 @@ const Navbar = () => {
               Admin Panel
             </Link>
           )}
-          {user?.role === "user" && (
+          
+          {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
             <Link
-              to="/dashboard"
+              to="/form"
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
+            >
+              Sell Energy
+            </Link>
+          )}
+          
+          {(user?.role === "CONSUMER" || user?.role === "BOTH") && (
+            <Link
+              to="/marketplace"
+              className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
+            >
+              Buy Energy
+            </Link>
+          )}
+          
+          {user && (user.role === "PRODUCER" || user.role === "CONSUMER" || user.role === "BOTH") && (
+            <Link
+              to={
+                user.role === "PRODUCER" 
+                  ? "/dashboard/producer" 
+                  : user.role === "CONSUMER" 
+                  ? "/dashboard/consumer" 
+                  : "/dashboard"
+              }
               className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
             >
               Dashboard
@@ -133,6 +160,8 @@ const Navbar = () => {
               >
                 Blog
               </Link>
+              
+              {/* Role-based mobile navigation */}
               {user?.role === "admin" && (
                 <Link
                   to="/admin"
@@ -142,9 +171,36 @@ const Navbar = () => {
                   Admin Panel
                 </Link>
               )}
-              {user?.role === "user" && (
+              
+              {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
                 <Link
-                  to="/dashboard"
+                  to="/form"
+                  onClick={closeSheet}
+                  className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
+                >
+                  Sell Energy
+                </Link>
+              )}
+              
+              {(user?.role === "CONSUMER" || user?.role === "BOTH") && (
+                <Link
+                  to="/marketplace"
+                  onClick={closeSheet}
+                  className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
+                >
+                  Buy Energy
+                </Link>
+              )}
+              
+              {user && (user.role === "PRODUCER" || user.role === "CONSUMER" || user.role === "BOTH") && (
+                <Link
+                  to={
+                    user.role === "PRODUCER" 
+                      ? "/dashboard/producer" 
+                      : user.role === "CONSUMER" 
+                      ? "/dashboard/consumer" 
+                      : "/dashboard"
+                  }
                   onClick={closeSheet}
                   className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
                 >

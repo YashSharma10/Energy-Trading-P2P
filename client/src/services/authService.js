@@ -1,8 +1,8 @@
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/api";
 
-export const registerUser = async (email, password) => {
-  return api.post("/auth/register", { email, password });
+export const registerUser = async (email, password, name, role) => {
+  return api.post("/auth/register", { email, password, name, role });
 };
 
 export const verifyOTP = async (email, otp) => {
@@ -25,6 +25,6 @@ export const logoutUser = () => {
     title: "Logout Successfully",
   });
   setTimeout(() => {
-    window.location.href = "/login";
+    globalThis.location.href = "/login";
   }, 500);
 };

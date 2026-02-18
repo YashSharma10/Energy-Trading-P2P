@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import config from "../config/index.js";
 
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -11,8 +10,8 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, default: "" },
   role: { 
     type: String, 
-    enum: ["user", "admin"], 
-    default: "user" 
+    enum: ["PRODUCER", "CONSUMER", "BOTH", "admin"], 
+    required: true 
   },
   totalCredits: { type: Number, default: 0 },
   totalSpents: { type: Number, default: 0 },
@@ -56,9 +55,14 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 
 userSchema.methods.generateAuthToken = function () {
   const expiry = process.env.TOKEN_EXPIRY || "7d";
-  return jwt.sign({ userId: this._id }, process.env.JWT_SECRET, {
-    expiresIn: expiry,
-  });
+  return jwt.sign(
+    { 
+      userId: this._id, 
+      role: this.role 
+    }, 
+    process.env.JWT_SECRET, 
+    { expiresIn: expiry }
+  );
 };
 
 export default mongoose.model("User", userSchema);

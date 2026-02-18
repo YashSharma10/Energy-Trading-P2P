@@ -28,5 +28,35 @@ const authMiddleware = (req, res, next) => {
   });
 };
 
+// Role-based authorization middleware
+const roleMiddleware = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required",
+      });
+    }
+
+    const userRole = req.user.role;
+
+    // Handle BOTH role - can access both PRODUCER and CONSUMER routes
+    if (userRole === "BOTH") {
+      return next();
+    }
+
+    // Check if user's role is in the allowed roles
+    if (!allowedRoles.includes(userRole)) {
+      logger.warn(`User with role ${userRole} attempted to access route requiring ${allowedRoles.join(", ")}`);
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to access this resource",
+      });
+    }
+
+    next();
+  };
+};
+
 export default authMiddleware;
-export { authMiddleware };
+export { authMiddleware, roleMiddleware };

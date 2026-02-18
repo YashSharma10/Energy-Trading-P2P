@@ -30,11 +30,23 @@ const Login = () => {
     try {
       const { user } = await loginUser(email, password);
       setUser(user);
-      toast.success("Login successful! Redirecting to home...");
+      toast.success("Login successful! Redirecting...");
+      
+      // Role-based redirect
       setTimeout(() => {
-        navigate("/");
+        if (user.role === "PRODUCER") {
+          navigate("/dashboard/producer");
+        } else if (user.role === "CONSUMER") {
+          navigate("/dashboard/consumer");
+        } else if (user.role === "BOTH") {
+          navigate("/dashboard");
+        } else if (user.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
         globalThis.location.reload();
-      }, 2000);
+      }, 1000);
     } catch (error) {
       console.error("Login error:", error);
       setError("Invalid email or password. Please try again.");

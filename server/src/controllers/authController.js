@@ -8,7 +8,15 @@ const isDevelopment = config.nodeEnv === "development";
 
 export const register = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, name, role } = req.body;
+
+    // Validate role
+    if (!role || !["PRODUCER", "CONSUMER", "BOTH"].includes(role)) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Invalid role. Must be PRODUCER, CONSUMER, or BOTH" 
+      });
+    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -24,6 +32,8 @@ export const register = async (req, res) => {
     const newUser = new User({ 
       email, 
       password,
+      name: name || "",
+      role,
       isVerified: autoVerify // Auto-verify in development without email config
     });
     await newUser.save();
@@ -200,6 +210,8 @@ export const login = async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        name: user.name,
+        role: user.role,
         isVerified: user.isVerified
       }
     });
