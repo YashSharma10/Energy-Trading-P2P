@@ -15,6 +15,14 @@ export const loginUser = async (email, password) => {
   return data;
 };
 
+export const forgotPassword = async (email) => {
+  return api.post("/auth/forgot-password", { email });
+};
+
+export const resetPassword = async (email, otp, newPassword) => {
+  return api.post("/auth/reset-password", { email, otp, newPassword });
+};
+
 export const getProfile = async () => {
   return api.get("/auth/profile");
 };

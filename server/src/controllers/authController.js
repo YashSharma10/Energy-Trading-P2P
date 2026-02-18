@@ -248,3 +248,127 @@ export const profile = async (req, res) => {
   }
 };
 
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      // Don't reveal if email exists - security best practice
+      return res.status(200).json({ 
+        success: true,
+        message: "If an account exists with this email, a password reset link has been sent." 
+      });
+    }
+
+    // Generate OTP for password reset
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    // Delete any existing OTPs for this email
+    await OTP.deleteMany({ email });
+
+    // Create new OTP
+    await new OTP({ email, otp, expiresAt, purpose: "password-reset" }).save();
+
+    // Send email with OTP
+    await sendMail(
+      email, 
+      "Password Reset OTP", 
+      `Your password reset OTP is: ${otp}\n\nThis OTP will expire in 15 minutes.\n\nIf you didn't request this, please ignore this email.`
+    );
+
+    logger.info(`Password reset OTP sent to ${email}`);
+
+    res.json({ 
+      success: true,
+      message: "If an account exists with this email, a password reset link has been sent.",
+      expiresIn: "15 minutes"
+    });
+  } catch (error) {
+    logger.error("Forgot password error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to process password reset request" 
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ 
+        success: false,
+        message: "User not found" 
+      });
+    }
+
+    // Find and verify OTP
+    const otpRecord = await OTP.findOne({ email }).sort({ createdAt: -1 });
+    
+    if (!otpRecord) {
+      return res.status(400).json({ 
+        success: false,
+        message: "No OTP found. Please request a new password reset." 
+      });
+    }
+
+    // Check if OTP is expired
+    if (new Date() > otpRecord.expiresAt) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({ 
+        success: false,
+        message: "OTP has expired. Please request a new password reset." 
+      });
+    }
+
+    // Check if max attempts reached
+    if (otpRecord.attempts >= 3) {
+      await OTP.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({ 
+        success: false,
+        message: "Maximum verification attempts exceeded. Please request a new OTP." 
+      });
+    }
+
+    // Verify OTP
+    const isValid = await otpRecord.verifyOTP(otp);
+    
+    if (!isValid) {
+      otpRecord.attempts += 1;
+      await otpRecord.save();
+      
+      const attemptsLeft = 3 - otpRecord.attempts;
+      return res.status(400).json({ 
+        success: false,
+        message: `Invalid OTP. ${attemptsLeft} attempt(s) remaining.`,
+        attemptsLeft 
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    // Delete OTP after successful reset
+    await OTP.deleteMany({ email });
+
+    logger.info(`Password reset successful for ${email}`);
+
+    res.json({ 
+      success: true,
+      message: "Password reset successful. You can now login with your new password." 
+    });
+  } catch (error) {
+    logger.error("Reset password error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to reset password" 
+    });
+  }
+};
+

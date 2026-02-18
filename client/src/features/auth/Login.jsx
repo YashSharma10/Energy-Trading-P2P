@@ -169,9 +169,12 @@ const Login = () => {
 
               <p className="text-center text-sm text-muted-foreground">
                 Forgot your password?{" "}
-                <span className="font-medium text-foreground/80">
-                  Contact your workspace admin
-                </span>
+                <Link
+                  to="/forgot-password"
+                  className="font-medium text-brandMainColor transition-colors hover:text-brandMainColor/80 dark:text-brandSubColor dark:hover:text-brandSubColor/90"
+                >
+                  Reset it here
+                </Link>
               </p>
             </CardContent>
           </Card>

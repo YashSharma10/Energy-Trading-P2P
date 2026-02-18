@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ProtectedRoute, PublicRoute, RoleBasedRoute } from "./components/layout";
-import { Register, VerifyOTP, Login, Profile } from "./features/auth";
+import { Register, VerifyOTP, Login, Profile, ForgotPassword, ResetPassword } from "./features/auth";
 import { AuthProvider } from "./context/AuthContext";
 import { 
   AboutUs, 
@@ -49,6 +49,8 @@ const App = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-otp" element={<VerifyOTP />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/calculator" element={<CarbonEmissionCalculator />} />
                 <Route path="/coming" element={<ComingSoon />} />
