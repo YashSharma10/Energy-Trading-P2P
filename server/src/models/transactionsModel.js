@@ -30,12 +30,27 @@ const transactionSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["card", "upi", "other"],
+    enum: ["card", "upi", "blockchain", "other"],
     default: "other",
   },
   transactionHash: { type: String },
   purchaseDate: { type: Date, default: Date.now, index: true },
   completedAt: { type: Date },
+  
+  // Blockchain-specific fields
+  blockchain: {
+    enabled: { type: Boolean, default: false },
+    chainId: { type: Number }, // Ethereum chain ID
+    contractAddress: { type: String }, // Smart contract address
+    transactionHash: { type: String }, // Blockchain TX hash
+    blockNumber: { type: Number }, // Block number
+    gasUsed: { type: String }, // Gas used for transaction
+    buyerWallet: { type: String }, // Buyer's wallet address
+    sellerWallet: { type: String }, // Seller's wallet address
+    blockchainTransactionId: { type: String }, // Smart contract transaction ID
+    verified: { type: Boolean, default: false }, // Verified on blockchain
+    timestamp: { type: Date }, // Blockchain timestamp
+  },
 });
 
 export default mongoose.model("Transaction", transactionSchema);

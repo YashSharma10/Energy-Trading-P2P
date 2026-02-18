@@ -76,5 +76,21 @@ export const paymentSchema = Joi.object({
     "number.max": "Quantity must not exceed 1 billion",
     "any.required": "Quantity is required",
   }),
-  paymentMethod: Joi.string().valid("card", "upi").optional(),
+  paymentMethod: Joi.string().valid("card", "upi", "blockchain").optional(),
+  blockchain: Joi.object({
+    enabled: Joi.boolean().default(false).optional(),
+    buyerWallet: Joi.string()
+      .pattern(/^0x[a-fA-F0-9]{40}$/)
+      .optional()
+      .messages({
+        "string.pattern.base": "Invalid Ethereum wallet address",
+      }),
+    sellerWallet: Joi.string()
+      .pattern(/^0x[a-fA-F0-9]{40}$/)
+      .optional()
+      .messages({
+        "string.pattern.base": "Invalid Ethereum wallet address",
+      }),
+    chainId: Joi.number().optional(),
+  }).optional(),
 });

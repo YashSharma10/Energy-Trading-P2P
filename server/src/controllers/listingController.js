@@ -5,6 +5,7 @@ import logger from "../utils/logger.js";
 import mongoose from "mongoose";
 import { sendNotificationEmail, emailTemplates } from "../utils/emailNotifications.js";
 import { generateReceiptData } from "../utils/receiptGenerator.js";
+import blockchainService from "../services/blockchainService.js";
 
 // ✅ Create a new listing
 export const createListing = async (req, res) => {
@@ -316,7 +317,7 @@ export const getTransactionData = async (req, res) => {
 export const makePayment = async (req, res) => {
   try {
     const buyerId = req.user.userId;
-    const { listingId, quantity, paymentMethod } = req.body;
+    const { listingId, quantity, paymentMethod, blockchain } = req.body;
 
     // 1. Validate buyer exists
     const buyer = await userModel.findById(buyerId);
@@ -361,8 +362,8 @@ export const makePayment = async (req, res) => {
       { new: true }
     );
 
-    // 6. Create transaction record
-    const transaction = new transactionsModel({
+    // 6. Create transaction record with blockchain support
+    const transactionData = {
       listing: listingId,
       buyer: buyerId,
       seller: listing.seller,
@@ -373,11 +374,66 @@ export const makePayment = async (req, res) => {
       paymentMethod: paymentMethod || "other",
       transactionHash: `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       completedAt: Date.now(),
-    });
+    };
 
+    // 7. Handle blockchain payment if requested
+    if (blockchain && blockchain.enabled && blockchainService.isConfigured()) {
+      try {
+        const { buyerWallet, sellerWallet } = blockchain;
+
+        // Validate wallet addresses
+        if (!blockchainService.isValidAddress(buyerWallet)) {
+          throw new Error("Invalid buyer wallet address");
+        }
+        if (!blockchainService.isValidAddress(sellerWallet)) {
+          throw new Error("Invalid seller wallet address");
+        }
+
+        // Execute blockchain payment
+        const blockchainResult = await blockchainService.executePayment(
+          buyerWallet,
+          sellerWallet,
+          totalAmount,
+          quantity,
+          listingId
+        );
+
+        // Add blockchain details to transaction
+        transactionData.paymentMethod = "blockchain";
+        transactionData.blockchain = {
+          enabled: true,
+          chainId: blockchain.chainId || 11155111, // Sepolia testnet default
+          contractAddress: blockchainService.contractAddress,
+          transactionHash: blockchainResult.transactionHash,
+          blockNumber: blockchainResult.blockNumber,
+          gasUsed: blockchainResult.gasUsed.toString(),
+          buyerWallet,
+          sellerWallet,
+          blockchainTransactionId: blockchainResult.transactionHash,
+          verified: blockchainResult.success,
+          timestamp: new Date(),
+        };
+
+        logger.info(`Blockchain payment processed: ${blockchainResult.transactionHash}`);
+      } catch (blockchainError) {
+        logger.error("Blockchain payment failed:", blockchainError);
+        // Revert listing quantity since payment failed
+        await CarbonCredit.findByIdAndUpdate(
+          listingId,
+          {
+            $inc: { quantity: quantity },
+            status: "Available",
+            updatedAt: Date.now(),
+          }
+        );
+        throw new Error(`Blockchain payment failed: ${blockchainError.message}`);
+      }
+    }
+
+    const transaction = new transactionsModel(transactionData);
     await transaction.save();
 
-    // 7. Update buyer's transaction history and spending
+    // 8. Update buyer's transaction history and spending
     await userModel.findByIdAndUpdate(
       buyerId,
       {
@@ -386,7 +442,7 @@ export const makePayment = async (req, res) => {
       }
     );
 
-    // 8. Update seller's credits sold
+    // 9. Update seller's credits sold
     await userModel.findByIdAndUpdate(
       listing.seller,
       {
@@ -422,6 +478,7 @@ export const makePayment = async (req, res) => {
       buyer: buyerId,
       seller: listing.seller,
       amount: totalAmount,
+      method: transactionData.paymentMethod,
     });
 
     return res.status(200).json({
@@ -433,6 +490,11 @@ export const makePayment = async (req, res) => {
         quantity,
         totalAmount,
         creditsRemaining: newQuantity,
+        paymentMethod: transactionData.paymentMethod,
+        blockchain: transaction.blockchain.enabled ? {
+          transactionHash: transaction.blockchain.transactionHash,
+          verified: transaction.blockchain.verified,
+        } : null,
       },
     });
   } catch (error) {
