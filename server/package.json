@@ -4,11 +4,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon index.js",
-    "seed": "node src/scripts/seedData.js",
-    "add-listings": "node src/scripts/addListingsToUsers.js",
-    "add-transactions": "node src/scripts/addTransactionsToConsumers.js"
-  },
+    "dev": "NODE_ENV=local nodemon index.js",
+    "start": "NODE_ENV=dev node index.js",
+    "seed": "NODE_ENV=local node src/scripts/seedData.js",
+    "add-listings": "NODE_ENV=local node src/scripts/addListingsToUsers.js",
+    "add-transactions": "NODE_ENV=local node src/scripts/addTransactionsToConsumers.js"
+  }
   "keywords": [],
   "author": "",
   "license": "ISC",
