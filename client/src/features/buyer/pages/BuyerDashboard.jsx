@@ -137,7 +137,7 @@ const BuyerDashboard = () => {
             <div className="grid gap-6 sm:grid-cols-3">
               <Card className="border border-border/70 bg-card/90 p-6 shadow-xl">
                 <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                  <Leaf className="h-5 w-5 text-brandMainColor" /> Total credits
+                  <Leaf className="h-5 w-5 text-green-600 dark:text-green-400" /> Total credits
                   purchased
                 </div>
                 <CardContent className="mt-4 p-0">
@@ -152,7 +152,7 @@ const BuyerDashboard = () => {
               </Card>
               <Card className="border border-border/70 bg-card/90 p-6 shadow-xl">
                 <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                  <CheckCircle className="h-5 w-5 text-brandMainColor" /> Total
+                  <CheckCircle className="h-5 w-5 text-red-600 dark:text-red-400" /> Total
                   spend (₹)
                 </div>
                 <CardContent className="mt-4 p-0">
@@ -167,7 +167,7 @@ const BuyerDashboard = () => {
               </Card>
               <Card className="border border-border/70 bg-card/90 p-6 shadow-xl">
                 <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                  <Clock className="h-5 w-5 text-brandMainColor" /> Total orders
+                  <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" /> Total orders
                 </div>
                 <CardContent className="mt-4 p-0">
                   <NumberTicker

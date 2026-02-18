@@ -71,20 +71,20 @@ const TransactionListing = () => {
       title: "Total credits purchased",
       value: totals.totalCredits,
       subtext: "Across all completed transactions",
-      icon: <Leaf className="h-5 w-5 text-brandMainColor" />,
+      icon: <Leaf className="h-5 w-5 text-green-600 dark:text-green-400" />,
     },
     {
       title: "Total spent",
       value: totals.totalSpent,
       isCurrency: true,
       subtext: "In INR, excluding fees",
-      icon: <CheckCircle className="h-5 w-5 text-brandMainColor" />,
+      icon: <CheckCircle className="h-5 w-5 text-red-600 dark:text-red-400" />,
     },
     {
       title: "Total orders",
       value: recentPurchases.length,
       subtext: "Including pending settlements",
-      icon: <Clock className="h-5 w-5 text-brandMainColor" />,
+      icon: <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />,
     },
   ];
 
