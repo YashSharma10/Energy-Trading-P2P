@@ -20,6 +20,22 @@ export const registerSchema = Joi.object({
         "Password must contain at least one uppercase letter, one lowercase letter, and one number",
       "any.required": "Password is required",
     }),
+  name: Joi.string()
+    .min(2)
+    .max(100)
+    .optional()
+    .allow("")
+    .messages({
+      "string.min": "Name must be at least 2 characters long",
+      "string.max": "Name must not exceed 100 characters",
+    }),
+  role: Joi.string()
+    .valid("PRODUCER", "CONSUMER", "BOTH")
+    .required()
+    .messages({
+      "any.required": "Role is required",
+      "any.only": "Role must be either PRODUCER, CONSUMER, or BOTH",
+    }),
 });
 
 export const loginSchema = Joi.object({
