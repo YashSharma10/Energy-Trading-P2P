@@ -4,12 +4,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=local nodemon index.js",
-    "start": "NODE_ENV=dev node index.js",
-    "seed": "NODE_ENV=local node src/scripts/seedData.js",
-    "add-listings": "NODE_ENV=local node src/scripts/addListingsToUsers.js",
-    "add-transactions": "NODE_ENV=local node src/scripts/addTransactionsToConsumers.js"
-  }
+    "dev": "cross-env NODE_ENV=local nodemon index.js",
+    "start": "cross-env NODE_ENV=dev node index.js",
+    "seed": "cross-env NODE_ENV=local node src/scripts/seedData.js",
+    "add-listings": "cross-env NODE_ENV=local node src/scripts/addListingsToUsers.js",
+    "add-transactions": "cross-env NODE_ENV=local node src/scripts/addTransactionsToConsumers.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -29,6 +29,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "nodemon": "^3.1.9"
   }
 }
