@@ -394,13 +394,13 @@ const CombinedDashboard = () => {
                                 {listing.projectType || 'Energy Listing'}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                {listing.quantity} {listing.unit || 'kWh'}
+                                {listing.quantity} credits
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
                             <p className="font-bold text-lg text-foreground">
-                              {formatCurrency(listing.price)}
+                              {formatCurrency(listing.pricePerCredit)}
                             </p>
                             <Button 
                               size="sm"

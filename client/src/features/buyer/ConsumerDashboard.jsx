@@ -244,16 +244,16 @@ const ConsumerDashboard = () => {
                                 {listing.projectType || 'Energy Listing'}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                {listing.quantity} {listing.unit || 'kWh'}
+                                {listing.quantity} credits
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
                               <p className="font-bold text-lg text-foreground">
-                                {formatCurrency(listing.price)}
+                                {formatCurrency(listing.pricePerCredit)}
                               </p>
-                              <p className="text-xs text-muted-foreground">Per listing</p>
+                              <p className="text-xs text-muted-foreground">Per credit</p>
                             </div>
                             <Button 
                               size="sm"

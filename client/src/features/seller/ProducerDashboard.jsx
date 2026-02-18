@@ -244,7 +244,7 @@ const ProducerDashboard = () => {
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
-                              <p className="font-bold text-lg text-foreground">{formatCurrency(listing.price)}</p>
+                              <p className="font-bold text-lg text-foreground">{formatCurrency(listing.pricePerCredit)}</p>
                               <Badge variant="outline" className="text-green-600 border-green-600">
                                 {listing.status}
                               </Badge>

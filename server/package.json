@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "seed": "node src/scripts/seedData.js",
-    "add-listings": "node src/scripts/addListingsToUsers.js"
+    "add-listings": "node src/scripts/addListingsToUsers.js",
+    "add-transactions": "node src/scripts/addTransactionsToConsumers.js"
   },
   "keywords": [],
   "author": "",

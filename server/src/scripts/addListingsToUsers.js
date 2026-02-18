@@ -1,3 +1,40 @@
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+
+// Load environment variables - try multiple paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Try to find and load .env from server root
+const envPaths = [
+  path.resolve(__dirname, "../../.env"),  // When run from scripts folder
+  path.resolve(process.cwd(), ".env"),     // When run via npm from server root
+];
+
+let envLoaded = false;
+for (const envPath of envPaths) {
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+    console.log(`✓ Loaded .env from: ${envPath}`);
+    envLoaded = true;
+    break;
+  }
+}
+
+if (!envLoaded) {
+  console.warn("⚠ .env file not found in expected locations");
+  console.warn("Tried:", envPaths);
+}
+
+// Verify MONGODB_URI is loaded
+if (!process.env.MONGODB_URI) {
+  console.error("❌ ERROR: MONGODB_URI environment variable is not set!");
+  console.error("Make sure your .env file contains MONGODB_URI");
+  process.exit(1);
+}
+
 import User from "../models/userModel.js";
 import CarbonCredit from "../models/Listing.js";
 import connect from "../db/index.js";

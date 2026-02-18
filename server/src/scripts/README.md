@@ -37,6 +37,47 @@ This script:
 - Populating dashboards with listings quickly
 - Testing with fresh data without losing user accounts
 
+### 3. addTransactionsToConsumers.js - Add Transactions to Consumer Accounts (NEW)
+Adds purchase transactions for each consumer/buyer in the database (without dropping existing data).
+
+```bash
+npm run add-transactions
+```
+
+This script:
+1. Finds all existing CONSUMER and BOTH role users
+2. For each consumer, creates 2-5 random purchase transactions
+3. Randomly selects from available listings as purchase targets
+4. Ensures consumers don't buy from themselves
+5. Creates realistic purchase quantities (10-110 credits per transaction)
+6. Sets random purchase dates in the past (1-60 days ago)
+7. Marks all transactions as "completed" (historical data)
+8. Automatically links transactions to both buyer and seller records
+9. Updates user's totalSpents field based on transactions
+10. **Does NOT delete existing data**
+
+**Perfect for:**
+- Adding purchase history to consumer dashboards
+- Testing buyer analytics and transaction reporting
+- Populating transaction tables with realistic data
+- Calculating buyer statistics (total spent, purchase count)
+
+**Requirements:**
+- Must have existing consumers/BOTH users in the database
+- Must have available listings (run `npm run add-listings` first)
+
+**Workflow:**
+```bash
+# Step 1: Create new users with all roles
+npm run seed
+
+# Step 2: Add listings for sellers
+npm run add-listings
+
+# Step 3: Add transactions for buyers
+npm run add-transactions
+```
+
 ## Seeded Data
 
 ### 👤 Users (6 total)

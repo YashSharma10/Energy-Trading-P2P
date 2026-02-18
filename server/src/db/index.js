@@ -4,7 +4,14 @@ import config from "../config/index.js";
 
 const connect = async () => {
   try {
-    await mongoose.connect(config.mongodb.uri);
+    // Use process.env.MONGODB_URI directly if config.mongodb.uri is not available
+    const mongoUri = config.mongodb.uri || process.env.MONGODB_URI;
+    
+    if (!mongoUri) {
+      throw new Error("MONGODB_URI is not defined in environment variables or config");
+    }
+    
+    await mongoose.connect(mongoUri);
     logger.info("MongoDb connected successfully");
   } catch (error) {
     logger.error("MongoDb connection error:", error);
