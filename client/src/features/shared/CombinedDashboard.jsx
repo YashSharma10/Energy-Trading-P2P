@@ -16,10 +16,17 @@ import {
   History
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getAllListings, getPostedListings, getTransactionData } from "@/services/listingService";
+import { toast } from "sonner";
 
 const CombinedDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [myListings, setMyListings] = useState([]);
+  const [marketplaceListings, setMarketplaceListings] = useState([]);
+  const [sellerTransactions, setSellerTransactions] = useState([]);
+  const [buyerTransactions, setBuyerTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalEarnings: 0,
     totalSpent: 0,
@@ -30,24 +37,85 @@ const CombinedDashboard = () => {
   });
 
   useEffect(() => {
-    // TODO: Fetch real stats from API
-    // For now using mock data
-    setStats({
-      totalEarnings: 1250.5,
-      totalSpent: 850.75,
-      energySold: 450,
-      energyPurchased: 320,
-      activeListings: 5,
-      activePurchases: 3
-    });
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch all data in parallel
+      const [myListingsData, marketplaceData, transactionsData] = await Promise.all([
+        getPostedListings(),
+        getAllListings(),
+        getTransactionData()
+      ]);
+
+      // Set my listings (seller data)
+      const postedListings = myListingsData?.posted || [];
+      setMyListings(postedListings);
+
+      // Set marketplace listings (buyer data)
+      const availableListings = (marketplaceData?.data || []).filter(
+        listing => listing.status === 'Available'
+      );
+      setMarketplaceListings(availableListings);
+
+      // Get seller and buyer transactions
+      const sellerTxns = transactionsData?.data?.sellerTransactions || [];
+      const buyerTxns = transactionsData?.data?.transactions || [];
+      setSellerTransactions(sellerTxns);
+      setBuyerTransactions(buyerTxns);
+
+      // Calculate stats from real data
+      const totalEarnings = sellerTxns.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
+      const totalSpent = buyerTxns.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
+      const energySold = sellerTxns.reduce((sum, t) => sum + (t.quantity || 0), 0);
+      const energyPurchased = buyerTxns.reduce((sum, t) => sum + (t.quantity || 0), 0);
+
+      setStats({
+        totalEarnings,
+        totalSpent,
+        energySold,
+        energyPurchased,
+        activeListings: postedListings.filter(l => l.status === 'Available').length,
+        activePurchases: availableListings.length
+      });
+
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      toast.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format date helper
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    return date.toLocaleDateString();
+  };
+
+  // Format currency helper
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  };
 
   const netBalance = stats.totalEarnings - stats.totalSpent;
 
   const statsCards = [
     {
       title: "Total Earnings",
-      value: `$${stats.totalEarnings.toFixed(2)}`,
+      value: formatCurrency(stats.totalEarnings),
       description: "From selling energy",
       icon: TrendingUp,
       color: "text-green-600 dark:text-green-400",
@@ -55,7 +123,7 @@ const CombinedDashboard = () => {
     },
     {
       title: "Total Spent",
-      value: `$${stats.totalSpent.toFixed(2)}`,
+      value: formatCurrency(stats.totalSpent),
       description: "On purchasing energy",
       icon: DollarSign,
       color: "text-red-600 dark:text-red-400",
@@ -63,7 +131,7 @@ const CombinedDashboard = () => {
     },
     {
       title: "Net Balance",
-      value: `$${netBalance.toFixed(2)}`,
+      value: formatCurrency(netBalance),
       description: netBalance >= 0 ? "Profit" : "Loss",
       icon: ArrowLeftRight,
       color: netBalance >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400",
@@ -79,24 +147,23 @@ const CombinedDashboard = () => {
     }
   ];
 
-  const sellerListings = [
-    { id: 1, energy: "50 kWh", price: "$25.00", status: "Active", buyers: 3 },
-    { id: 2, energy: "100 kWh", price: "$48.00", status: "Active", buyers: 7 },
-    { id: 3, energy: "75 kWh", price: "$36.00", status: "Active", buyers: 2 },
-  ];
-
-  const buyerListings = [
-    { id: 1, seller: "Solar Farm A", energy: "50 kWh", price: "$24.50", rating: 4.8 },
-    { id: 2, seller: "Wind Energy Co", energy: "100 kWh", price: "$47.00", rating: 4.9 },
-    { id: 3, seller: "Green Power Inc", energy: "75 kWh", price: "$35.25", rating: 4.7 },
-  ];
-
-  const recentTransactions = [
-    { id: 1, type: "Sale", party: "John Doe", energy: "25 kWh", amount: "$12.50", date: "2 hours ago" },
-    { id: 2, type: "Purchase", party: "Wind Energy Co", energy: "50 kWh", amount: "-$23.50", date: "5 hours ago" },
-    { id: 3, type: "Sale", party: "Jane Smith", energy: "30 kWh", amount: "$15.00", date: "1 day ago" },
-    { id: 4, type: "Purchase", party: "Solar Farm A", energy: "40 kWh", amount: "-$19.00", date: "2 days ago" },
-  ];
+  // Combine and sort all transactions
+  const allTransactions = [
+    ...sellerTransactions.map(t => ({
+      ...t,
+      type: 'Sale',
+      party: t.buyer?.name || t.buyer?.email || 'Buyer',
+      isPositive: true,
+      amount: t.totalAmount
+    })),
+    ...buyerTransactions.map(t => ({
+      ...t,
+      type: 'Purchase',
+      party: t.seller?.name || t.seller?.email || 'Seller',
+      isPositive: false,
+      amount: t.totalAmount
+    }))
+  ].sort((a, b) => new Date(b.purchaseDate || b.createdAt) - new Date(a.purchaseDate || a.createdAt));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -137,27 +204,42 @@ const CombinedDashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
-          {statsCards.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.title} className="border-border/50">
+          {loading ? (
+            Array(4).fill(0).map((_, i) => (
+              <Card key={i} className="border-border/50">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </CardTitle>
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`h-4 w-4 ${stat.color}`} />
-                  </div>
+                  <div className="h-4 w-24 bg-muted animate-pulse rounded"></div>
+                  <div className="h-8 w-8 bg-muted animate-pulse rounded-lg"></div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {stat.description}
-                  </p>
+                  <div className="h-8 w-20 bg-muted animate-pulse rounded mb-2"></div>
+                  <div className="h-3 w-32 bg-muted animate-pulse rounded"></div>
                 </CardContent>
               </Card>
-            );
-          })}
+            ))
+          ) : (
+            statsCards.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <Card key={stat.title} className="border-border/50">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {stat.title}
+                    </CardTitle>
+                    <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                      <Icon className={`h-4 w-4 ${stat.color}`} />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stat.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
 
         {/* Main Content Tabs */}
@@ -192,32 +274,46 @@ const CombinedDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {sellerListings.map((listing) => (
-                      <div
-                        key={listing.id}
-                        className="flex items-center justify-between p-3 border border-border rounded-lg"
-                      >
-                        <div>
-                          <p className="font-semibold text-foreground">{listing.energy}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {listing.buyers} interested buyers
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-foreground">{listing.price}</p>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </div>
+                    {loading ? (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-muted-foreground">Loading...</p>
                       </div>
-                    ))}
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => navigate("/listings")}
-                    >
-                      View All
-                    </Button>
+                    ) : myListings.length === 0 ? (
+                      <div className="text-center py-4">
+                        <p className="text-sm text-muted-foreground">No listings yet</p>
+                      </div>
+                    ) : (
+                      <>
+                        {myListings.slice(0, 3).map((listing) => (
+                          <div
+                            key={listing._id}
+                            className="flex items-center justify-between p-3 border border-border rounded-lg"
+                          >
+                            <div>
+                              <p className="font-semibold text-foreground">
+                                {listing.quantity} {listing.unit || 'kWh'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {listing.projectType || 'Energy'}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-foreground">{formatCurrency(listing.price)}</p>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => navigate("/listings")}
+                        >
+                          View All
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -245,7 +341,7 @@ const CombinedDashboard = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Total Earnings</span>
                       <span className="font-bold text-green-600 dark:text-green-400">
-                        ${stats.totalEarnings.toFixed(2)}
+                        {formatCurrency(stats.totalEarnings)}
                       </span>
                     </div>
                     <Button 
@@ -274,40 +370,57 @@ const CombinedDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {buyerListings.map((listing) => (
-                    <div
-                      key={listing.id}
-                      className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                          <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-foreground">{listing.seller}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {listing.energy} • ⭐ {listing.rating}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <p className="font-bold text-lg text-foreground">{listing.price}</p>
-                        <Button 
-                          size="sm"
-                          className="bg-brandMainColor hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:hover:bg-brandSubColor/90"
-                        >
-                          Buy
-                        </Button>
-                      </div>
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">Loading listings...</p>
                     </div>
-                  ))}
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => navigate("/marketplace")}
-                  >
-                    Browse All Listings
-                  </Button>
+                  ) : marketplaceListings.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No listings available</p>
+                    </div>
+                  ) : (
+                    <>
+                      {marketplaceListings.slice(0, 3).map((listing) => (
+                        <div
+                          key={listing._id}
+                          className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                              <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-foreground">
+                                {listing.projectType || 'Energy Listing'}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {listing.quantity} {listing.unit || 'kWh'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <p className="font-bold text-lg text-foreground">
+                              {formatCurrency(listing.price)}
+                            </p>
+                            <Button 
+                              size="sm"
+                              className="bg-brandMainColor hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:hover:bg-brandSubColor/90"
+                              onClick={() => navigate(`/marketplace/${listing._id}`)}
+                            >
+                              Buy
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => navigate("/marketplace")}
+                      >
+                        Browse All Listings
+                      </Button>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -327,44 +440,56 @@ const CombinedDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentTransactions.map((transaction) => (
-                    <div
-                      key={transaction.id}
-                      className="flex items-center justify-between p-4 border border-border rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Badge 
-                          variant="outline" 
-                          className={transaction.type === "Sale" 
-                            ? "text-green-600 border-green-600" 
-                            : "text-blue-600 border-blue-600"
-                          }
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">Loading transactions...</p>
+                    </div>
+                  ) : allTransactions.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">No transactions yet</p>
+                    </div>
+                  ) : (
+                    <>
+                      {allTransactions.slice(0, 4).map((transaction) => (
+                        <div
+                          key={transaction._id}
+                          className="flex items-center justify-between p-4 border border-border rounded-lg"
                         >
-                          {transaction.type}
-                        </Badge>
-                        <div>
-                          <p className="font-semibold text-foreground">{transaction.party}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {transaction.energy} • {transaction.date}
+                          <div className="flex items-center gap-3">
+                            <Badge 
+                              variant="outline" 
+                              className={transaction.type === "Sale" 
+                                ? "text-green-600 border-green-600" 
+                                : "text-blue-600 border-blue-600"
+                              }
+                            >
+                              {transaction.type}
+                            </Badge>
+                            <div>
+                              <p className="font-semibold text-foreground">{transaction.party}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {transaction.quantity} credits • {formatDate(transaction.purchaseDate || transaction.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+                          <p className={`font-bold ${
+                            transaction.isPositive 
+                              ? "text-green-600 dark:text-green-400" 
+                              : "text-red-600 dark:text-red-400"
+                          }`}>
+                            {transaction.isPositive ? '+' : '-'}{formatCurrency(transaction.amount)}
                           </p>
                         </div>
-                      </div>
-                      <p className={`font-bold ${
-                        transaction.type === "Sale" 
-                          ? "text-green-600 dark:text-green-400" 
-                          : "text-red-600 dark:text-red-400"
-                      }`}>
-                        {transaction.amount}
-                      </p>
-                    </div>
-                  ))}
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => navigate("/transaction-listing")}
-                  >
-                    View All Transactions
-                  </Button>
+                      ))}
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => navigate("/transaction-listing")}
+                      >
+                        View All Transactions
+                      </Button>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

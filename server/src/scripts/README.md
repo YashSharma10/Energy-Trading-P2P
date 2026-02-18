@@ -1,21 +1,41 @@
-# Database Seed Script
+# Database Seed Scripts
 
-This directory contains the database seeding script to populate the CarbonEase application with sample data.
+This directory contains scripts to populate and manage the CarbonEase application database with sample data.
 
-## Usage
+## Available Scripts
 
-To seed the database with sample data, run:
+### 1. seedData.js - Full Database Seed
+Drops the entire database and creates fresh sample data from scratch.
 
 ```bash
 npm run seed
 ```
 
 This will:
-1. Clear all existing data from the database
+1. Drop all existing data from the database
 2. Create sample users
 3. Create sample carbon credit listings
 4. Create sample transactions
 5. Link all relationships between entities
+
+### 2. addListingsToUsers.js - Add Listings to Existing Users (NEW)
+Adds multiple listings to each existing user in the database (without dropping existing data).
+
+```bash
+npm run add-listings
+```
+
+This script:
+1. Finds all existing non-admin users
+2. For users with PRODUCER or BOTH role, creates 2-4 random listings
+3. Automatically links listings to user's `posted` array
+4. Generates random project types, locations, prices, and quantities
+5. **Does NOT delete existing data**
+
+**Perfect for:**
+- Adding test data to an existing database
+- Populating dashboards with listings quickly
+- Testing with fresh data without losing user accounts
 
 ## Seeded Data
 
