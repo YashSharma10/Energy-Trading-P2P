@@ -1,9 +1,6 @@
 import { Globe } from "@/components/animations/globe";
 import { GridPattern } from "@/components/animations/grid-pattern";
-import { PulsatingButton } from "@/components/animations/pulsating-button";
 import { cn } from "@/lib/utils";
-import { ArrowRight, DollarSign, ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
 
 function GlobeSection() {
   return (
@@ -31,29 +28,7 @@ function GlobeSection() {
 
       {/* Globe animation */}
       <Globe className="z-10 w-full h-full object-cover mt-20 opacity-90" />
-      {/* Buttons */}
-      <div className="absolute bottom-12 flex gap-8 justify-center w-full px-6 sm:px-0 z-20">
-        <Link to="/marketplace">
-          {/* Link to Marketplace */}
-          <PulsatingButton className="bg-card text-brandMainColor shadow-2xl transition-colors duration-200 hover:bg-brandMainColor/10">
-            <span className="flex items-center gap-2 whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight lg:text-lg">
-              <ShoppingCart className="w-5 h-5 text-brandMainColor" /> Buy
-              Carbon Credits
-              <ArrowRight className="w-5 h-5 text-brandMainColor" />{" "}
-            </span>
-          </PulsatingButton>
-        </Link>
-        <Link to="/dashboard">
-          {/* Link to Seller Dashboard */}
-          <PulsatingButton className="bg-card text-brandMainColor shadow-2xl border-2 border-brandMainColor transition-colors duration-200 hover:bg-brandMainColor/10">
-            <span className="flex items-center gap-2 whitespace-pre-wrap text-center text-sm font-medium leading-none tracking-tight lg:text-lg">
-              <DollarSign className="w-5 h-5 text-brandMainColor" /> Sell your
-              Credits
-              <ArrowRight className="w-5 h-5 text-brandMainColor" />{" "}
-            </span>
-          </PulsatingButton>
-        </Link>
-      </div>
+      
       <GridPattern
         squares={[
           [4, 4],
