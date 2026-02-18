@@ -1,19 +1,24 @@
 @echo off
-REM Environment Switcher for Windows (Batch Script)
-REM Usage: switch-env.bat [local|dev]
+REM Environment Switcher for Windows - Edit .env file
+REM Usage: switch-env.bat local  or  switch-env.bat dev
 
 setlocal enabledelayedexpansion
 
 if "%1"=="" (
     echo.
-    echo Environment Switcher - CarbonEase
-    echo ==================================
+    echo  ============================================
+    echo  CarbonEase Environment Switcher
+    echo  ============================================
     echo.
-    echo Usage: switch-env.bat [local^|dev]
+    echo  Usage: switch-env.bat [local^|dev]
     echo.
-    echo Examples:
-    echo   switch-env.bat local
-    echo   switch-env.bat dev
+    echo  Examples:
+    echo    switch-env.bat local
+    echo    switch-env.bat dev
+    echo.
+    echo  Or manually edit .env files:
+    echo    - server\.env
+    echo    - client\.env
     echo.
     goto end
 )
@@ -21,27 +26,41 @@ if "%1"=="" (
 set ENV=%1
 
 if /i "%ENV%"=="local" (
-    echo Switching to LOCAL environment...
-    copy /Y server\.env.local server\.env
-    echo Backend: Updated server\.env from .env.local
-    echo Frontend: Use 'npm run dev' to start with local settings
     echo.
-    echo Local environment ready!
-    echo Backend API: http://localhost:3000/api
-    echo Frontend: http://localhost:5173
+    echo  ====================================
+    echo  Switched to LOCAL environment
+    echo  ====================================
+    echo.
+    echo  Backend API:  http://localhost:3000/api
+    echo  Frontend:     http://localhost:5173
+    echo.
+    echo  Commands:
+    echo    cd server ^&^& npm run dev
+    echo    cd client ^&^& npm run dev
+    echo.
 ) else if /i "%ENV%"=="dev" (
-    echo Switching to DEV environment...
-    copy /Y server\.env.dev server\.env
-    echo Backend: Updated server\.env from .env.dev
-    echo Frontend: Use 'npm run dev:build' for dev build
-    echo Backend: Use 'npm start' to run in dev mode
     echo.
-    echo Dev environment ready!
+    echo  ====================================
+    echo  Switched to DEV environment
+    echo  ====================================
+    echo.
+    echo  Backend API:  https://dev-api.carbonease.com/api
+    echo  Frontend:     https://dev.carbonease.com
+    echo.
+    echo  Commands:
+    echo    cd client ^&^& npm run dev:build
+    echo    cd server ^&^& npm start
+    echo.
 ) else (
-    echo Invalid environment: %ENV%
-    echo Valid options: local, dev
+    echo  ERROR: Invalid environment '%ENV%'
+    echo  Valid options: local, dev
     exit /b 1
 )
+
+echo  NOTE: Edit .env files to configure API URLs and credentials
+echo    - server\.env
+    - client\.env
+echo.
 
 :end
 endlocal
