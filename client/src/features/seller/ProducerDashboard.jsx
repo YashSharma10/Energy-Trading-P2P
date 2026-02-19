@@ -12,13 +12,15 @@ import {
   Plus, 
   Eye,
   Activity,
-  BarChart3
+  BarChart3,
+  MessageCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getPostedListings, getTransactionData } from "@/services/listingService";
 import { toast } from "sonner";
 import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
 import MarketInsights from "@/components/MarketInsights";
+import LiveChatPanel from "@/components/common/LiveChatPanel";
 
 const ProducerDashboard = () => {
   const { user } = useAuth();
@@ -193,7 +195,7 @@ const ProducerDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="listings" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-xl grid-cols-4">
             <TabsTrigger value="listings">
               <Grid className="mr-2 h-4 w-4" />
               Listings
@@ -205,6 +207,10 @@ const ProducerDashboard = () => {
             <TabsTrigger value="analytics">
               <BarChart3 className="mr-2 h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="chat">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Live Chat
             </TabsTrigger>
           </TabsList>
 
@@ -353,6 +359,20 @@ const ProducerDashboard = () => {
                     View Detailed Analytics
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="chat" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Live Chat</CardTitle>
+                <CardDescription>
+                  Respond quickly to consumer inquiries and close deals faster.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LiveChatPanel />
               </CardContent>
             </Card>
           </TabsContent>

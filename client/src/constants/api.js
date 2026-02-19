@@ -2,6 +2,9 @@
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
+export const SOCKET_BASE_URL =
+  import.meta.env.VITE_SOCKET_URL || API_BASE_URL.replace(/\/api\/?$/, "");
+
 // API Endpoints
 export const API_ENDPOINTS = {
   // Auth
@@ -57,6 +60,15 @@ export const API_ENDPOINTS = {
     BY_SLUG: (slug) => `/blogs/${slug}`,
     BY_ID: (id) => `/blogs/${id}`,
     STATS: "/blogs/admin/stats",
+  },
+
+  // Chat
+  CHAT: {
+    BASE: "/chat",
+    USERS: "/chat/users",
+    CREATE: "/chat/create",
+    MESSAGES: (chatId) => `/chat/${chatId}/messages`,
+    SEND: "/chat/message",
   },
 };
 

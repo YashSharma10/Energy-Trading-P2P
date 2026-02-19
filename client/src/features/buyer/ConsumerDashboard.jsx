@@ -11,13 +11,15 @@ import {
   History, 
   TrendingDown,
   BarChart3,
-  Search
+  Search,
+  MessageCircle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getAllListings, getTransactionData } from "@/services/listingService";
 import { toast } from "sonner";
 import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
 import MarketInsights from "@/components/MarketInsights";
+import LiveChatPanel from "@/components/common/LiveChatPanel";
 
 const ConsumerDashboard = () => {
   const { user } = useAuth();
@@ -197,7 +199,7 @@ const ConsumerDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="marketplace" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-xl grid-cols-4">
             <TabsTrigger value="marketplace">
               <Search className="mr-2 h-4 w-4" />
               Marketplace
@@ -209,6 +211,10 @@ const ConsumerDashboard = () => {
             <TabsTrigger value="analytics">
               <BarChart3 className="mr-2 h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="chat">
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Live Chat
             </TabsTrigger>
           </TabsList>
 
@@ -366,6 +372,20 @@ const ConsumerDashboard = () => {
                     View Detailed Analytics
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="chat" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Live Chat</CardTitle>
+                <CardDescription>
+                  Connect with producers in real time to finalize energy deals.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LiveChatPanel />
               </CardContent>
             </Card>
           </TabsContent>

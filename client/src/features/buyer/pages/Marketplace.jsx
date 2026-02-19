@@ -34,6 +34,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ShoppingCart,
+  MessageCircle,
   Sparkles,
   Leaf,
   Eye,
@@ -47,6 +48,8 @@ import {
   LISTING_STATUS,
 } from "@/constants/api";
 import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
+import LiveChatPanel from "@/components/common/LiveChatPanel";
+import { toast } from "sonner";
 
 const Marketplace = () => {
   const navigate = useNavigate();
@@ -65,6 +68,9 @@ const Marketplace = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [pricingData, setPricingData] = useState(null);
   const [pricingLoading, setPricingLoading] = useState(false);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [chatParticipantId, setChatParticipantId] = useState(null);
+  const [chatParticipantName, setChatParticipantName] = useState("");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(PAGINATION.DEFAULT_PAGE);
@@ -411,6 +417,18 @@ const Marketplace = () => {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={chatDialogOpen} onOpenChange={setChatDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Chat with {chatParticipantName || "Seller"}</DialogTitle>
+            <DialogDescription>
+              Ask questions and finalize your carbon credit purchase.
+            </DialogDescription>
+          </DialogHeader>
+          <LiveChatPanel initialParticipantId={chatParticipantId} />
+        </DialogContent>
+      </Dialog>
+
       <div className="bg-background">
       <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
@@ -697,6 +715,25 @@ const Marketplace = () => {
                           }}
                         >
                           <Eye className="mr-2 h-4 w-4" /> Details
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="h-10 flex-1 text-sm font-semibold"
+                          onClick={() => {
+                            const sellerId = listing.seller?._id || listing.seller;
+                            if (!sellerId) {
+                              toast.error("Seller info not available for this listing");
+                              return;
+                            }
+
+                            setChatParticipantId(sellerId);
+                            setChatParticipantName(
+                              listing.seller?.email || listing.seller?.name || "Seller"
+                            );
+                            setChatDialogOpen(true);
+                          }}
+                        >
+                          <MessageCircle className="mr-2 h-4 w-4" /> Chat
                         </Button>
                         <Button
                           className="h-10 flex-1 bg-brandMainColor text-sm font-semibold text-white hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"

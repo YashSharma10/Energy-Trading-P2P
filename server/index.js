@@ -1,8 +1,10 @@
 import express from "express";
 import cors from "cors";
+import http from "http";
 import connect from "./src/db/index.js";
 import logger from "./src/utils/logger.js";
 import config from "./src/config/index.js";
+import initSocket from "./src/socket/index.js";
 
 // Initialize Express app
 const app = express();
@@ -20,6 +22,7 @@ import chatbotRoutes from "./src/routes/chatbotRoute.js";
 import ecoProductRoutes from "./src/routes/ecoProductRoute.js";
 import pricingRoutes from "./src/routes/pricingRoute.js";
 import blogRoutes from "./src/routes/blogRoute.js";
+import chatRoutes from "./src/routes/chatRoute.js";
 
 app.use((req, res, next) => {
   logger.info(`Received ${req.method} request to ${req.url}`);
@@ -35,13 +38,17 @@ app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/eco-products", ecoProductRoutes);
 app.use("/api/pricing", pricingRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Start Server
 const PORT = config.port;
 
 try {
   await connect();
-  app.listen(PORT, () => {
+  const httpServer = http.createServer(app);
+  initSocket(httpServer);
+
+  httpServer.listen(PORT, () => {
     logger.info(`🚀 Server is running on port ${PORT}`);
   });
 } catch (err) {
