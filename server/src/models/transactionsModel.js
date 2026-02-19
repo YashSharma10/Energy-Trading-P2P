@@ -34,6 +34,15 @@ const transactionSchema = new mongoose.Schema({
     default: "other",
   },
   transactionHash: { type: String },
+  // Blockchain-specific fields
+  blockchainTxHash: { type: String, index: true },
+  blockchainStatus: {
+    type: String,
+    enum: ["pending", "confirmed", "failed", "not_on_chain"],
+    default: "not_on_chain",
+  },
+  blockNumber: { type: Number },
+  smartContractReceipt: { type: Object },
   purchaseDate: { type: Date, default: Date.now, index: true },
   completedAt: { type: Date },
 });

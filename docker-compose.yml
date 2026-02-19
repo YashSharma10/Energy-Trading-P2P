@@ -1,0 +1,113 @@
+version: "3.8"
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: energy-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=carbonEase
+    networks:
+      - energy-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Blockchain Service
+  blockchain:
+    build:
+      context: ./blockchain-service
+      dockerfile: Dockerfile
+    container_name: energy-blockchain
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_PORT=5001
+      - FLASK_ENV=production
+      - NODE_SERVER_URL=http://server:3000
+    volumes:
+      - blockchain_data:/app/data
+    networks:
+      - energy-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:5001/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Mining Worker
+  worker:
+    build:
+      context: ./blockchain-service
+      dockerfile: Dockerfile
+    container_name: energy-worker
+    command: python worker.py
+    environment:
+      - FLASK_PORT=5001
+    depends_on:
+      - blockchain
+    networks:
+      - energy-network
+    restart: always
+
+  # Node.js API Server
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: energy-server
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/carbonEase
+      - BLOCKCHAIN_SERVICE_URL=http://blockchain:5001
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRY=7d
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      blockchain:
+        condition: service_healthy
+    networks:
+      - energy-network
+    restart: unless-stopped
+
+  # React Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: energy-client
+    ports:
+      - "5173:80"
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+    depends_on:
+      - server
+    networks:
+      - energy-network
+    restart: unless-stopped
+
+networks:
+  energy-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  blockchain_data:
+    driver: local

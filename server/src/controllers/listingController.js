@@ -3,8 +3,12 @@ import transactionsModel from "../models/transactionsModel.js";
 import userModel from "../models/userModel.js";
 import logger from "../utils/logger.js";
 import mongoose from "mongoose";
-import { sendNotificationEmail, emailTemplates } from "../utils/emailNotifications.js";
+import {
+  sendNotificationEmail,
+  emailTemplates,
+} from "../utils/emailNotifications.js";
 import { generateReceiptData } from "../utils/receiptGenerator.js";
+import blockchainClient from "../services/blockchainClient.js";
 
 // ✅ Create a new listing
 export const createListing = async (req, res) => {
@@ -14,16 +18,16 @@ export const createListing = async (req, res) => {
       ...req.body,
       seller: userId,
     };
-    
+
     const newListing = new CarbonCredit(listingData);
     const savedListing = await newListing.save();
-    
+
     await userModel.findByIdAndUpdate(
       userId,
       { $push: { posted: savedListing._id } },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
-    
+
     res.status(201).json({
       success: true,
       message: "Listing created successfully",
@@ -31,10 +35,10 @@ export const createListing = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error creating listing:", error);
-    res.status(400).json({ 
+    res.status(400).json({
       success: false,
       message: "Failed to create listing",
-      error: error.message 
+      error: error.message,
     });
   }
 };
@@ -42,11 +46,11 @@ export const createListing = async (req, res) => {
 // ✅ Get all listings with pagination and search
 export const getListings = async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      limit = 10, 
+    const {
+      page = 1,
+      limit = 10,
       search = "",
-      status = "Available"
+      status = "Available",
     } = req.query;
 
     const pageNum = parseInt(page, 10);
@@ -54,12 +58,12 @@ export const getListings = async (req, res) => {
     const skip = (pageNum - 1) * limitNum;
 
     let query = {};
-    
+
     // Add search if provided
     if (search) {
       query.$text = { $search: search };
     }
-    
+
     // Filter by status
     if (status && status !== "all") {
       query.status = status;
@@ -67,7 +71,7 @@ export const getListings = async (req, res) => {
 
     // Get total count for pagination
     const total = await CarbonCredit.countDocuments(query);
-    
+
     // Fetch listings with pagination
     const listings = await CarbonCredit.find(query)
       .populate("seller", "email")
@@ -89,10 +93,10 @@ export const getListings = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error fetching listings:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       message: "Failed to fetch listings",
-      error: error.message 
+      error: error.message,
     });
   }
 };
@@ -122,7 +126,7 @@ export const filterListings = async (req, res) => {
       page = 1,
       limit = 10,
       sortBy = "createdAt",
-      sortOrder = "desc"
+      sortOrder = "desc",
     } = req.query;
 
     const pageNum = parseInt(page, 10);
@@ -135,13 +139,13 @@ export const filterListings = async (req, res) => {
     if (status) filter.status = status;
     if (location) filter.location = { $regex: location, $options: "i" };
     if (verifiedBy) filter["verification.verifiedBy"] = verifiedBy;
-    
+
     if (minPrice || maxPrice) {
       filter.pricePerCredit = {};
       if (minPrice) filter.pricePerCredit.$gte = Number(minPrice);
       if (maxPrice) filter.pricePerCredit.$lte = Number(maxPrice);
     }
-    
+
     if (minQuantity || maxQuantity) {
       filter.quantity = {};
       if (minQuantity) filter.quantity.$gte = Number(minQuantity);
@@ -176,10 +180,10 @@ export const filterListings = async (req, res) => {
     });
   } catch (error) {
     logger.error("Error filtering listings:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       message: "Failed to filter listings",
-      error: error.message 
+      error: error.message,
     });
   }
 };
@@ -190,7 +194,7 @@ export const updateListing = async (req, res) => {
     const updatedListing = await CarbonCredit.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true },
     );
     if (!updatedListing)
       return res.status(404).json({ message: "Listing not found" });
@@ -215,16 +219,16 @@ export const deleteListing = async (req, res) => {
 export const deleteAllListings = async (req, res) => {
   try {
     await CarbonCredit.deleteMany({});
-    res.status(200).json({ 
+    res.status(200).json({
       success: true,
-      message: "All listings deleted successfully" 
+      message: "All listings deleted successfully",
     });
   } catch (error) {
     logger.error("Error deleting all listings:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       message: "Failed to delete listings",
-      error: error.message 
+      error: error.message,
     });
   }
 };
@@ -261,7 +265,7 @@ export const getTransactionData = async (req, res) => {
   try {
     const userId = req.user.userId;
     const user = await userModel.findById(userId).select("role");
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -273,7 +277,7 @@ export const getTransactionData = async (req, res) => {
     // Admin only sees admin-specific data
     let buyerTransactions = [];
     let sellerTransactions = [];
-    
+
     if (user.role !== "admin") {
       // Get seller transactions
       sellerTransactions = await transactionsModel
@@ -281,7 +285,7 @@ export const getTransactionData = async (req, res) => {
         .populate("listing", "title description projectType")
         .populate("buyer", "email name")
         .sort({ createdAt: -1 });
-      
+
       // Get buyer transactions
       const userData = await userModel
         .findById(userId)
@@ -293,7 +297,7 @@ export const getTransactionData = async (req, res) => {
           ],
         })
         .select("transactions");
-      
+
       buyerTransactions = userData?.transactions || [];
     }
 
@@ -318,7 +322,7 @@ export const makePayment = async (req, res) => {
     const buyerId = req.user.userId;
     const { listingId, quantity, paymentMethod } = req.body;
 
-    // 1. Validate buyer exists
+    // 1. Validate buyer exists and get blockchain address
     const buyer = await userModel.findById(buyerId);
     if (!buyer) {
       throw new Error("Buyer not found");
@@ -335,7 +339,9 @@ export const makePayment = async (req, res) => {
     }
 
     if (listing.quantity < quantity) {
-      throw new Error(`Insufficient credits available. Only ${listing.quantity} credits remaining.`);
+      throw new Error(
+        `Insufficient credits available. Only ${listing.quantity} credits remaining.`,
+      );
     }
 
     // 3. Prevent buying own credits
@@ -343,11 +349,49 @@ export const makePayment = async (req, res) => {
       throw new Error("You cannot purchase your own credits");
     }
 
-    // 4. Calculate amounts
+    // 4. Get seller information
+    const seller = await userModel.findById(listing.seller);
+    if (!seller) {
+      throw new Error("Seller not found");
+    }
+
+    // 5. Ensure blockchain addresses exist
+    if (!buyer.blockchainAddress) {
+      // Create wallet for buyer if not exists
+      try {
+        const walletData = await blockchainClient.createWallet();
+        buyer.blockchainAddress = walletData.data.address;
+        buyer.blockchainPublicKey = walletData.data.public_key;
+        await buyer.save();
+        logger.info(
+          `Created blockchain wallet for buyer: ${buyer.blockchainAddress}`,
+        );
+      } catch (blockchainError) {
+        logger.error("Failed to create buyer wallet:", blockchainError);
+        // Continue with transaction but mark as not on blockchain
+      }
+    }
+
+    if (!seller.blockchainAddress) {
+      // Create wallet for seller if not exists
+      try {
+        const walletData = await blockchainClient.createWallet();
+        seller.blockchainAddress = walletData.data.address;
+        seller.blockchainPublicKey = walletData.data.public_key;
+        await seller.save();
+        logger.info(
+          `Created blockchain wallet for seller: ${seller.blockchainAddress}`,
+        );
+      } catch (blockchainError) {
+        logger.error("Failed to create seller wallet:", blockchainError);
+      }
+    }
+
+    // 6. Calculate amounts
     const pricePerCredit = listing.pricePerCredit;
     const totalAmount = pricePerCredit * quantity;
 
-    // 5. Update listing quantity atomically
+    // 7. Update listing quantity atomically
     const newQuantity = listing.quantity - quantity;
     const newStatus = newQuantity === 0 ? "Sold" : "Available";
 
@@ -358,10 +402,10 @@ export const makePayment = async (req, res) => {
         status: newStatus,
         updatedAt: Date.now(),
       },
-      { new: true }
+      { new: true },
     );
 
-    // 6. Create transaction record
+    // 8. Create transaction record
     const transaction = new transactionsModel({
       listing: listingId,
       buyer: buyerId,
@@ -373,26 +417,63 @@ export const makePayment = async (req, res) => {
       paymentMethod: paymentMethod || "other",
       transactionHash: `TXN-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
       completedAt: Date.now(),
+      blockchainStatus: "pending", // Will be updated when mined
     });
 
     await transaction.save();
 
-    // 7. Update buyer's transaction history and spending
-    await userModel.findByIdAndUpdate(
-      buyerId,
-      {
-        $push: { transactions: transaction._id },
-        $inc: { totalSpents: totalAmount },
-      }
-    );
+    // 9. Record transaction on blockchain (non-blocking)
+    let blockchainTxHash = null;
+    let blockchainReceipt = null;
 
-    // 8. Update seller's credits sold
-    await userModel.findByIdAndUpdate(
-      listing.seller,
-      {
-        $inc: { totalCredits: quantity },
+    if (buyer.blockchainAddress && seller.blockchainAddress) {
+      try {
+        const blockchainResult = await blockchainClient.recordPayment({
+          buyerId: buyerId,
+          sellerId: listing.seller.toString(),
+          listingId: listingId,
+          quantity: quantity,
+          pricePerCredit: pricePerCredit,
+          totalAmount: totalAmount,
+          buyerAddress: buyer.blockchainAddress,
+          sellerAddress: seller.blockchainAddress,
+        });
+
+        if (blockchainResult.success) {
+          blockchainTxHash = blockchainResult.data.transaction.transaction_hash;
+          blockchainReceipt = blockchainResult.data.receipt;
+
+          // Update transaction with blockchain info
+          transaction.blockchainTxHash = blockchainTxHash;
+          transaction.blockchainStatus = "pending";
+          transaction.smartContractReceipt = blockchainReceipt;
+          await transaction.save();
+
+          logger.info(
+            `Transaction recorded on blockchain: ${blockchainTxHash}`,
+          );
+        }
+      } catch (blockchainError) {
+        logger.error("Failed to record on blockchain:", blockchainError);
+        // Transaction continues even if blockchain fails
+        transaction.blockchainStatus = "failed";
+        await transaction.save();
       }
-    );
+    } else {
+      transaction.blockchainStatus = "not_on_chain";
+      await transaction.save();
+    }
+
+    // 10. Update buyer's transaction history and spending
+    await userModel.findByIdAndUpdate(buyerId, {
+      $push: { transactions: transaction._id },
+      $inc: { totalSpents: totalAmount },
+    });
+
+    // 11. Update seller's credits sold
+    await userModel.findByIdAndUpdate(listing.seller, {
+      $inc: { totalCredits: quantity },
+    });
 
     // Send email notifications (non-blocking)
     const populatedTransaction = await transactionsModel
@@ -405,23 +486,23 @@ export const makePayment = async (req, res) => {
     sendNotificationEmail(
       buyer.email,
       emailTemplates.purchaseConfirmation,
-      populatedTransaction
-    ).catch(err => logger.error("Failed to send purchase email:", err));
+      populatedTransaction,
+    ).catch((err) => logger.error("Failed to send purchase email:", err));
 
     // Send sale notification to seller
-    const seller = await userModel.findById(listing.seller);
     if (seller) {
       sendNotificationEmail(
         seller.email,
         emailTemplates.listingSold,
-        populatedTransaction
-      ).catch(err => logger.error("Failed to send seller email:", err));
+        populatedTransaction,
+      ).catch((err) => logger.error("Failed to send seller email:", err));
     }
 
     logger.info(`Payment successful: ${transaction._id}`, {
       buyer: buyerId,
       seller: listing.seller,
       amount: totalAmount,
+      blockchainTx: blockchainTxHash || "not_recorded",
     });
 
     return res.status(200).json({
@@ -430,6 +511,8 @@ export const makePayment = async (req, res) => {
       data: {
         transactionId: transaction._id,
         transactionHash: transaction.transactionHash,
+        blockchainTxHash: blockchainTxHash,
+        blockchainStatus: transaction.blockchainStatus,
         quantity,
         totalAmount,
         creditsRemaining: newQuantity,
@@ -437,7 +520,7 @@ export const makePayment = async (req, res) => {
     });
   } catch (error) {
     logger.error("Payment failed:", error);
-    
+
     return res.status(400).json({
       success: false,
       message: error.message || "Payment failed",

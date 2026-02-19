@@ -8,10 +8,10 @@ const userSchema = new mongoose.Schema({
   name: { type: String, default: "" },
   company: { type: String, default: "" },
   phone: { type: String, default: "" },
-  role: { 
-    type: String, 
-    enum: ["PRODUCER", "CONSUMER", "BOTH", "admin"], 
-    required: true 
+  role: {
+    type: String,
+    enum: ["PRODUCER", "CONSUMER", "BOTH", "admin"],
+    required: true,
   },
   totalCredits: { type: Number, default: 0 },
   totalSpents: { type: Number, default: 0 },
@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema({
       ref: "Transaction",
     },
   ],
+  // Blockchain wallet fields
+  blockchainAddress: { type: String, default: "" },
+  blockchainPublicKey: { type: String, default: "" },
+  // Private key should never be stored in production
+  // Users should manage their own private keys
   isVerified: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
@@ -56,12 +61,12 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.methods.generateAuthToken = function () {
   const expiry = process.env.TOKEN_EXPIRY || "7d";
   return jwt.sign(
-    { 
-      userId: this._id, 
-      role: this.role 
-    }, 
-    process.env.JWT_SECRET, 
-    { expiresIn: expiry }
+    {
+      userId: this._id,
+      role: this.role,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: expiry },
   );
 };
 
