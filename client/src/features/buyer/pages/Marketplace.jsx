@@ -207,6 +207,14 @@ const Marketplace = () => {
     };
   }, [allListings]);
 
+  const trendingListings = useMemo(() => {
+    if (!allListings.length) return [];
+    // Get top 4 listings by price (highest first)
+    return allListings
+      .sort((a, b) => Number(b.pricePerCredit) - Number(a.pricePerCredit))
+      .slice(0, 4);
+  }, [allListings]);
+
   return (
     <>
       {/* Details Modal */}
@@ -495,6 +503,38 @@ const Marketplace = () => {
               </CardContent>
             </Card>
 
+            {/* Trending Section Below Filters */}
+            {!loading && trendingListings.length > 0 && (
+              <Card className="hidden lg:block border border-brandMainColor/40 dark:border-brandSubColor/40 bg-gradient-to-br from-brandMainColor/5 to-emerald-500/5 dark:from-brandSubColor/5 dark:to-lime-400/5 shadow-lg">
+                <CardHeader className="space-y-1">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Sparkles className="h-4 w-4 text-brandMainColor dark:text-brandSubColor" /> Trending Now
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {trendingListings.map((listing) => (
+                    <div
+                      key={listing._id}
+                      className="p-3 rounded-lg border border-border/40 bg-background/50 hover:border-brandMainColor/60 dark:hover:border-brandSubColor/60 transition-colors cursor-pointer group"
+                      onClick={() => {
+                        setSelectedListing(listing);
+                        setPricingData(null);
+                        setShowDetailsModal(true);
+                      }}
+                    >
+                      <p className="text-xs font-bold text-brandMainColor dark:text-brandSubColor mb-1">★ Hot Deal</p>
+                      <p className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-brandMainColor dark:group-hover:text-brandSubColor transition-colors">
+                        {listing.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        ₹{listing.pricePerCredit.toFixed(0)} <span className="text-xs">{listing.quantity} credits</span>
+                      </p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
             <div className="flex items-center justify-between gap-3 lg:hidden">
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
@@ -573,6 +613,13 @@ const Marketplace = () => {
           </div>
 
           <section className="space-y-6">
+            {/* All Listings Section */}
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <Leaf className="h-6 w-6 text-brandMainColor dark:text-brandSubColor" />
+                All Listings
+              </h2>
+            </div>
             {loading ? (
               <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                 {Array.from({ length: 6 }).map((_, idx) => (
