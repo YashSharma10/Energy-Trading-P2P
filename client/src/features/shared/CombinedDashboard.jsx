@@ -141,7 +141,7 @@ const CombinedDashboard = () => {
     },
     {
       title: "Energy Balance",
-      value: `${stats.energySold - stats.energyPurchased} kWh`,
+      value: `${stats.energySold - stats.energyPurchased} credits`,
       description: stats.energySold > stats.energyPurchased ? "Surplus sold" : "Net consumed",
       icon: Zap,
       color: "text-yellow-600 dark:text-yellow-400",
@@ -293,7 +293,7 @@ const CombinedDashboard = () => {
                           >
                             <div>
                               <p className="font-semibold text-foreground">
-                                {listing.quantity} {listing.unit || 'kWh'}
+                                {listing.quantity} {listing.unit || 'credits'}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {listing.projectType || 'Energy'}
@@ -338,7 +338,7 @@ const CombinedDashboard = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Energy Sold</span>
-                      <span className="font-bold text-foreground">{stats.energySold} kWh</span>
+                      <span className="font-bold text-foreground">{stats.energySold} credits</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Total Earnings</span>

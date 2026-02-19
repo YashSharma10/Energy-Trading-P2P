@@ -95,9 +95,14 @@ const ListingsPage = () => {
       (sum, listing) => sum + (Number(listing.quantity) || 0),
       0,
     );
+    const normalizePrice = (value) => {
+      const cleaned = String(value ?? "").replace(/[^0-9.-]/g, "");
+      const parsed = Number.parseFloat(cleaned);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
     const averagePrice = listings.length
       ? listings.reduce(
-          (sum, listing) => sum + (Number(listing.pricePerCredit) || 0),
+          (sum, listing) => sum + normalizePrice(listing.pricePerCredit),
           0,
         ) / listings.length
       : 0;
@@ -299,6 +304,13 @@ const ListingsPage = () => {
                         : status === "Sold"
                           ? "destructive"
                           : "secondary";
+                    const rawPrice = String(listing.pricePerCredit ?? "");
+                    const parsedPrice = Number.parseFloat(
+                      rawPrice.replace(/[^0-9.-]/g, ""),
+                    );
+                    const priceLabel = Number.isFinite(parsedPrice)
+                      ? parsedPrice.toLocaleString()
+                      : "0";
 
                     return (
                       <TableRow key={listing._id} className="last:border-0">
@@ -318,10 +330,7 @@ const ListingsPage = () => {
                         <TableCell>
                           {Number(listing.quantity || 0).toLocaleString()}
                         </TableCell>
-                        <TableCell>
-                          $
-                          {Number(listing.pricePerCredit || 0).toLocaleString()}
-                        </TableCell>
+                        <TableCell>${priceLabel}</TableCell>
                         <TableCell>
                           <Badge variant={badgeVariant} className="capitalize">
                             {status.toLowerCase()}

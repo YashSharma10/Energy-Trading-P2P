@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Zap } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Zap, TrendingUp, TrendingDown, Activity, RefreshCw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -18,6 +18,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useMarketInsights } from "@/hooks/useDynamicPricing";
+import { Switch } from "@/components/ui/switch";
 
 const emissionFactors = {
   electricity: 0.5, // kg CO2/kWh
@@ -42,6 +45,8 @@ const unitOptions = {
 };
 
 const CarbonEmissionCalculator = () => {
+  const { insights, loading: insightsLoading, refreshInsights } = useMarketInsights(true);
+  
   const [activities, setActivities] = useState(
     Object.keys(emissionFactors).map((type) => ({
       type,
@@ -52,8 +57,20 @@ const CarbonEmissionCalculator = () => {
 
   const [totalEmissions, setTotalEmissions] = useState(0);
   const [requiredCredits, setRequiredCredits] = useState(0);
-  const [creditCost, setCreditCost] = useState(10);
+  const [useMarketPrice, setUseMarketPrice] = useState(true);
+  const [customCreditCost, setCustomCreditCost] = useState(10);
   const [showResults, setShowResults] = useState(false);
+
+  // Calculate market average price from insights
+  const marketAveragePrice = insights?.averagePrice || 10;
+  const creditCost = useMarketPrice ? marketAveragePrice : customCreditCost;
+
+  // Update custom price when market price changes (first time)
+  useEffect(() => {
+    if (insights?.averagePrice && customCreditCost === 10) {
+      setCustomCreditCost(insights.averagePrice);
+    }
+  }, [insights?.averagePrice]);
 
   const handleActivityChange = (index, field, value) => {
     const updatedActivities = [...activities];
@@ -188,33 +205,128 @@ const CarbonEmissionCalculator = () => {
           <div className="flex flex-col gap-6 lg:sticky lg:top-24">
             <Card className="border border-border/70 bg-card/90 shadow-xl">
               <CardHeader>
-                <CardTitle className="text-xl font-semibold text-foreground">
-                  Credits and pricing
-                </CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
-                  Adjust credit cost to mirror your latest procurement
-                  benchmarks.
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl font-semibold text-foreground">
+                      Credits and pricing
+                    </CardTitle>
+                    <CardDescription className="text-sm text-muted-foreground">
+                      Dynamic market-based pricing for accurate cost estimation
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={refreshInsights}
+                    disabled={insightsLoading}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${insightsLoading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="credit-cost"
-                    className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-                  >
-                    Cost per carbon credit (USD)
+                {/* Market Price Display */}
+                <div className="rounded-lg border border-border/60 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-semibold text-foreground">Market Price</span>
+                    </div>
+                    <Badge variant="outline" className="text-blue-600 border-blue-600">
+                      Live
+                    </Badge>
+                  </div>
+                  
+                  {insightsLoading ? (
+                    <div className="space-y-2">
+                      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 animate-pulse"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-3xl font-bold text-foreground">
+                          ${marketAveragePrice.toFixed(2)}
+                        </span>
+                        <span className="text-sm text-muted-foreground">per credit</span>
+                      </div>
+                      
+                      {insights?.averagePriceChange !== undefined && (
+                        <div className="flex items-center gap-1 text-sm">
+                          {insights.averagePriceChange > 0 ? (
+                            <>
+                              <TrendingUp className="h-3 w-3 text-green-600 dark:text-green-400" />
+                              <span className="text-green-600 dark:text-green-400 font-medium">
+                                +${Math.abs(insights.averagePriceChange).toFixed(2)}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <TrendingDown className="h-3 w-3 text-red-600 dark:text-red-400" />
+                              <span className="text-red-600 dark:text-red-400 font-medium">
+                                -${Math.abs(insights.averagePriceChange).toFixed(2)}
+                              </span>
+                            </>
+                          )}
+                          <span className="text-muted-foreground ml-1">from average</span>
+                        </div>
+                      )}
+
+                      {/* Market Metrics */}
+                      {insights && (
+                        <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-border/30">
+                          <div className="text-center">
+                            <p className="text-xs text-muted-foreground mb-1">Demand</p>
+                            <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                              {(insights.averageDemandScore || 0).toFixed(0)}/100
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-muted-foreground mb-1">Supply</p>
+                            <p className="text-lg font-semibold text-purple-600 dark:text-purple-400">
+                              {(insights.averageSupplyScore || 0).toFixed(0)}/100
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Toggle between market and custom price */}
+                <div className="flex items-center justify-between space-x-2 rounded-lg border border-border/60 bg-muted/30 p-3">
+                  <Label htmlFor="market-price-toggle" className="text-sm font-medium cursor-pointer">
+                    Use Market Price
                   </Label>
-                  <Input
-                    id="credit-cost"
-                    type="number"
-                    className="border border-border bg-background/[0.85] text-foreground placeholder:text-muted-foreground focus:border-brandMainColor focus:ring-brandMainColor"
-                    value={creditCost}
-                    onChange={(e) =>
-                      setCreditCost(parseFloat(e.target.value) || 0)
-                    }
-                    placeholder="Enter cost per credit"
+                  <Switch
+                    id="market-price-toggle"
+                    checked={useMarketPrice}
+                    onCheckedChange={setUseMarketPrice}
                   />
                 </div>
+
+                {/* Custom price input (only show when not using market price) */}
+                {!useMarketPrice && (
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="custom-credit-cost"
+                      className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                    >
+                      Custom Cost per Credit (USD)
+                    </Label>
+                    <Input
+                      id="custom-credit-cost"
+                      type="number"
+                      className="border border-border bg-background/[0.85] text-foreground placeholder:text-muted-foreground focus:border-brandMainColor focus:ring-brandMainColor"
+                      value={customCreditCost}
+                      onChange={(e) =>
+                        setCustomCreditCost(parseFloat(e.target.value) || 0)
+                      }
+                      placeholder="Enter custom cost per credit"
+                    />
+                  </div>
+                )}
+
                 <Button
                   onClick={calculateEmissions}
                   className="w-full bg-brandMainColor text-sm font-semibold text-white hover:bg-brandMainColor/90"
