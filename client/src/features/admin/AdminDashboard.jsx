@@ -31,6 +31,7 @@ import {
   Shield,
   AlertCircle,
   Leaf,
+  BookOpen,
 } from "lucide-react";
 import { NumberTicker } from "@/components/magicui/number-ticker";
 import { Link } from "react-router-dom";
@@ -189,15 +190,26 @@ const AdminDashboard = () => {
               </p>
             </div>
           </div>
-          <Link to="/admin/eco-products">
-            <Button
-              size="sm"
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Leaf className="h-4 w-4 mr-2" />
-              Manage Eco Products
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link to="/admin/blogs">
+              <Button
+                size="sm"
+                className="bg-brandMainColor hover:bg-brandMainColor/90 text-white"
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                Manage Blogs
+              </Button>
+            </Link>
+            <Link to="/admin/eco-products">
+              <Button
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Leaf className="h-4 w-4 mr-2" />
+                Manage Eco Products
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 

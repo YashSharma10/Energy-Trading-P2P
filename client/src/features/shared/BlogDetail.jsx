@@ -1,16 +1,65 @@
 import { Link, useParams } from "react-router-dom";
-import { CalendarDays, Clock, Tag } from "lucide-react";
-
-import { blogPosts } from "@/constants/blogPosts";
+import { CalendarDays, Clock, Tag, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getBlogBySlug, getAllBlogs } from "@/services/blogService";
+import { toast } from "@/hooks/use-toast";
 
 export default function BlogDetail() {
   const { slug } = useParams();
-  const post = blogPosts.find((item) => item.slug === slug);
-  const relatedPosts = blogPosts
-    .filter((item) => item.slug !== slug)
-    .slice(0, 2);
+  const [post, setPost] = useState(null);
+  const [relatedPosts, setRelatedPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!post) {
+  useEffect(() => {
+    if (slug) {
+      fetchBlogData();
+    }
+  }, [slug]);
+
+  const fetchBlogData = async () => {
+    setLoading(true);
+    setNotFound(false);
+    try {
+      const [blogResponse, allBlogsResponse] = await Promise.all([
+        getBlogBySlug(slug),
+        getAllBlogs({ status: "published", limit: 3 }),
+      ]);
+
+      if (blogResponse.success) {
+        setPost(blogResponse.data);
+        const related = allBlogsResponse.data
+          .filter((item) => item.slug !== slug)
+          .slice(0, 2);
+        setRelatedPosts(related);
+      } else {
+        setNotFound(true);
+      }
+    } catch (error) {
+      console.error("Error fetching blog:", error);
+      if (error.response?.status === 404) {
+        setNotFound(true);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to load blog post",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-brandMainColor" />
+      </div>
+    );
+  }
+
+  if (notFound || !post) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center bg-background px-6 text-center">
         <span className="text-sm font-semibold uppercase tracking-wide text-brandMainColor">
@@ -70,36 +119,70 @@ export default function BlogDetail() {
       </section>
 
       <article className="mx-auto w-full max-w-5xl px-6 py-12 lg:px-8">
-        {post.heroQuote && (
-          <blockquote className="rounded-2xl border border-brandMainColor/40 bg-brandMainColor/10 p-6 text-center text-lg font-semibold text-brandMainColor shadow-sm dark:border-brandSubColor/40 dark:bg-brandSubColor/10 dark:text-brandSubColor">
-            “{post.heroQuote}”
-          </blockquote>
+        {post.imageUrl && (
+          <div className="mb-10">
+            <img
+              src={post.imageUrl}
+              alt={post.title}
+              className="w-full rounded-2xl object-cover shadow-lg"
+              style={{ maxHeight: "500px" }}
+            />
+          </div>
         )}
 
-        <div className="mt-10 space-y-12">
-          {post.sections.map((section) => (
-            <section key={section.heading} className="space-y-4">
-              <h2 className="text-2xl font-semibold text-foreground dark:text-white">
-                {section.heading}
-              </h2>
-              {section.paragraphs.map((paragraph) => (
-                <p
-                  key={paragraph}
-                  className="text-base leading-7 text-muted-foreground dark:text-white/80"
-                >
-                  {paragraph}
-                </p>
-              ))}
-              {section.bullets && section.bullets.length > 0 && (
-                <ul className="list-disc space-y-2 rounded-xl border border-border bg-background/80 p-5 pl-8 text-base text-muted-foreground dark:text-white/85">
-                  {section.bullets.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
+        <div className="prose prose-lg max-w-none dark:prose-invert">
+          {post.content?.split("\n").map((line, idx) => {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) return <br key={idx} />;
+
+            if (trimmedLine.startsWith("•") || trimmedLine.startsWith("-")) {
+              return (
+                <ul key={idx} className="list-disc space-y-2 pl-6">
+                  <li className="text-base leading-7 text-muted-foreground dark:text-white/80">
+                    {trimmedLine.replace(/^[•-]\s*/, "")}
+                  </li>
                 </ul>
-              )}
-            </section>
-          ))}
+              );
+            }
+
+            return (
+              <p
+                key={idx}
+                className="text-base leading-7 text-muted-foreground dark:text-white/80"
+              >
+                {trimmedLine}
+              </p>
+            );
+          })}
         </div>
+
+        {post.sections && (
+          <div className="mt-10 space-y-12">
+            {post.sections.map((section, idx) => (
+              <section key={idx} className="space-y-4">
+                <h2 className="text-2xl font-semibold text-foreground dark:text-white">
+                  {section.heading}
+                </h2>
+                {section.paragraphs &&
+                  section.paragraphs.map((paragraph, pIdx) => (
+                    <p
+                      key={pIdx}
+                      className="text-base leading-7 text-muted-foreground dark:text-white/80"
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                {section.bullets && section.bullets.length > 0 && (
+                  <ul className="list-disc space-y-2 rounded-xl border border-border bg-background/80 p-5 pl-8 text-base text-muted-foreground dark:text-white/85">
+                    {section.bullets.map((item, bIdx) => (
+                      <li key={bIdx}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            ))}
+          </div>
+        )}
       </article>
 
       {relatedPosts.length > 0 && (

@@ -1,6 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ProtectedRoute, PublicRoute, RoleBasedRoute } from "./components/layout";
-import { Register, VerifyOTP, Login, Profile, ForgotPassword, ResetPassword } from "./features/auth";
+import {
+  ProtectedRoute,
+  PublicRoute,
+  RoleBasedRoute,
+} from "./components/layout";
+import {
+  Register,
+  VerifyOTP,
+  Login,
+  Profile,
+  ForgotPassword,
+  ResetPassword,
+} from "./features/auth";
 import { AuthProvider } from "./context/AuthContext";
 import {
   AboutUs,
@@ -26,7 +37,7 @@ import {
 import ProducerDashboard from "./features/seller/ProducerDashboard";
 import { Marketplace, TransactionListing } from "./features/buyer";
 import ConsumerDashboard from "./features/buyer/ConsumerDashboard";
-import { AdminDashboard, AdminEcoProducts } from "./features/admin";
+import { AdminDashboard, AdminEcoProducts, AdminBlogs } from "./features/admin";
 import BuyerAnalytics from "./features/buyer/pages/BuyerAnalytics";
 import SellerAnalytics from "./features/seller/pages/SellerAnalytics";
 
@@ -166,7 +177,9 @@ const App = () => {
                 <Route
                   path="/market-insights"
                   element={
-                    <RoleBasedRoute allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}>
+                    <RoleBasedRoute
+                      allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}
+                    >
                       <MarketInsightsPage />
                     </RoleBasedRoute>
                   }
@@ -202,6 +215,14 @@ const App = () => {
                   element={
                     <RoleBasedRoute allowedRoles={["admin"]}>
                       <AdminEcoProducts />
+                    </RoleBasedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/blogs"
+                  element={
+                    <RoleBasedRoute allowedRoles={["admin"]}>
+                      <AdminBlogs />
                     </RoleBasedRoute>
                   }
                 />

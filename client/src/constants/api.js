@@ -50,6 +50,14 @@ export const API_ENDPOINTS = {
     DELETE: (id) => `/eco-products/${id}`,
     UPDATE: (id) => `/eco-products/${id}`,
   },
+
+  // Blogs
+  BLOGS: {
+    BASE: "/blogs",
+    BY_SLUG: (slug) => `/blogs/${slug}`,
+    BY_ID: (id) => `/blogs/${id}`,
+    STATS: "/blogs/admin/stats",
+  },
 };
 
 // HTTP Status Codes
