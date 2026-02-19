@@ -46,8 +46,9 @@ const SellerDashboard = () => {
       }
       setIsLoading(true);
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-        
+        const API_BASE_URL =
+          import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+
         // Fetch transactions
         const transactionsResponse = await axios.get(
           `${API_BASE_URL}/credits/payment-data`,
@@ -55,7 +56,7 @@ const SellerDashboard = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (Array.isArray(transactionsResponse.data.data?.sellerTransactions)) {
@@ -71,7 +72,7 @@ const SellerDashboard = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (Array.isArray(listingsResponse.data?.posted)) {
@@ -94,11 +95,11 @@ const SellerDashboard = () => {
   const metrics = useMemo(() => {
     const totalRevenue = recentPurchases.reduce(
       (sum, transaction) => sum + (Number(transaction.totalAmount) || 0),
-      0
+      0,
     );
     const totalCreditsSold = recentPurchases.reduce(
       (sum, transaction) => sum + (Number(transaction.quantity) || 0),
-      0
+      0,
     );
     const totalOrders = recentPurchases.length;
     const avgDealSize = totalOrders ? totalRevenue / totalOrders : 0;
@@ -107,7 +108,7 @@ const SellerDashboard = () => {
       return status === "pending";
     }).length;
     const activeListings = listings.filter(
-      (listing) => listing.status === "Available"
+      (listing) => listing.status === "Available",
     ).length;
     const totalListings = listings.length;
 
@@ -153,39 +154,37 @@ const SellerDashboard = () => {
   const statsCards = overviewCards;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-background/95 to-muted/30">
-      <section className="border-b border-border/60 bg-card/40 px-8 py-10 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <Badge
-                variant="secondary"
-                className="w-fit bg-primary/15 text-primary"
-              >
-                Seller Portal
-              </Badge>
-              <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
+    <div className="flex min-h-screen flex-col bg-background">
+      <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
+        <div className="mx-auto max-w-6xl px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <h1 className="text-lg font-semibold text-foreground leading-tight">
                 Sales performance dashboard
               </h1>
-              <p className="max-w-2xl text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Track revenue, credits sold, and buyer trends for your carbon
-                offset portfolio.
+                offset portfolio
               </p>
             </div>
-            <Button asChild variant="outline">
-              <Link to="/seller-analytics">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                View Analytics
-              </Link>
-            </Button>
           </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/seller-analytics">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              View Analytics
+            </Link>
+          </Button>
         </div>
-      </section>
+      </div>
 
       <section className="mt-10 px-8">
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
           {statsCards.map((card, index) => (
-            <Card key={index} className="border border-border/70 bg-card/90 shadow-xl">
+            <Card
+              key={index}
+              className="border border-border/70 bg-card/90 shadow-xl"
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
@@ -193,7 +192,9 @@ const SellerDashboard = () => {
                       {card.title}
                     </p>
                     <h3 className="text-2xl font-bold text-foreground">
-                      {card.isCurrency ? `₹${card.value.toLocaleString()}` : card.value.toLocaleString()}
+                      {card.isCurrency
+                        ? `₹${card.value.toLocaleString()}`
+                        : card.value.toLocaleString()}
                     </h3>
                     <p className="text-xs text-muted-foreground">
                       {card.description}
@@ -214,7 +215,9 @@ const SellerDashboard = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl font-semibold">Your Listings</CardTitle>
+                <CardTitle className="text-xl font-semibold">
+                  Your Listings
+                </CardTitle>
                 <p className="text-sm text-muted-foreground mt-1">
                   Manage your carbon credit listings
                 </p>
@@ -246,20 +249,26 @@ const SellerDashboard = () => {
                 <TableBody>
                   {listings.slice(0, 5).map((listing) => (
                     <TableRow key={listing._id}>
-                      <TableCell className="font-medium">{listing.title}</TableCell>
+                      <TableCell className="font-medium">
+                        {listing.title}
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline">{listing.projectType}</Badge>
                       </TableCell>
-                      <TableCell>{Number(listing.quantity || 0).toLocaleString()}</TableCell>
-                      <TableCell>₹{Number(listing.pricePerCredit || 0).toLocaleString()}</TableCell>
+                      <TableCell>
+                        {Number(listing.quantity || 0).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        ₹{Number(listing.pricePerCredit || 0).toLocaleString()}
+                      </TableCell>
                       <TableCell>
                         <Badge
                           variant={
                             listing.status === "Available"
                               ? "default"
                               : listing.status === "Sold"
-                              ? "secondary"
-                              : "outline"
+                                ? "secondary"
+                                : "outline"
                           }
                         >
                           {listing.status}

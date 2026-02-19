@@ -41,17 +41,18 @@ const ListingsPage = () => {
 
       setIsLoading(true);
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+        const API_BASE_URL =
+          import.meta.env.VITE_API_URL || "http://localhost:3000/api";
         const response = await axios.get(
           `${API_BASE_URL}/credits/posted-data`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
         setListings(
-          Array.isArray(response.data?.posted) ? response.data.posted : []
+          Array.isArray(response.data?.posted) ? response.data.posted : [],
         );
       } catch (error) {
         console.error("Error fetching listings:", error);
@@ -80,7 +81,7 @@ const ListingsPage = () => {
       ]
         .filter(Boolean)
         .some((value) =>
-          value.toLowerCase().includes(searchTerm.toLowerCase())
+          value.toLowerCase().includes(searchTerm.toLowerCase()),
         );
       return matchesStatus && matchesSearch;
     });
@@ -88,16 +89,16 @@ const ListingsPage = () => {
 
   const metrics = useMemo(() => {
     const activeListings = listings.filter(
-      (listing) => listing.status === "Available"
+      (listing) => listing.status === "Available",
     ).length;
     const totalVolume = listings.reduce(
       (sum, listing) => sum + (Number(listing.quantity) || 0),
-      0
+      0,
     );
     const averagePrice = listings.length
       ? listings.reduce(
           (sum, listing) => sum + (Number(listing.pricePerCredit) || 0),
-          0
+          0,
         ) / listings.length
       : 0;
 
@@ -111,7 +112,8 @@ const ListingsPage = () => {
 
   const handleStatusChange = async (id, status) => {
     try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const API_BASE_URL =
+        import.meta.env.VITE_API_URL || "http://localhost:3000/api";
       await axios.put(
         `${API_BASE_URL}/listings/${id}`,
         { status },
@@ -119,7 +121,7 @@ const ListingsPage = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setListings((prevListings) =>
         prevListings.map((listing) =>
@@ -128,8 +130,8 @@ const ListingsPage = () => {
                 ...listing,
                 status,
               }
-            : listing
-        )
+            : listing,
+        ),
       );
       toast({
         title: "Listing updated",
@@ -146,24 +148,24 @@ const ListingsPage = () => {
   };
 
   return (
-    <div className="flex min-h-full flex-col bg-gradient-to-b from-background via-background/95 to-muted/30">
-      <section className="border-b border-border/60 bg-card/40 px-8 py-10 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6">
-          <div className="space-y-2">
-            <Badge
-              variant="secondary"
-              className="w-fit bg-primary/15 text-primary"
-            >
-              Inventory
-            </Badge>
-            <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
+    <div className="flex min-h-full flex-col bg-background">
+      <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
+        <div className="mx-auto max-w-6xl px-8 py-4 flex items-center gap-2">
+          <SlidersHorizontal className="h-5 w-5 text-primary shrink-0" />
+          <div>
+            <h1 className="text-lg font-semibold text-foreground leading-tight">
               Manage your marketplace listings
             </h1>
-            <p className="max-w-2xl text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Keep your projects accurate and up to date so buyers can quickly
-              discover the credits that fit their climate goals.
+              discover your credits
             </p>
           </div>
+        </div>
+      </div>
+
+      <section className="border-b border-border/60 bg-card/40 px-8 py-6">
+        <div className="mx-auto max-w-6xl">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             <Card className="border border-border/60 bg-card shadow-sm">
               <CardHeader className="pb-2">
@@ -295,8 +297,8 @@ const ListingsPage = () => {
                       status === "Available"
                         ? "outline"
                         : status === "Sold"
-                        ? "destructive"
-                        : "secondary";
+                          ? "destructive"
+                          : "secondary";
 
                     return (
                       <TableRow key={listing._id} className="last:border-0">

@@ -14,7 +14,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock, Leaf, Sparkles, User, BarChart3 } from "lucide-react";
+import {
+  CheckCircle,
+  Clock,
+  Leaf,
+  Sparkles,
+  User,
+  BarChart3,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -33,7 +40,7 @@ const BuyerDashboard = () => {
           "http://localhost:3000/api/credits/payment-data",
           {
             headers: { Authorization: `Bearer ${token}` },
-          }
+          },
         );
 
         console.log("Posted Data", response.data.data?.transactions);
@@ -45,7 +52,7 @@ const BuyerDashboard = () => {
           // Calculate the total amount spent
           const total = transactions.reduce(
             (sum, transaction) => sum + (transaction.totalAmount || 0),
-            0
+            0,
           );
           setTotalAmount(total);
         } else {
@@ -63,7 +70,7 @@ const BuyerDashboard = () => {
     const orders = recentPurchases.length;
     const totalCredits = recentPurchases.reduce(
       (sum, tx) => sum + (Number(tx.quantity) || 0),
-      0
+      0,
     );
     return {
       totalSpent: totalAmount || 0,
@@ -73,66 +80,37 @@ const BuyerDashboard = () => {
   }, [recentPurchases, totalAmount]);
 
   return (
-    <div className="relative overflow-hidden bg-background">
-      <div className="absolute inset-0 bg-gradient-to-b from-brandMainColor/15 via-transparent to-transparent dark:from-brandSubColor/20" />
-      <div className="absolute left-16 top-16 hidden h-56 w-56 rounded-full bg-emerald-400/20 blur-3xl dark:bg-emerald-300/10 lg:block" />
-      <div className="absolute right-16 bottom-24 hidden h-64 w-64 rounded-full bg-lime-300/20 blur-3xl dark:bg-lime-200/10 lg:block" />
-
-      <main className="relative mx-auto max-w-6xl px-6 py-16 lg:px-0">
-        <section className="overflow-hidden rounded-3xl border border-border/70 bg-card/90 p-10 shadow-2xl backdrop-blur-sm">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-4">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1 text-sm font-medium text-primary dark:text-primary-foreground">
-                <Sparkles className="h-4 w-4" /> Buyer dashboard
-              </span>
-              <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                Your climate portfolio performance at a glance
+    <div className="bg-background">
+      <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
+        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <h1 className="text-lg font-semibold text-foreground leading-tight">
+                Buyer Dashboard
               </h1>
-              <p className="max-w-2xl text-lg text-muted-foreground">
-                Monitor purchases, understand spend, and keep stakeholders
-                aligned on the impact of every retired credit.
+              <p className="text-xs text-muted-foreground">
+                Monitor purchases, understand spend, and track your climate
+                portfolio
               </p>
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  asChild
-                  className="rounded-full bg-brandMainColor px-6 text-sm font-semibold text-white hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
-                >
-                  <Link to="/market">Browse marketplace</Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="rounded-full px-6 text-sm font-semibold"
-                >
-                  <Link to="/buyer-analytics">
-                    <BarChart3 className="mr-2 h-4 w-4" />
-                    View Analytics
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="rounded-full border-border/70 text-sm font-semibold"
-                >
-                  <Link to="/transaction-listing">View transactions</Link>
-                </Button>
-              </div>
             </div>
-            <Card className="flex max-w-sm flex-col items-center gap-4 border border-border/70 bg-background/80 p-6 shadow-xl">
-              <div className="rounded-full bg-brandMainColor/10 p-4 text-brandMainColor">
-                <User className="h-10 w-10" />
-              </div>
-              <CardTitle className="text-xl font-semibold text-foreground">
-                {user?.name || "CarbonEase Buyer"}
-              </CardTitle>
-              <CardDescription className="text-center text-sm text-muted-foreground">
-                {user?.email || "email@carbonease.com"}
-              </CardDescription>
-            </Card>
           </div>
-        </section>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/market">Browse marketplace</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/buyer-analytics">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Analytics
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
 
-        <section className="mt-10 grid gap-8 lg:grid-cols-[1.15fr,0.85fr]">
+      <main className="mx-auto max-w-6xl px-6 py-6">
+        <section className="grid gap-8 lg:grid-cols-[1.15fr,0.85fr]">
           <div className="space-y-8">
             <div className="grid gap-6 sm:grid-cols-3">
               <Card className="border border-border/70 bg-card/90 p-6 shadow-xl">
@@ -216,7 +194,8 @@ const BuyerDashboard = () => {
                             {order.seller?.name || "Unknown"}
                           </TableCell>
                           <TableCell className="text-sm text-foreground">
-                            {Number(order.quantity || 0).toLocaleString()} credits
+                            {Number(order.quantity || 0).toLocaleString()}{" "}
+                            credits
                           </TableCell>
                           <TableCell className="text-sm font-semibold text-foreground">
                             ₹{Number(order.totalAmount || 0).toLocaleString()}

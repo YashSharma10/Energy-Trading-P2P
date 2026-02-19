@@ -20,7 +20,8 @@ const BuyerAnalytics = () => {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
   useEffect(() => {
     fetchAnalytics();
@@ -42,17 +43,31 @@ const BuyerAnalytics = () => {
 
   const getMonthName = (month) => {
     const months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     return months[month - 1];
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-8">
-        <div className="mx-auto max-w-7xl space-y-6">
-          <Skeleton className="h-12 w-64" />
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-blue-50 dark:bg-blue-950/30">
+          <div className="mx-auto max-w-7xl px-8 py-4">
+            <Skeleton className="h-6 w-48" />
+          </div>
+        </div>
+        <div className="mx-auto max-w-7xl p-8 space-y-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {[...Array(4)].map((_, i) => (
               <Skeleton key={i} className="h-32" />
@@ -65,22 +80,31 @@ const BuyerAnalytics = () => {
 
   if (!analytics) return null;
 
-  const { summary, monthlySpending, creditsByType, recentTransactions } = analytics;
+  const { summary, monthlySpending, creditsByType, recentTransactions } =
+    analytics;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Buyer Analytics</h1>
-            <p className="text-muted-foreground">Track your carbon offset impact</p>
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border bg-blue-50 dark:bg-blue-950/30">
+        <div className="mx-auto max-w-7xl px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <PieChart className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <h1 className="text-lg font-semibold text-foreground leading-tight">
+                Buyer Analytics
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Track your carbon offset impact
+              </p>
+            </div>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
             Export Report
           </Button>
         </div>
-
+      </div>
+      <div className="mx-auto max-w-7xl p-8 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="border border-border/60 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950 dark:to-green-950 shadow-lg">
@@ -95,7 +119,9 @@ const BuyerAnalytics = () => {
                 value={summary.carbonOffsetTons}
                 className="text-3xl font-bold text-emerald-600 dark:text-emerald-400"
               />
-              <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Tons CO₂ offset</p>
+              <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                Tons CO₂ offset
+              </p>
             </CardContent>
           </Card>
 
@@ -113,7 +139,9 @@ const BuyerAnalytics = () => {
                 prefix="₹"
                 decimalPlaces={0}
               />
-              <p className="mt-1 text-xs text-muted-foreground">All-time spending</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                All-time spending
+              </p>
             </CardContent>
           </Card>
 
@@ -129,7 +157,9 @@ const BuyerAnalytics = () => {
                 value={summary.totalCreditsPurchased}
                 className="text-3xl font-bold"
               />
-              <p className="mt-1 text-xs text-muted-foreground">Total credits</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Total credits
+              </p>
             </CardContent>
           </Card>
 
@@ -145,7 +175,9 @@ const BuyerAnalytics = () => {
                 value={summary.totalTransactions}
                 className="text-3xl font-bold"
               />
-              <p className="mt-1 text-xs text-muted-foreground">Purchases made</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Purchases made
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -171,8 +203,12 @@ const BuyerAnalytics = () => {
                         className="h-full bg-gradient-to-r from-blue-500 to-cyan-500"
                         style={{
                           width: `${Math.min(
-                            (month.spending / Math.max(...monthlySpending.map((m) => m.spending))) * 100,
-                            100
+                            (month.spending /
+                              Math.max(
+                                ...monthlySpending.map((m) => m.spending),
+                              )) *
+                              100,
+                            100,
                           )}%`,
                         }}
                       />
@@ -221,8 +257,12 @@ const BuyerAnalytics = () => {
                         className="h-full bg-gradient-to-r from-emerald-500 to-green-500"
                         style={{
                           width: `${Math.min(
-                            (type.credits / Math.max(...creditsByType.map((t) => t.credits))) * 100,
-                            100
+                            (type.credits /
+                              Math.max(
+                                ...creditsByType.map((t) => t.credits),
+                              )) *
+                              100,
+                            100,
                           )}%`,
                         }}
                       />
@@ -249,15 +289,22 @@ const BuyerAnalytics = () => {
             <CardContent>
               <div className="space-y-4">
                 {recentTransactions.slice(0, 5).map((txn) => (
-                  <div key={txn._id} className="flex items-center justify-between border-b border-border/40 pb-3 last:border-0">
+                  <div
+                    key={txn._id}
+                    className="flex items-center justify-between border-b border-border/40 pb-3 last:border-0"
+                  >
                     <div>
-                      <div className="text-sm font-medium">{txn.listing?.title}</div>
+                      <div className="text-sm font-medium">
+                        {txn.listing?.title}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {new Date(txn.purchaseDate).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold text-sm">₹{txn.totalAmount.toLocaleString()}</div>
+                      <div className="font-semibold text-sm">
+                        ₹{txn.totalAmount.toLocaleString()}
+                      </div>
                       <Badge variant="outline" className="text-xs">
                         {txn.quantity} credits
                       </Badge>

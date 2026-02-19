@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { BookOpen } from "lucide-react";
 import { blogPosts } from "@/constants/blogPosts";
 
 const insights = [
@@ -22,21 +23,19 @@ const insights = [
 export default function Blog() {
   return (
     <div className="bg-background">
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-brandMainColor/20 via-background to-background py-16">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 text-center lg:px-8">
-          <span className="mx-auto inline-flex items-center rounded-full border border-brandMainColor/50 bg-brandMainColor/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-brandMainColor">
-            CarbonEase Blog
-          </span>
-          <h1 className="text-3xl font-bold text-foreground sm:text-4xl md:text-5xl dark:text-white">
-            Stories, playbooks, and trends powering credible climate action
-          </h1>
-          <p className="mx-auto max-w-3xl text-base text-muted-foreground dark:text-white/80">
-            Stay ahead of the carbon market with expert insights, platform
-            walkthroughs, and practical guidance for sustainability leaders,
-            buyers, and project developers.
-          </p>
+      <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
+        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-primary shrink-0" />
+          <div>
+            <h1 className="text-lg font-semibold text-foreground leading-tight">
+              Blog
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Stories, playbooks, and trends powering credible climate action
+            </p>
+          </div>
         </div>
-      </section>
+      </div>
 
       <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-12 lg:grid-cols-3 lg:px-8">
         {blogPosts.map((post) => (

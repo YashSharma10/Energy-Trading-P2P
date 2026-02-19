@@ -1,5 +1,6 @@
 // API Constants
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -10,7 +11,7 @@ export const API_ENDPOINTS = {
     VERIFY_OTP: "/auth/verify-otp",
     PROFILE: "/auth/profile",
   },
-  
+
   // Listings/Credits
   CREDITS: {
     BASE: "/credits",
@@ -21,7 +22,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id) => `/credits/${id}`,
     DELETE_ALL: "/credits/all/listings",
   },
-  
+
   // Admin
   ADMIN: {
     USERS: "/admin/users",
@@ -31,12 +32,22 @@ export const API_ENDPOINTS = {
     USER_ROLE: (id) => `/admin/users/${id}/role`,
     DELETE_LISTING: (id) => `/admin/listings/${id}`,
   },
-  
+
   // Analytics
   ANALYTICS: {
     SELLER: "/analytics/seller",
     BUYER: "/analytics/buyer",
     MARKET_TRENDS: "/analytics/market-trends",
+  },
+  ECO_PRODUCTS: {
+    BASE: "/eco-products",
+    BY_ID: (id) => `/eco-products/product/${id}`,
+    PURCHASE: "/eco-products/purchase",
+    MY_ORDERS: "/eco-products/my-orders",
+    ADMIN_ORDERS: "/eco-products/admin/orders",
+    ADMIN_STATS: "/eco-products/admin/stats",
+    DELETE: (id) => `/eco-products/${id}`,
+    UPDATE: (id) => `/eco-products/${id}`,
   },
 };
 
@@ -85,6 +96,19 @@ export const LISTING_STATUS = {
   SOLD: "Sold",
   PENDING: "Pending",
 };
+
+// Eco Product Categories
+export const ECO_PRODUCT_CATEGORIES = [
+  "Solar Equipment",
+  "Energy Storage",
+  "EV Accessories",
+  "Eco Home",
+  "Sustainable Fashion",
+  "Organic & Natural",
+  "Recycled Products",
+  "Water Conservation",
+  "Others",
+];
 
 // Payment Status
 export const PAYMENT_STATUS = {

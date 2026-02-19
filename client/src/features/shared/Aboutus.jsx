@@ -1,3 +1,4 @@
+import { Leaf } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -48,47 +49,22 @@ const keyPlayers = [
 
 const AboutUs = () => {
   return (
-    <div className="relative overflow-hidden bg-background">
-      <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 via-transparent to-transparent dark:from-emerald-500/20" />
-      <div className="absolute left-[10%] top-24 h-56 w-56 rounded-full bg-emerald-500/15 blur-3xl dark:bg-emerald-400/10" />
-      <div className="absolute right-[5%] top-64 h-72 w-72 rounded-full bg-lime-400/10 blur-3xl dark:bg-lime-300/10" />
-
-      <main className="relative mx-auto flex max-w-6xl flex-col gap-14 px-6 py-16 lg:px-0">
-        <section className="overflow-hidden rounded-3xl border border-border/60 bg-card/85 p-10 shadow-2xl backdrop-blur-sm">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-sm font-medium text-primary dark:text-primary-foreground">
-                About CarbonEase Marketplace
-              </span>
-              <h1 className="mt-5 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                Building the most trusted climate asset exchange
-              </h1>
-              <p className="mt-5 text-lg text-muted-foreground">
-                CarbonEase simplifies how teams discover, verify, and trade
-                carbon credits. We connect responsible buyers with high-impact
-                projects so every tonne retired moves the planet closer to net
-                zero.
-              </p>
-            </div>
-            <Card className="border-none bg-gradient-to-br from-brandMainColor/20 via-background to-background shadow-2xl dark:from-brandSubColor/25">
-              <CardContent className="space-y-4 p-8">
-                <CardTitle className="text-xl font-semibold text-foreground">
-                  Our north star
-                </CardTitle>
-                <CardDescription className="text-base leading-relaxed text-muted-foreground">
-                  Deliver the most transparent, data-rich marketplace for carbon
-                  assets—so sustainability leaders can act decisively and
-                  investors can fund tangible climate impact.
-                </CardDescription>
-                <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4 text-sm text-primary dark:text-primary-foreground/80">
-                  1 tonne of verified carbon removal, matched with the right
-                  buyer, unlocks lasting environmental and economic value.
-                </div>
-              </CardContent>
-            </Card>
+    <div className="bg-background">
+      <div className="border-b border-border bg-green-50 dark:bg-green-950/30">
+        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center gap-2">
+          <Leaf className="h-5 w-5 text-primary shrink-0" />
+          <div>
+            <h1 className="text-lg font-semibold text-foreground leading-tight">
+              About CarbonEase
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Building the most trusted climate asset exchange
+            </p>
           </div>
-        </section>
+        </div>
+      </div>
 
+      <main className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-8">
         <section className="grid gap-6 md:grid-cols-3">
           {highlights.map(({ title, description }) => (
             <Card

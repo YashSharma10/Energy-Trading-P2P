@@ -12,10 +12,14 @@ export const isAdmin = (req, res, next) => {
       });
     }
 
-    // User object should have role from JWT or populated from DB
-    // For now, we'll need to fetch user from DB to check role
-    // This will be improved after JWT includes role
-    
+    if (req.user.role !== "admin") {
+      logger.warn(`Non-admin user ${req.user.userId} attempted admin access`);
+      return res.status(403).json({
+        success: false,
+        message: "Admin access required",
+      });
+    }
+
     next();
   } catch (error) {
     logger.error("Admin check error:", error);

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Zap } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -46,7 +47,7 @@ const CarbonEmissionCalculator = () => {
       type,
       amount: 0,
       unit: unitOptions[type][0],
-    }))
+    })),
   );
 
   const [totalEmissions, setTotalEmissions] = useState(0);
@@ -74,21 +75,20 @@ const CarbonEmissionCalculator = () => {
 
   return (
     <div className="bg-background">
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-brandMainColor/15 via-background to-background py-16">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 text-center lg:px-8">
-          <span className="mx-auto inline-flex items-center rounded-full border border-brandMainColor/40 bg-brandMainColor/10 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-brandMainColor">
-            CarbonEase Tools
-          </span>
-          <h1 className="text-3xl font-bold text-foreground sm:text-4xl dark:text-white">
-            Carbon Emission Calculator
-          </h1>
-          <p className="mx-auto max-w-2xl text-base text-muted-foreground dark:text-white/80">
-            Estimate emissions across power, travel, and fuel usage. Generate
-            accurate offsets in minutes and translate them into verified carbon
-            credit requirements.
-          </p>
+      <div className="border-b border-border bg-yellow-50 dark:bg-yellow-950/30">
+        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center gap-2">
+          <Zap className="h-5 w-5 text-primary shrink-0" />
+          <div>
+            <h1 className="text-lg font-semibold text-foreground leading-tight">
+              Carbon Emission Calculator
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Estimate emissions across power, travel, and fuel usage and
+              translate them into verified carbon credits
+            </p>
+          </div>
         </div>
-      </section>
+      </div>
 
       <section className="mx-auto w-full max-w-6xl px-6 py-16 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.65fr,1fr]">
@@ -121,9 +121,9 @@ const CarbonEmissionCalculator = () => {
                         activity.type === "train"
                           ? "Mobility"
                           : activity.type === "electricity" ||
-                            activity.type === "naturalGas"
-                          ? "Energy"
-                          : "Fuel"}
+                              activity.type === "naturalGas"
+                            ? "Energy"
+                            : "Fuel"}
                       </p>
                       <h3 className="text-lg font-semibold text-foreground">
                         {activity.type.charAt(0).toUpperCase() +
@@ -150,7 +150,7 @@ const CarbonEmissionCalculator = () => {
                             handleActivityChange(
                               index,
                               "amount",
-                              parseFloat(e.target.value) || 0
+                              parseFloat(e.target.value) || 0,
                             )
                           }
                           placeholder={`Enter ${activity.type} usage`}

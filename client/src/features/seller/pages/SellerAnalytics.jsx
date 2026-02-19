@@ -28,7 +28,8 @@ const SellerAnalytics = () => {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
   useEffect(() => {
     fetchAnalytics();
@@ -50,17 +51,31 @@ const SellerAnalytics = () => {
 
   const getMonthName = (month) => {
     const months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     return months[month - 1];
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-8">
-        <div className="mx-auto max-w-7xl space-y-6">
-          <Skeleton className="h-12 w-64" />
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-blue-50 dark:bg-blue-950/30">
+          <div className="mx-auto max-w-7xl px-8 py-4">
+            <Skeleton className="h-6 w-48" />
+          </div>
+        </div>
+        <div className="mx-auto max-w-7xl p-8 space-y-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {[...Array(4)].map((_, i) => (
               <Skeleton key={i} className="h-32" />
@@ -76,19 +91,27 @@ const SellerAnalytics = () => {
   const { summary, monthlyRevenue, topBuyers, recentTransactions } = analytics;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 p-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Seller Analytics</h1>
-            <p className="text-muted-foreground">Track your sales performance and revenue</p>
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border bg-blue-50 dark:bg-blue-950/30">
+        <div className="mx-auto max-w-7xl px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <h1 className="text-lg font-semibold text-foreground leading-tight">
+                Seller Analytics
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Track your sales performance and revenue
+              </p>
+            </div>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" size="sm">
             <Download className="mr-2 h-4 w-4" />
             Export Report
           </Button>
         </div>
-
+      </div>
+      <div className="mx-auto max-w-7xl p-8 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="border border-border/60 bg-card shadow-lg">
@@ -105,7 +128,9 @@ const SellerAnalytics = () => {
                 prefix="₹"
                 decimalPlaces={0}
               />
-              <p className="mt-1 text-xs text-muted-foreground">All-time earnings</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                All-time earnings
+              </p>
             </CardContent>
           </Card>
 
@@ -121,7 +146,9 @@ const SellerAnalytics = () => {
                 value={summary.totalCreditsSold}
                 className="text-3xl font-bold"
               />
-              <p className="mt-1 text-xs text-muted-foreground">Total credits sold</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Total credits sold
+              </p>
             </CardContent>
           </Card>
 
@@ -137,7 +164,9 @@ const SellerAnalytics = () => {
                 value={summary.totalTransactions}
                 className="text-3xl font-bold"
               />
-              <p className="mt-1 text-xs text-muted-foreground">Completed sales</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Completed sales
+              </p>
             </CardContent>
           </Card>
 
@@ -153,7 +182,9 @@ const SellerAnalytics = () => {
                 value={summary.activeListings}
                 className="text-3xl font-bold"
               />
-              <p className="mt-1 text-xs text-muted-foreground">Available for sale</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Available for sale
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -179,8 +210,12 @@ const SellerAnalytics = () => {
                         className="h-full bg-gradient-to-r from-brandMainColor to-emerald-500"
                         style={{
                           width: `${Math.min(
-                            (month.revenue / Math.max(...monthlyRevenue.map((m) => m.revenue))) * 100,
-                            100
+                            (month.revenue /
+                              Math.max(
+                                ...monthlyRevenue.map((m) => m.revenue),
+                              )) *
+                              100,
+                            100,
                           )}%`,
                         }}
                       />
@@ -212,13 +247,17 @@ const SellerAnalytics = () => {
                 {topBuyers.map((buyer, idx) => (
                   <div key={idx} className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium">{buyer.name || buyer.email}</div>
+                      <div className="font-medium">
+                        {buyer.name || buyer.email}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {buyer.transactionCount} transactions
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">₹{buyer.totalSpent.toLocaleString()}</div>
+                      <div className="font-semibold">
+                        ₹{buyer.totalSpent.toLocaleString()}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -239,15 +278,22 @@ const SellerAnalytics = () => {
             <CardContent>
               <div className="space-y-4">
                 {recentTransactions.slice(0, 5).map((txn) => (
-                  <div key={txn._id} className="flex items-center justify-between border-b border-border/40 pb-3 last:border-0">
+                  <div
+                    key={txn._id}
+                    className="flex items-center justify-between border-b border-border/40 pb-3 last:border-0"
+                  >
                     <div>
-                      <div className="text-sm font-medium">{txn.listing?.title}</div>
+                      <div className="text-sm font-medium">
+                        {txn.listing?.title}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {new Date(txn.purchaseDate).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold text-sm">₹{txn.totalAmount.toLocaleString()}</div>
+                      <div className="font-semibold text-sm">
+                        ₹{txn.totalAmount.toLocaleString()}
+                      </div>
                       <Badge variant="outline" className="text-xs">
                         {txn.quantity} credits
                       </Badge>
