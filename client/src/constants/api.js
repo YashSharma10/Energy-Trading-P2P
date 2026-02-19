@@ -43,6 +43,7 @@ export const API_ENDPOINTS = {
     BASE: "/eco-products",
     BY_ID: (id) => `/eco-products/product/${id}`,
     PURCHASE: "/eco-products/purchase",
+    CREATE_CHECKOUT_SESSION: "/eco-products/create-checkout-session",
     MY_ORDERS: "/eco-products/my-orders",
     ADMIN_ORDERS: "/eco-products/admin/orders",
     ADMIN_STATS: "/eco-products/admin/stats",

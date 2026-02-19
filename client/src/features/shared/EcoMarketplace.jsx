@@ -26,6 +26,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
 import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
+import PaymentSuccessDialog from "@/components/common/PaymentSuccessDialog";
 import {
   Search,
   Leaf,
@@ -38,15 +39,17 @@ import {
   IndianRupee,
   RefreshCw,
   X,
+  CreditCard,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import {
   getEcoProducts,
-  purchaseEcoProduct,
+  createCheckoutSession,
   getMyEcoOrders,
 } from "@/services/ecoProductService";
 import { ECO_PRODUCT_CATEGORIES } from "@/constants/api";
+import api from "@/lib/api";
 
 const EcoMarketplace = () => {
   const { user } = useAuth();
@@ -71,9 +74,47 @@ const EcoMarketplace = () => {
   const [myOrders, setMyOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
 
+  // Payment success dialog
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successOrderDetails, setSuccessOrderDetails] = useState(null);
+
   useEffect(() => {
     fetchProducts();
   }, [currentPage, search, category, sortOrder]);
+
+  // Check for payment success on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get("success");
+    const orderId = urlParams.get("orderId");
+
+    if (success === "true" && orderId) {
+      // Fetch order details
+      fetchOrderDetails(orderId);
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  const fetchOrderDetails = async (orderId) => {
+    try {
+      const { data } = await api.get(`/eco-products/my-orders`);
+      const order = data.data?.find((o) => o._id === orderId);
+      if (order) {
+        setSuccessOrderDetails({
+          orderHash: order.orderHash,
+          productName: order.product?.name,
+          quantity: order.quantity,
+          totalAmount: order.totalAmount,
+        });
+        setShowSuccessDialog(true);
+        // Refresh products to update stock
+        fetchProducts();
+      }
+    } catch (err) {
+      console.error("Failed to fetch order details:", err);
+    }
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -117,28 +158,29 @@ const EcoMarketplace = () => {
     }
     setPurchasing(true);
     try {
-      const res = await purchaseEcoProduct({
+      // Create Stripe checkout session
+      const res = await createCheckoutSession({
         productId: purchaseProduct._id,
         quantity: purchaseQty,
         shippingAddress,
       });
-      toast({
-        title: "Purchase Successful! 🎉",
-        description: `Order #${res.data.orderHash} placed. Total: ₹${res.data.totalAmount.toLocaleString()}`,
-      });
-      setPurchaseProduct(null);
-      setPurchaseQty(1);
-      setShippingAddress("");
-      fetchProducts();
+
+      // Redirect to Stripe checkout using the session URL
+      if (res.data.sessionUrl) {
+        window.location.href = res.data.sessionUrl;
+      } else {
+        throw new Error("No checkout URL received");
+      }
     } catch (err) {
       toast({
-        title: "Purchase Failed",
-        description: err.response?.data?.message || "Something went wrong",
+        title: "Payment Failed",
+        description:
+          err.response?.data?.message || err.message || "Something went wrong",
         variant: "destructive",
       });
-    } finally {
       setPurchasing(false);
     }
+    // Don't reset purchasing state here as user will be redirected
   };
 
   const openOrders = async () => {
@@ -539,15 +581,20 @@ const EcoMarketplace = () => {
                 disabled={purchasing || purchaseQty < 1}
               >
                 {purchasing ? (
-                  <span className="flex items-center gap-2">Processing...</span>
+                  <span className="flex items-center gap-2">
+                    Redirecting to Payment...
+                  </span>
                 ) : (
                   <>
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Confirm Purchase - ₹
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Pay with Stripe - ₹
                     {(purchaseProduct.price * purchaseQty).toLocaleString()}
                   </>
                 )}
               </Button>
+              <p className="text-xs text-center text-muted-foreground mt-2">
+                Secure payment powered by Stripe
+              </p>
             </div>
           )}
         </DialogContent>
@@ -621,6 +668,16 @@ const EcoMarketplace = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Payment Success Dialog */}
+      <PaymentSuccessDialog
+        isOpen={showSuccessDialog}
+        onClose={() => {
+          setShowSuccessDialog(false);
+          setSuccessOrderDetails(null);
+        }}
+        orderDetails={successOrderDetails}
+      />
     </div>
   );
 };

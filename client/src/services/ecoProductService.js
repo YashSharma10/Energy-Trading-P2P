@@ -21,6 +21,14 @@ export const purchaseEcoProduct = async (purchaseData) => {
   return data;
 };
 
+export const createCheckoutSession = async (purchaseData) => {
+  const { data } = await api.post(
+    API_ENDPOINTS.ECO_PRODUCTS.CREATE_CHECKOUT_SESSION,
+    purchaseData,
+  );
+  return data;
+};
+
 export const getMyEcoOrders = async () => {
   const { data } = await api.get(API_ENDPOINTS.ECO_PRODUCTS.MY_ORDERS);
   return data;

@@ -20,7 +20,7 @@ const ecoOrderSchema = new mongoose.Schema({
   paymentStatus: {
     type: String,
     enum: ["pending", "completed", "failed", "refunded"],
-    default: "completed",
+    default: "pending",
     index: true,
   },
   orderStatus: {
@@ -30,6 +30,10 @@ const ecoOrderSchema = new mongoose.Schema({
     index: true,
   },
   orderHash: { type: String },
+  // Stripe payment details
+  stripeSessionId: { type: String },
+  stripePaymentIntentId: { type: String },
+  stripePaymentMethod: { type: String },
   createdAt: { type: Date, default: Date.now, index: true },
   completedAt: { type: Date },
 });

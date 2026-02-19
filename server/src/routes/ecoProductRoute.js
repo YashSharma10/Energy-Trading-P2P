@@ -9,6 +9,8 @@ import {
   getMyEcoOrders,
   getAllEcoOrders,
   getEcoStats,
+  createCheckoutSession,
+  handleStripeWebhook,
 } from "../controllers/ecoProductController.js";
 
 import authMiddleware from "../middlewares/authMiddleware.js";
@@ -22,6 +24,14 @@ import {
 
 const router = express.Router();
 
+// ─── Webhook route (MUST be before express.json()) ──────
+// This route is handled separately in index.js with raw body
+router.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook,
+);
+
 // ─── Public routes ───────────────────────────────────────
 router.get("/", getEcoProducts);
 router.get("/product/:id", getEcoProductById);
@@ -32,6 +42,12 @@ router.post(
   authMiddleware,
   validate(purchaseEcoProductSchema),
   purchaseEcoProduct,
+);
+router.post(
+  "/create-checkout-session",
+  authMiddleware,
+  validate(purchaseEcoProductSchema),
+  createCheckoutSession,
 );
 router.get("/my-orders", authMiddleware, getMyEcoOrders);
 

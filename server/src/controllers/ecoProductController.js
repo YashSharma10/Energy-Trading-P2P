@@ -2,6 +2,10 @@ import EcoProduct from "../models/EcoProduct.js";
 import EcoOrder from "../models/EcoOrder.js";
 import userModel from "../models/userModel.js";
 import logger from "../utils/logger.js";
+import Stripe from "stripe";
+import config from "../config/index.js";
+
+const stripe = new Stripe(config.stripe.secretKey);
 
 // ==============================
 // ADMIN: Create a new eco product
@@ -218,12 +222,10 @@ export const purchaseEcoProduct = async (req, res) => {
     }
 
     if (product.status !== "Active") {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Product is not available for purchase",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Product is not available for purchase",
+      });
     }
 
     if (product.stock < quantity) {
@@ -395,3 +397,212 @@ export const getEcoStats = async (req, res) => {
     });
   }
 };
+
+// ==============================
+// AUTHENTICATED: Create Stripe checkout session
+// ==============================
+export const createCheckoutSession = async (req, res) => {
+  try {
+    const buyerId = req.user.userId;
+    const { productId, quantity, shippingAddress } = req.body;
+
+    const buyer = await userModel.findById(buyerId);
+    if (!buyer) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    const product = await EcoProduct.findById(productId);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    }
+
+    if (product.status !== "Active") {
+      return res.status(400).json({
+        success: false,
+        message: "Product is not available for purchase",
+      });
+    }
+
+    if (product.stock < quantity) {
+      return res.status(400).json({
+        success: false,
+        message: `Insufficient stock. Only ${product.stock} items remaining.`,
+      });
+    }
+
+    const totalAmount = product.price * quantity;
+    const orderHash = `ECO-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+
+    // Create a pending order
+    const order = new EcoOrder({
+      product: productId,
+      buyer: buyerId,
+      quantity,
+      pricePerUnit: product.price,
+      totalAmount,
+      shippingAddress: shippingAddress || "",
+      paymentStatus: "pending",
+      orderStatus: "placed",
+      orderHash,
+    });
+
+    await order.save();
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "inr",
+            product_data: {
+              name: product.name,
+              description: product.description,
+              images: product.imageUrl ? [product.imageUrl] : [],
+            },
+            unit_amount: Math.round(product.price * 100), // Convert to paise/cents
+          },
+          quantity: quantity,
+        },
+      ],
+      mode: "payment",
+      success_url: `${config.clientUrl}/eco-marketplace?success=true&orderId=${order._id}`,
+      cancel_url: `${config.clientUrl}/eco-marketplace?canceled=true`,
+      metadata: {
+        orderId: order._id.toString(),
+        productId: productId,
+        buyerId: buyerId,
+        quantity: quantity.toString(),
+      },
+    });
+
+    // Update order with Stripe session ID
+    order.stripeSessionId = session.id;
+    await order.save();
+
+    logger.info(`Stripe checkout session created: ${session.id}`, {
+      orderId: order._id,
+      buyer: buyerId,
+      product: productId,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Checkout session created successfully",
+      data: {
+        sessionId: session.id,
+        sessionUrl: session.url,
+        orderId: order._id,
+        orderHash: order.orderHash,
+      },
+    });
+  } catch (error) {
+    logger.error("Error creating checkout session:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create checkout session",
+      error: error.message,
+    });
+  }
+};
+
+// ==============================
+// WEBHOOK: Handle Stripe webhook events
+// ==============================
+export const handleStripeWebhook = async (req, res) => {
+  const sig = req.headers["stripe-signature"];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      config.stripe.webhookSecret,
+    );
+  } catch (err) {
+    logger.error("Webhook signature verification failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case "checkout.session.completed":
+      const session = event.data.object;
+      await handleCheckoutSessionCompleted(session);
+      break;
+
+    case "payment_intent.succeeded":
+      const paymentIntent = event.data.object;
+      logger.info("PaymentIntent succeeded:", paymentIntent.id);
+      break;
+
+    case "payment_intent.payment_failed":
+      const failedPayment = event.data.object;
+      await handlePaymentFailed(failedPayment);
+      break;
+
+    default:
+      logger.info(`Unhandled event type: ${event.type}`);
+  }
+
+  res.json({ received: true });
+};
+
+// Helper function to handle successful checkout
+async function handleCheckoutSessionCompleted(session) {
+  try {
+    const orderId = session.metadata.orderId;
+    const order = await EcoOrder.findById(orderId);
+
+    if (!order) {
+      logger.error(`Order not found: ${orderId}`);
+      return;
+    }
+
+    // Update order status
+    order.paymentStatus = "completed";
+    order.stripePaymentIntentId = session.payment_intent;
+    order.completedAt = Date.now();
+    await order.save();
+
+    // Update product stock
+    const product = await EcoProduct.findById(order.product);
+    if (product) {
+      const newStock = product.stock - order.quantity;
+      await EcoProduct.findByIdAndUpdate(order.product, {
+        $inc: { stock: -order.quantity, totalSold: order.quantity },
+        status: newStock === 0 ? "OutOfStock" : "Active",
+        updatedAt: Date.now(),
+      });
+    }
+
+    logger.info(`Order completed successfully: ${orderId}`, {
+      paymentIntent: session.payment_intent,
+      amount: session.amount_total,
+    });
+  } catch (error) {
+    logger.error("Error handling checkout session completion:", error);
+  }
+}
+
+// Helper function to handle failed payment
+async function handlePaymentFailed(paymentIntent) {
+  try {
+    // Find order by payment intent ID
+    const order = await EcoOrder.findOne({
+      stripePaymentIntentId: paymentIntent.id,
+    });
+
+    if (order) {
+      order.paymentStatus = "failed";
+      await order.save();
+      logger.info(`Order payment failed: ${order._id}`);
+    }
+  } catch (error) {
+    logger.error("Error handling payment failure:", error);
+  }
+}
