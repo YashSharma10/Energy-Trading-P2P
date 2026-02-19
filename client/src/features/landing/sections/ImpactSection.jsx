@@ -5,34 +5,34 @@ import { Globe, Leaf, TrendingUp, Users } from "lucide-react";
 const stats = [
   {
     icon: <Leaf className="w-8 h-8" />,
-    value: 250000,
+    value: 500000,
     suffix: "+",
-    label: "Carbon Credits Traded",
-    description: "Tons of CO₂ offset globally",
+    label: "Credits Traded",
+    description: "Tons of CO₂ equivalent",
     color: "from-emerald-500 to-green-600",
   },
   {
     icon: <Users className="w-8 h-8" />,
-    value: 15000,
+    value: 8500,
     suffix: "+",
-    label: "Active Users",
-    description: "Making climate action daily",
+    label: "Active Traders",
+    description: "Buyers and sellers on platform",
     color: "from-teal-500 to-cyan-600",
   },
   {
     icon: <Globe className="w-8 h-8" />,
-    value: 45,
+    value: 12,
     suffix: "+",
-    label: "Countries Served",
-    description: "Global reach, local impact",
+    label: "Projects Listed",
+    description: "Verified renewable projects",
     color: "from-blue-500 to-indigo-600",
   },
   {
     icon: <TrendingUp className="w-8 h-8" />,
-    value: 98,
+    value: 99,
     suffix: "%",
     label: "Verification Rate",
-    description: "Blockchain-certified credits",
+    description: "100% blockchain verified",
     color: "from-lime-500 to-emerald-600",
   },
 ];
@@ -48,13 +48,13 @@ const ImpactSection = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-brandMainColor bg-brandMainColor/10 rounded-full border border-brandMainColor/20 dark:text-brandSubColor dark:bg-brandSubColor/10 dark:border-brandSubColor/20">
-            Our Impact
+            Platform Stats
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-brandMainColor dark:text-brandSubColor mb-4">
-            Creating Real Climate Impact
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground dark:text-white mb-4">
+            By the numbers
           </h2>
-          <p className="text-lg text-muted-foreground dark:text-white/85 max-w-2xl mx-auto">
-            Together we're making a measurable difference in the fight against climate change
+          <p className="text-lg text-muted-foreground dark:text-white/80 max-w-2xl mx-auto">
+            Active trading happening right now
           </p>
         </div>
 

@@ -10,49 +10,49 @@ import {
 
 const reviews = [
   {
-    name: "Carbon Market Growth",
-    username: "@carbon_markets",
-    body: "The voluntary carbon market is projected to reach $100 billion by 2030, growing 15x from 2021 levels. Join the climate revolution!",
+    name: "Carbon Market Size",
+    username: "@market_trends",
+    body: "Voluntary carbon market hit $2B in 2023 and growing. Average credit prices: $8-30 depending on project type and verification.",
     img: <FaGlobeAmericas className="text-3xl text-emerald-600" />,
     bgClass: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20",
     textClass: "text-emerald-900 dark:text-emerald-100",
   },
   {
-    name: "Temperature Rising",
-    username: "@climate_science",
-    body: "Global temperatures have risen 1.2°C since pre-industrial times. Every 0.1°C matters - we must limit warming to 1.5°C by 2030.",
+    name: "India's Solar Growth",
+    username: "@renewable_india",
+    body: "India's renewable capacity crossed 180 GW in 2025. Solar is now the dominant generation source. Credits flowing into local and global markets.",
     img: <FaTemperatureHigh className="text-3xl text-orange-600" />,
     bgClass: "bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20",
     textClass: "text-orange-900 dark:text-orange-100",
   },
   {
-    name: "Renewable Revolution",
-    username: "@clean_energy",
-    body: "Renewable energy now accounts for 35% of global electricity in 2025! Solar and wind are now the cheapest sources of power.",
+    name: "Corporate Demand",
+    username: "@esg_track",
+    body: "5000+ companies committed to net-zero by 2030. They need verified credits. Demand > Supply creates pricing efficiency.",
     img: <FaRecycle className="text-3xl text-green-600" />,
     bgClass: "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20",
     textClass: "text-green-900 dark:text-green-100",
   },
   {
-    name: "Forest Conservation",
-    username: "@forest_guardian",
-    body: "Reforestation projects can sequester 10 gigatons of CO₂ annually by 2050. Plant trees, buy credits, make a difference!",
+    name: "End-to-End Trading",
+    username: "@peer2peer",
+    body: "P2P eliminates broker markups (typically 20-40%). Direct price discovery. Faster settlements. Better value for all participants.",
     img: <FaTree className="text-3xl text-lime-600" />,
     bgClass: "bg-gradient-to-br from-lime-50 to-lime-100 dark:from-lime-900/20 dark:to-lime-800/20",
     textClass: "text-lime-900 dark:text-lime-100",
   },
   {
-    name: "Corporate Commitments",
-    username: "@net_zero_2030",
-    body: "Over 5,000 companies have committed to net-zero emissions by 2030. Carbon credits are essential to achieving these goals.",
+    name: "Energy Credits Volume",
+    username: "@renewable_projects",
+    body: "Wind, solar, and hydro projects generating 2M+ credits annually in India alone. Limited trading infrastructure = price inefficiency.",
     img: <FaLeaf className="text-3xl text-teal-600" />,
     bgClass: "bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20",
     textClass: "text-teal-900 dark:text-teal-100",
   },
   {
-    name: "India's Climate Action",
-    username: "@india_climate",
-    body: "India aims for 500 GW renewable capacity by 2030 and net-zero by 2070. CarbonEase supports this transition with verified credits.",
+    name: "Blockchain Adoption",
+    username: "@dlt_energy",
+    body: "Distributed ledger tech for energy trading reduces fraud, settles instantly, and creates auditable trail. Already live in Nordic countries.",
     img: <FaLeaf className="text-3xl text-emerald-700" />,
     bgClass: "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30",
     textClass: "text-emerald-950 dark:text-emerald-50",
@@ -90,17 +90,18 @@ const ReviewCard = ({ img, name, username, body, bgClass, textClass }) => {
   );
 };
 
-export function FactSection() {
+function FactSection() {
   return (
     <div className="relative flex h-[600px] w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-brandMainColor/5 to-background">
       <div className="absolute top-8 z-10 text-center px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-brandMainColor dark:text-brandSubColor mb-2">
-          Climate Facts & Market Insights
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground dark:text-white mb-2">
+          Market & industry insights
         </h2>
-        <p className="text-muted-foreground dark:text-white/70 max-w-2xl mx-auto">
-          Stay informed with the latest climate statistics and carbon market trends
+        <p className="text-muted-foreground dark:text-white/70 max-w-2xl mx-auto">Trends driving demand for direct trading
         </p>
       </div>
+
+      {/* Marquee content below */}
       <Marquee pauseOnHover className="[--duration:25s] mt-24">
         {firstRow.map((review, index) => (
           <ReviewCard key={index} {...review} />

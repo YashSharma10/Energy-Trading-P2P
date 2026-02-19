@@ -7,48 +7,47 @@ import {
 
 const faqs = [
   {
-    question: "What is CarbonEase, and how does it help businesses?",
+    question: "What types of credits can I trade on this platform?",
     answer:
-      "CarbonEase is a digital platform that enables businesses to trade carbon credits, track emissions, and invest in sustainable energy projects. It provides data-driven insights to help organizations meet environmental compliance and sustainability goals.",
+      "We accept Verra (VCS), Gold Standard, and ACR certified credits from renewable energy projects (solar, wind, hydro), methane avoidance, and energy efficiency. All credits are independently verified before listing.",
   },
   {
-    question: "How does CarbonEase ensure transparency in carbon trading?",
+    question: "How does pricing work? Is there a fixed rate?",
     answer:
-      "Our platform leverages blockchain-powered smart contracts to verify transactions, ensuring transparency, authenticity, and security in every carbon credit trade.",
+      "Pricing is peer-to-peer. Sellers set their own prices based on market demand. You can see live price history for each project type and make competitive offers as a buyer. No hidden commissions.",
   },
   {
-    question: "Who can benefit from using CarbonEase?",
+    question: "How long does a trade take from listing to payment?",
     answer:
-      "Corporations, industries, sustainability consultants, and policymakers can use CarbonEase to measure, reduce, and offset carbon emissions while participating in the global carbon credit economy.",
+      "Most trades settle within 24-48 hours. You list credits, buyers make offers or take your asking price, and payment is processed through your chosen method (bank transfer, UPI, card, or crypto). Blockchain certificates are issued immediately.",
   },
   {
-    question: "How does CarbonEase calculate carbon emissions?",
+    question: "What if there's a dispute over a trade?",
     answer:
-      "We use a scientifically validated Carbon Emission Calculator that accounts for energy consumption, logistics, operational activities, and supply chain emissions to generate precise carbon footprint assessments.",
+      "Every transaction is recorded on the blockchain with full documentation. Since both parties agree to terms before purchase, disputes are rare. We have an arbitration process for edge cases, and all transactions are reversible within 14 days if there's an issue.",
   },
   {
-    question: "What is the process for selling carbon credits on CarbonEase?",
+    question: "Can I sell credits from my own renewable energy project?",
     answer:
-      "Businesses generating verified carbon credits from sustainability projects can list them on our marketplace. Buyers can then acquire these credits to offset their emissions, promoting a balanced and responsible carbon economy.",
+      "Yes. If you have a certified renewable project generating credits, you can register it and list credits directly. You'll need current certification from Verra, Gold Standard, or ACR. Most projects are up and running within 2 weeks.",
   },
   {
-    question:
-      "What advantages does CarbonEase offer over traditional carbon markets?",
+    question: "What payment methods are supported?",
     answer:
-      "CarbonEase simplifies carbon trading with a digital-first approach, offering real-time analytics, automated compliance tracking, and a global network of verified buyers and sellers.",
+      "Bank transfer (NEFT/RTGS), UPI, credit/debit cards, and cryptocurrency (Bitcoin, Ethereum). Payouts happen same-day for UPI and crypto, 1-2 days for bank transfers. No minimum withdrawal amount.",
   },
   {
-    question: "How can my organization start using CarbonEase?",
+    question: "Is my data secure? How do you handle compliance?",
     answer:
-      "Getting started is simple: create an account, complete your business profile, use our carbon calculator for an emissions audit, and begin trading carbon credits or investing in renewable energy projects.",
+      "All transactions are recorded on blockchain for transparency. KYC verification is required for trading. We comply with local regulations and your transaction history is available for audit. Certificates are issued for each purchase for your compliance records.",
   },
 ];
 
 export default function AccordionSection() {
   return (
     <div className="width mx-auto mb-8 rounded-lg border border-border bg-card/95 p-6 shadow-lg backdrop-blur-sm">
-      <h2 className="mb-6 text-center text-3xl font-semibold text-brandMainColor dark:text-brandSubColor">
-        Frequently Asked Questions
+      <h2 className="mb-6 text-center text-3xl font-semibold text-foreground dark:text-white">
+        Questions? We've got answers
       </h2>
       <Accordion type="single" collapsible>
         {faqs.map((faq, index) => (

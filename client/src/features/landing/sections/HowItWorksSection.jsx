@@ -4,29 +4,29 @@ import { Card, CardContent } from "@/components/ui/card";
 const steps = [
   {
     icon: <Wallet className="w-8 h-8" />,
-    title: "Create Account",
-    description: "Sign up in seconds and get instant access to the carbon marketplace",
+    title: "Sign Up",
+    description: "Create an account in under 2 minutes. Verify your identity to start trading.",
     color: "from-emerald-500 to-teal-500",
     delay: "0ms",
   },
   {
     icon: <ShoppingBag className="w-8 h-8" />,
-    title: "Browse Credits",
-    description: "Explore verified carbon credits from renewable energy and reforestation projects",
+    title: "Browse Listings",
+    description: "View active credit listings with prices, project details, and seller ratings.",
     color: "from-teal-500 to-cyan-500",
     delay: "150ms",
   },
   {
     icon: <CheckCircle2 className="w-8 h-8" />,
-    title: "Purchase & Verify",
-    description: "Buy credits with flexible payment options and get blockchain-verified certificates",
+    title: "Buy or Sell",
+    description: "Place an offer or accept a listing. Payment processed instantly via your preferred method.",
     color: "from-cyan-500 to-blue-500",
     delay: "300ms",
   },
   {
     icon: <TrendingUp className="w-8 h-8" />,
-    title: "Track Impact",
-    description: "Monitor your carbon offset journey with real-time analytics and reporting",
+    title: "Track Trades",
+    description: "View your purchase history, portfolio value, and transaction receipts in one place.",
     color: "from-blue-500 to-emerald-500",
     delay: "450ms",
   },
@@ -42,13 +42,13 @@ const HowItWorksSection = () => {
         {/* Header */}
         <div className="text-center mb-16 animate-fade-in">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-brandMainColor bg-brandMainColor/10 rounded-full border border-brandMainColor/20 dark:text-brandSubColor dark:bg-brandSubColor/10 dark:border-brandSubColor/20">
-            How It Works
+            Get Started
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-brandMainColor dark:text-brandSubColor mb-4">
-            Start Your Climate Action in 4 Simple Steps
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground dark:text-white mb-4">
+            Four steps to your first trade
           </h2>
-          <p className="text-lg text-muted-foreground dark:text-white/85 max-w-2xl mx-auto">
-            Join thousands making a real impact on climate change through transparent carbon credit trading
+          <p className="text-lg text-muted-foreground dark:text-white/80 max-w-2xl mx-auto">
+            Simple, straightforward process. No hidden steps or surprise fees.
           </p>
         </div>
 
