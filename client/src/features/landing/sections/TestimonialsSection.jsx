@@ -3,51 +3,51 @@ import { Quote, Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Sarah Johnson",
-    role: "Sustainability Director",
-    company: "EcoTech Solutions",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-    content: "CarbonEase has transformed how we approach our carbon offsetting strategy. The transparency and ease of use are unmatched.",
+    name: "Akshay Patel",
+    role: "Renewable Energy Consultant",
+    company: "Solar Power Solutions",
+    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Akshay",
+    content: "Sold 5000 credits in the first month. The P2P model cuts out middlemen and I get paid instantly. Prices are fair too.",
     rating: 5,
   },
   {
-    name: "Rajesh Kumar",
-    role: "CFO",
-    company: "GreenEnergy India",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rajesh",
-    content: "The blockchain verification gives us complete confidence in our carbon credit purchases. A game-changer for corporate sustainability.",
+    name: "Neha Desai",
+    role: "Operations",
+    company: "Manufacturing Firm",
+    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Neha",
+    content: "We use CarbonEase to track and sell our excess carbon credits. Each listing gets multiple offers within hours. Good inventory management tool too.",
     rating: 5,
   },
   {
-    name: "Maria Garcia",
-    role: "Environmental Consultant",
-    company: "ClimateFirst Consulting",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",
-    content: "Finally, a platform that makes carbon trading accessible and trustworthy. The real-time analytics help us track our impact effectively.",
+    name: "Rohan Sharma",
+    role: "Freelance Trader",
+    company: "Self-Employed",
+    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rohan",
+    content: "Made this my side income. Credit prices are transparent and I can see the project details before buying. No surprises.",
     rating: 5,
   },
   {
-    name: "David Chen",
-    role: "Operations Manager",
-    company: "Urban Logistics Co.",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=David",
-    content: "We've offset over 50,000 tons through CarbonEase. The platform is intuitive and the support team is exceptional.",
-    rating: 5,
-  },
-  {
-    name: "Priya Sharma",
-    role: "CEO",
-    company: "Renewable Ventures",
+    name: "Priya Khanna",
+    role: "ESG Manager",
+    company: "Tech Company",
     image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Priya",
-    content: "As a seller, CarbonEase provides the perfect marketplace to connect with buyers who value verified, high-quality credits.",
+    content: "Buy verified credits here for our net-zero commitments. The blockchain receipts satisfy our auditors. Good prices compared to traditional brokers.",
     rating: 5,
   },
   {
-    name: "James Wilson",
-    role: "Sustainability Lead",
-    company: "Global Manufacturing Inc.",
-    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=James",
-    content: "The emission calculator and project mapping features have made our net-zero journey much more manageable and measurable.",
+    name: "Vikram Singh",
+    role: "Wind Farm Owner",
+    company: "Green Power Ltd",
+    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Vikram",
+    content: "Directly list our generated credits here. No agents, no delays. Settlement happens same day. This is how trading should work.",
+    rating: 5,
+  },
+  {
+    name: "Deepa Gupta",
+    role: "Compliance Officer",
+    company: "Carbon Consulting",
+    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Deepa",
+    content: "Every trade is documented on chain. Audit trails are complete. Makes compliance reporting straightforward for our clients.",
     rating: 5,
   },
 ];
@@ -62,13 +62,13 @@ const TestimonialsSection = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-brandMainColor bg-brandMainColor/10 rounded-full border border-brandMainColor/20 dark:text-brandSubColor dark:bg-brandSubColor/10 dark:border-brandSubColor/20">
-            Testimonials
+            From Our Users
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-brandMainColor dark:text-brandSubColor mb-4">
-            Trusted by Climate Leaders
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground dark:text-white mb-4">
+            What traders are saying
           </h2>
-          <p className="text-lg text-muted-foreground dark:text-white/85 max-w-2xl mx-auto">
-            See what our community says about their experience with CarbonEase
+          <p className="text-lg text-muted-foreground dark:text-white/80 max-w-2xl mx-auto">
+            Real feedback from people actually using the platform
           </p>
         </div>
 

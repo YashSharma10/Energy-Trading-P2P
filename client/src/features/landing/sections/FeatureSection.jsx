@@ -10,38 +10,38 @@ import {
 
 const notifications = [
   {
-    name: "Blockchain-Verified Trading",
-    description: "100% transparent transactions with immutable records. Every credit is traceable and fraud-proof.",
+    name: "Secure Transactions",
+    description: "Blockchain-backed verification. Every trade is recorded and traceable. No disputes, no reversals.",
     icon: <ShieldCheck size={24} className="text-white" />,
     gradient: "from-brandMainColor via-emerald-600 to-emerald-700",
   },
   {
-    name: "Smart Carbon Calculator",
-    description: "Calculate your carbon footprint in seconds. Get personalized offset recommendations instantly.",
+    name: "Verified Credits Only",
+    description: "All credits come from Verra, Gold Standard, or ACR certified projects. We check so you don't have to.",
     icon: <Leaf size={24} className="text-white" />,
     gradient: "from-emerald-500 via-brandMainColor to-emerald-700",
   },
   {
-    name: "Registry-Certified Credits",
-    description: "Only verified credits from Verra, Gold Standard, and ACR. Quality you can trust.",
+    name: "Direct P2P Trading",
+    description: "Cut out the middleman. Trade directly with buyers and sellers. Better prices, faster settlements.",
     icon: <DollarSign size={24} className="text-white" />,
     gradient: "from-brandSubColor via-brandMainColor to-emerald-600",
   },
   {
-    name: "Real-Time Analytics",
-    description: "Track your environmental impact with live dashboards. See your contribution to climate action.",
+    name: "Live Price Feeds",
+    description: "Real-time market data. Know exactly what credits are trading for before you buy or sell.",
     icon: <MessageCircle size={24} className="text-white" />,
     gradient: "from-brandMainColor via-emerald-500 to-brandSubColor",
   },
   {
-    name: "Global Project Mapping",
-    description: "Discover renewable energy and reforestation projects worldwide. Support local initiatives.",
+    name: "Project Directory",
+    description: "Browse active renewable energy projects by type, location, and impact metrics. See where your money goes.",
     icon: <MapPin size={24} className="text-white" />,
     gradient: "from-emerald-700 via-brandMainColor to-emerald-900",
   },
   {
-    name: "Flexible Payment Methods",
-    description: "Pay with cards, UPI, or crypto. Instant settlements with receipt generation.",
+    name: "Instant Payouts",
+    description: "Multiple payment methods: card, UPI, bank transfer, or crypto. Withdraw anytime.",
     icon: <CreditCard size={24} className="text-white" />,
     gradient: "from-brandMainColor via-emerald-700 to-emerald-900",
   },
@@ -71,12 +71,11 @@ function FeatureSection({ className }) {
         className
       )}
     >
-      <h1 className="text-3xl md:text-4xl font-bold text-brandMainColor dark:text-brandSubColor">
-        Why Choose CarbonEase?
+      <h1 className="text-3xl md:text-4xl font-bold text-foreground dark:text-white">
+        What You Get
       </h1>
-      <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground dark:text-white/85">
-        Join the future of carbon trading with cutting-edge technology, verified credits,
-        and real impact on climate change.
+      <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground dark:text-white/80">
+        A platform built for energy traders. No complexity, no delays, no surprises.
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-12">

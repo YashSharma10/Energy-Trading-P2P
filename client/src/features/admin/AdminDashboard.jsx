@@ -221,7 +221,7 @@ const AdminDashboard = () => {
               <Card className="border border-border/60 bg-card shadow-lg">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                    <Users className="h-4 w-4" />
+                    <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     Total Users
                   </CardTitle>
                 </CardHeader>
@@ -239,7 +239,7 @@ const AdminDashboard = () => {
               <Card className="border border-border/60 bg-card shadow-lg">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                    <ShoppingBag className="h-4 w-4" />
+                    <ShoppingBag className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                     Active Listings
                   </CardTitle>
                 </CardHeader>
@@ -257,7 +257,7 @@ const AdminDashboard = () => {
               <Card className="border border-border/60 bg-card shadow-lg">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                    <TrendingUp className="h-4 w-4" />
+                    <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                     Transactions
                   </CardTitle>
                 </CardHeader>
@@ -275,7 +275,7 @@ const AdminDashboard = () => {
               <Card className="border border-border/60 bg-card shadow-lg">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                    <DollarSign className="h-4 w-4" />
+                    <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
                     Total Revenue
                   </CardTitle>
                 </CardHeader>
