@@ -31,7 +31,12 @@ import {
   Leaf,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL, API_ENDPOINTS, PAGINATION, LISTING_STATUS } from "@/constants/api";
+import {
+  API_BASE_URL,
+  API_ENDPOINTS,
+  PAGINATION,
+  LISTING_STATUS,
+} from "@/constants/api";
 
 const Marketplace = () => {
   const navigate = useNavigate();
@@ -65,17 +70,20 @@ const Marketplace = () => {
         limit: itemsPerPage,
         status: LISTING_STATUS.AVAILABLE,
       };
-      
+
       if (filters.title) params.search = filters.title;
       if (filters.location) params.location = filters.location;
       if (filters.minPrice) params.minPrice = filters.minPrice;
       if (sortOrder) params.sortBy = `pricePerCredit:${sortOrder}`;
 
-      const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.CREDITS.BASE}`, { params });
+      const response = await axios.get(
+        `${API_BASE_URL}${API_ENDPOINTS.CREDITS.BASE}`,
+        { params },
+      );
       const listings = response.data.data || [];
       setAllListings(listings);
       setFilteredListings(listings);
-      
+
       if (response.data.pagination) {
         setTotalPages(response.data.pagination.totalPages);
         setTotalItems(response.data.pagination.totalItems);
@@ -141,12 +149,12 @@ const Marketplace = () => {
     const totalProjects = allListings.length;
     const totalPrice = allListings.reduce(
       (sum, project) => sum + (Number(project.pricePerCredit) || 0),
-      0
+      0,
     );
     const regions = new Set(
       allListings
         .map((project) => project.location?.toLowerCase().trim())
-        .filter(Boolean)
+        .filter(Boolean),
     ).size;
 
     return {
@@ -157,101 +165,50 @@ const Marketplace = () => {
   }, [allListings]);
 
   return (
-    <div className="relative overflow-hidden bg-background">
-      <div className="absolute inset-0 bg-gradient-to-b from-brandMainColor/15 via-transparent to-transparent dark:from-brandSubColor/20" />
-      <div className="absolute left-16 top-24 hidden h-56 w-56 rounded-full bg-emerald-400/15 blur-3xl dark:bg-emerald-300/10 lg:block" />
-      <div className="absolute right-24 bottom-16 hidden h-64 w-64 rounded-full bg-lime-400/15 blur-3xl dark:bg-lime-300/10 lg:block" />
-
-      <main className="relative mx-auto max-w-6xl px-6 py-16 lg:px-0">
-        <section className="grid gap-8 rounded-3xl border border-border/70 bg-card/90 p-10 shadow-2xl backdrop-blur-sm lg:grid-cols-[1.1fr,0.9fr]">
-          <div className="space-y-6">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1 text-sm font-medium text-primary dark:text-primary-foreground">
-              <Sparkles className="h-4 w-4" /> Carbon credit marketplace
-            </span>
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-              Discover high-integrity climate projects ready for investment
-            </h1>
-            <p className="max-w-2xl text-lg text-muted-foreground">
-              Browse verified listings across renewable energy, nature-based
-              solutions, and carbon removal. Filter by location, price, and
-              project type to build a diversified offset portfolio.
-            </p>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <Card className="border border-border/60 bg-background/80 shadow-inner">
-                <CardContent className="space-y-1 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Live projects
-                  </p>
-                  <p className="text-2xl font-semibold text-foreground">
-                    {marketInsights.totalProjects}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Across compliance and voluntary markets
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border border-border/60 bg-background/80 shadow-inner">
-                <CardContent className="space-y-1 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Avg. price / credit
-                  </p>
-                  <p className="text-2xl font-semibold text-foreground">
-                    ₹{marketInsights.averagePrice.toFixed(0)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Based on current marketplace listings
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className="border border-border/60 bg-background/80 shadow-inner">
-                <CardContent className="space-y-1 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Regions represented
-                  </p>
-                  <p className="text-2xl font-semibold text-foreground">
-                    {marketInsights.regions}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Climate-positive projects worldwide
-                  </p>
-                </CardContent>
-              </Card>
+    <div className="bg-background">
+      <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
+        <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <h1 className="text-lg font-semibold text-foreground leading-tight">
+                Carbon Credit Marketplace
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Browse verified listings across renewable energy, nature-based
+                solutions, and carbon removal
+              </p>
             </div>
           </div>
-          <Card className="border border-primary/30 bg-primary/10 shadow-xl dark:border-brandSubColor/30 dark:bg-brandSubColor/10">
-            <CardContent className="flex h-full flex-col justify-between p-8">
-              <div className="space-y-4">
-                <CardTitle className="text-2xl font-semibold text-primary dark:text-primary-foreground">
-                  Why climate leaders choose CarbonEase
-                </CardTitle>
-                <ul className="space-y-3 text-sm text-primary/80 dark:text-primary-foreground/80">
-                  <li className="flex items-start gap-2">
-                    <Leaf className="mt-0.5 h-4 w-4" /> Rigorous due diligence
-                    per listing, including registry documentation and MRV
-                    status.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Leaf className="mt-0.5 h-4 w-4" /> Integrated procurement
-                    workflows from exploration to retirement certificates.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Leaf className="mt-0.5 h-4 w-4" /> Collaborative workspace
-                    for finance, sustainability, and procurement teams.
-                  </li>
-                </ul>
-              </div>
-              <Button
-                variant="outline"
-                className="mt-6 h-12 rounded-full border-primary/40 text-primary hover:bg-primary/10 dark:border-primary-foreground/30 dark:text-primary-foreground"
-                onClick={fetchListings}
-              >
-                Refresh marketplace inventory
-              </Button>
-            </CardContent>
-          </Card>
-        </section>
+          <Button variant="outline" size="sm" onClick={fetchListings}>
+            Refresh inventory
+          </Button>
+        </div>
+        <div className="mx-auto max-w-6xl px-6 pb-3 flex gap-6">
+          <div className="text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {marketInsights.totalProjects}
+            </span>{" "}
+            live projects
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Avg.{" "}
+            <span className="font-semibold text-foreground">
+              ₹{marketInsights.averagePrice.toFixed(0)}
+            </span>{" "}
+            / credit
+          </div>
+          <div className="text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {marketInsights.regions}
+            </span>{" "}
+            regions
+          </div>
+        </div>
+      </div>
 
-        <section className="mt-12 grid gap-10 lg:grid-cols-[280px,1fr]">
+      <main className="mx-auto max-w-6xl px-6 py-6">
+        <section className="grid gap-10 lg:grid-cols-[280px,1fr]">
           <div className="space-y-4">
             <Card className="hidden lg:block border border-border/70 bg-card/90 shadow-xl">
               <CardHeader className="space-y-1">
@@ -381,7 +338,10 @@ const Marketplace = () => {
             {loading ? (
               <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map((_, idx) => (
-                  <Skeleton key={`skeleton-${idx}`} className="h-64 w-full rounded-2xl" />
+                  <Skeleton
+                    key={`skeleton-${idx}`}
+                    className="h-64 w-full rounded-2xl"
+                  />
                 ))}
               </div>
             ) : error ? (
@@ -432,7 +392,8 @@ const Marketplace = () => {
                             credit
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {Number(listing.quantity).toLocaleString()} available
+                            {Number(listing.quantity).toLocaleString()}{" "}
+                            available
                           </div>
                         </div>
                         <div className="rounded-2xl border border-border/60 bg-background/80 p-4 text-xs text-muted-foreground">
@@ -443,7 +404,7 @@ const Marketplace = () => {
                           className="h-11 w-full rounded-xl bg-brandMainColor text-sm font-semibold text-white transition-colors hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
                           onClick={() => {
                             navigate(
-                              `/payment?id=${listing._id}&price=${listing.pricePerCredit}&title=${encodeURIComponent(listing.title)}&maxQuantity=${listing.quantity}`
+                              `/payment?id=${listing._id}&price=${listing.pricePerCredit}&title=${encodeURIComponent(listing.title)}&maxQuantity=${listing.quantity}`,
                             );
                           }}
                         >
@@ -457,8 +418,8 @@ const Marketplace = () => {
 
                 <div className="flex flex-col items-center justify-between gap-4 rounded-2xl border border-border/70 bg-card/90 p-4 shadow-lg sm:flex-row">
                   <p className="text-sm text-muted-foreground">
-                    Showing {indexOfFirstItem}-{indexOfLastItem} of{" "}
-                    {totalItems} listings
+                    Showing {indexOfFirstItem}-{indexOfLastItem} of {totalItems}{" "}
+                    listings
                   </p>
                   <div className="flex items-center gap-3">
                     <Button

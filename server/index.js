@@ -17,6 +17,7 @@ import carbonCreditRoutes from "./src/routes/listingRoute.js";
 import adminRoutes from "./src/routes/adminRoute.js";
 import analyticsRoutes from "./src/routes/analyticsRoute.js";
 import chatbotRoutes from "./src/routes/chatbotRoute.js";
+import ecoProductRoutes from "./src/routes/ecoProductRoute.js";
 
 app.use((req, res, next) => {
   logger.info(`Received ${req.method} request to ${req.url}`);
@@ -29,6 +30,7 @@ app.use("/api/credits", carbonCreditRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/eco-products", ecoProductRoutes);
 
 // Start Server
 const PORT = config.port;

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, Leaf } from "lucide-react";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "../ui/button";
@@ -48,7 +48,14 @@ const Navbar = () => {
           >
             Blog
           </Link>
-          
+          <Link
+            to="/eco-marketplace"
+            className="text-sm font-medium text-green-600 dark:text-green-400 transition-colors hover:text-green-700 dark:hover:text-green-300 flex items-center gap-1"
+          >
+            <Leaf className="h-3.5 w-3.5" />
+            Eco Shop
+          </Link>
+
           {/* Role-based navigation */}
           {user?.role === "admin" && (
             <Link
@@ -58,7 +65,16 @@ const Navbar = () => {
               Admin Panel
             </Link>
           )}
-          
+
+          {user?.role === "admin" && (
+            <Link
+              to="/admin/eco-products"
+              className="text-sm font-medium text-green-600 dark:text-green-400 transition-colors hover:text-green-700 dark:hover:text-green-300"
+            >
+              Manage Eco Products
+            </Link>
+          )}
+
           {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
             <Link
               to="/form"
@@ -67,7 +83,7 @@ const Navbar = () => {
               Sell Energy
             </Link>
           )}
-          
+
           {(user?.role === "CONSUMER" || user?.role === "BOTH") && (
             <Link
               to="/marketplace"
@@ -76,21 +92,24 @@ const Navbar = () => {
               Buy Energy
             </Link>
           )}
-          
-          {user && (user.role === "PRODUCER" || user.role === "CONSUMER" || user.role === "BOTH") && (
-            <Link
-              to={
-                user.role === "PRODUCER" 
-                  ? "/dashboard/producer" 
-                  : user.role === "CONSUMER" 
-                  ? "/dashboard/consumer" 
-                  : "/dashboard"
-              }
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-            >
-              Dashboard
-            </Link>
-          )}
+
+          {user &&
+            (user.role === "PRODUCER" ||
+              user.role === "CONSUMER" ||
+              user.role === "BOTH") && (
+              <Link
+                to={
+                  user.role === "PRODUCER"
+                    ? "/dashboard/producer"
+                    : user.role === "CONSUMER"
+                      ? "/dashboard/consumer"
+                      : "/dashboard"
+                }
+                className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
+              >
+                Dashboard
+              </Link>
+            )}
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
@@ -160,7 +179,15 @@ const Navbar = () => {
               >
                 Blog
               </Link>
-              
+              <Link
+                to="/eco-marketplace"
+                onClick={closeSheet}
+                className="text-sm font-medium text-green-600 dark:text-green-400 transition-colors hover:text-green-700 dark:hover:text-green-300 flex items-center gap-1"
+              >
+                <Leaf className="h-3.5 w-3.5" />
+                Eco Shop
+              </Link>
+
               {/* Role-based mobile navigation */}
               {user?.role === "admin" && (
                 <Link
@@ -171,7 +198,17 @@ const Navbar = () => {
                   Admin Panel
                 </Link>
               )}
-              
+
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin/eco-products"
+                  onClick={closeSheet}
+                  className="text-sm font-medium text-green-600 dark:text-green-400 transition-colors hover:text-green-700 dark:hover:text-green-300"
+                >
+                  Manage Eco Products
+                </Link>
+              )}
+
               {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
                 <Link
                   to="/form"
@@ -181,7 +218,7 @@ const Navbar = () => {
                   Sell Energy
                 </Link>
               )}
-              
+
               {(user?.role === "CONSUMER" || user?.role === "BOTH") && (
                 <Link
                   to="/marketplace"
@@ -191,22 +228,25 @@ const Navbar = () => {
                   Buy Energy
                 </Link>
               )}
-              
-              {user && (user.role === "PRODUCER" || user.role === "CONSUMER" || user.role === "BOTH") && (
-                <Link
-                  to={
-                    user.role === "PRODUCER" 
-                      ? "/dashboard/producer" 
-                      : user.role === "CONSUMER" 
-                      ? "/dashboard/consumer" 
-                      : "/dashboard"
-                  }
-                  onClick={closeSheet}
-                  className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-                >
-                  Dashboard
-                </Link>
-              )}
+
+              {user &&
+                (user.role === "PRODUCER" ||
+                  user.role === "CONSUMER" ||
+                  user.role === "BOTH") && (
+                  <Link
+                    to={
+                      user.role === "PRODUCER"
+                        ? "/dashboard/producer"
+                        : user.role === "CONSUMER"
+                          ? "/dashboard/consumer"
+                          : "/dashboard"
+                    }
+                    onClick={closeSheet}
+                    className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
+                  >
+                    Dashboard
+                  </Link>
+                )}
               <div className="mt-2 border-t border-border pt-4">
                 {user ? (
                   <Button

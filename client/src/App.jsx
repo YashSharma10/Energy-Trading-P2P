@@ -2,32 +2,30 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ProtectedRoute, PublicRoute, RoleBasedRoute } from "./components/layout";
 import { Register, VerifyOTP, Login, Profile, ForgotPassword, ResetPassword } from "./features/auth";
 import { AuthProvider } from "./context/AuthContext";
-import { 
-  AboutUs, 
-  Calculator as CarbonEmissionCalculator, 
-  ContactUs, 
-  Blog, 
-  BlogDetail, 
+import {
+  AboutUs,
+  Calculator as CarbonEmissionCalculator,
+  ContactUs,
+  Blog,
+  BlogDetail,
   ComingSoon,
   ReceiptViewer,
-  TransactionPage
+  TransactionPage,
+  EcoMarketplace,
 } from "./features/shared";
 import UserDashboard from "./features/shared/UserDashboard";
 import CombinedDashboard from "./features/shared/CombinedDashboard";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import { LandingPage } from "./features/landing";
-import { 
+import {
   AllListings as ListingsPage,
   CreateListingPage,
 } from "./features/seller";
 import ProducerDashboard from "./features/seller/ProducerDashboard";
-import { 
-  Marketplace,
-  TransactionListing,
-} from "./features/buyer";
+import { Marketplace, TransactionListing } from "./features/buyer";
 import ConsumerDashboard from "./features/buyer/ConsumerDashboard";
-import { AdminDashboard } from "./features/admin";
+import { AdminDashboard, AdminEcoProducts } from "./features/admin";
 import BuyerAnalytics from "./features/buyer/pages/BuyerAnalytics";
 import SellerAnalytics from "./features/seller/pages/SellerAnalytics";
 
@@ -52,101 +50,159 @@ const App = () => {
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/about" element={<AboutUs />} />
-                <Route path="/calculator" element={<CarbonEmissionCalculator />} />
+                <Route
+                  path="/calculator"
+                  element={<CarbonEmissionCalculator />}
+                />
                 <Route path="/coming" element={<ComingSoon />} />
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogDetail />} />
               </Route>
-
+              {/* Eco Marketplace - accessible to everyone, login needed only for purchase */}
+              <Route path="/eco-marketplace" element={<EcoMarketplace />} />
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
                 {/* Producer Dashboard - for PRODUCER and BOTH roles */}
-                <Route path="/dashboard/producer" element={
-                  <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
-                    <ProducerDashboard />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/dashboard/producer"
+                  element={
+                    <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
+                      <ProducerDashboard />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Consumer Dashboard - for CONSUMER and BOTH roles */}
-                <Route path="/dashboard/consumer" element={
-                  <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
-                    <ConsumerDashboard />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/dashboard/consumer"
+                  element={
+                    <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
+                      <ConsumerDashboard />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Combined Dashboard - for BOTH role only */}
-                <Route path="/dashboard" element={
-                  <RoleBasedRoute allowedRoles={["BOTH"]}>
-                    <CombinedDashboard />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/dashboard"
+                  element={
+                    <RoleBasedRoute allowedRoles={["BOTH"]}>
+                      <CombinedDashboard />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Legacy User Dashboard - kept for backward compatibility */}
-                <Route path="/dashboard/legacy" element={
-                  <RoleBasedRoute allowedRoles={["user"]}>
-                    <UserDashboard />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/dashboard/legacy"
+                  element={
+                    <RoleBasedRoute allowedRoles={["user"]}>
+                      <UserDashboard />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Marketplace - accessible by CONSUMER and BOTH */}
-                <Route path="/marketplace" element={
-                  <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
-                    <Marketplace />
-                  </RoleBasedRoute>
-                } />
-                <Route path="/market" element={
-                  <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
-                    <Marketplace />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/marketplace"
+                  element={
+                    <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
+                      <Marketplace />
+                    </RoleBasedRoute>
+                  }
+                />
+                <Route
+                  path="/market"
+                  element={
+                    <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
+                      <Marketplace />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Listings - accessible by PRODUCER and BOTH */}
-                <Route path="/listings" element={
-                  <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
-                    <ListingsPage />
-                  </RoleBasedRoute>
-                } />
-                <Route path="/form" element={
-                  <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
-                    <CreateListingPage />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/listings"
+                  element={
+                    <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
+                      <ListingsPage />
+                    </RoleBasedRoute>
+                  }
+                />
+                <Route
+                  path="/form"
+                  element={
+                    <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
+                      <CreateListingPage />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Payment and Transactions - accessible by all energy trading roles */}
-                <Route path="/payment" element={
-                  <RoleBasedRoute allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}>
-                    <TransactionPage />
-                  </RoleBasedRoute>
-                } />
-                <Route path="/transaction-listing" element={
-                  <RoleBasedRoute allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}>
-                    <TransactionListing />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/payment"
+                  element={
+                    <RoleBasedRoute
+                      allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}
+                    >
+                      <TransactionPage />
+                    </RoleBasedRoute>
+                  }
+                />
+                <Route
+                  path="/transaction-listing"
+                  element={
+                    <RoleBasedRoute
+                      allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}
+                    >
+                      <TransactionListing />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Analytics */}
-                <Route path="/buyer-analytics" element={
-                  <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
-                    <BuyerAnalytics />
-                  </RoleBasedRoute>
-                } />
-                <Route path="/seller-analytics" element={
-                  <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
-                    <SellerAnalytics />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/buyer-analytics"
+                  element={
+                    <RoleBasedRoute allowedRoles={["CONSUMER", "BOTH"]}>
+                      <BuyerAnalytics />
+                    </RoleBasedRoute>
+                  }
+                />
+                <Route
+                  path="/seller-analytics"
+                  element={
+                    <RoleBasedRoute allowedRoles={["PRODUCER", "BOTH"]}>
+                      <SellerAnalytics />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Admin Routes - accessible by admin only */}
-                <Route path="/admin" element={
-                  <RoleBasedRoute allowedRoles={["admin"]}>
-                    <AdminDashboard />
-                  </RoleBasedRoute>
-                } />
-                
+                <Route
+                  path="/admin"
+                  element={
+                    <RoleBasedRoute allowedRoles={["admin"]}>
+                      <AdminDashboard />
+                    </RoleBasedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/eco-products"
+                  element={
+                    <RoleBasedRoute allowedRoles={["admin"]}>
+                      <AdminEcoProducts />
+                    </RoleBasedRoute>
+                  }
+                />
+
                 {/* Common Protected Routes */}
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/receipt/:transactionId" element={<ReceiptViewer />} />
+                <Route
+                  path="/receipt/:transactionId"
+                  element={<ReceiptViewer />}
+                />
               </Route>
 
               {/* Default Route */}

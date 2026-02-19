@@ -30,8 +30,10 @@ import {
   TrendingUp,
   Shield,
   AlertCircle,
+  Leaf,
 } from "lucide-react";
 import { NumberTicker } from "@/components/magicui/number-ticker";
+import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
   const { token, user } = useAuth();
@@ -44,7 +46,8 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  const API_BASE_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
   useEffect(() => {
     if (user?.role !== "admin") {
@@ -67,7 +70,12 @@ const AdminDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         }),
         axios.get(`${API_BASE_URL}/admin/users`, {
-          params: { page: currentPage, limit: 10, search: searchTerm, role: roleFilter === "all" ? "" : roleFilter },
+          params: {
+            page: currentPage,
+            limit: 10,
+            search: searchTerm,
+            role: roleFilter === "all" ? "" : roleFilter,
+          },
           headers: { Authorization: `Bearer ${token}` },
         }),
         axios.get(`${API_BASE_URL}/admin/transactions`, {
@@ -97,11 +105,11 @@ const AdminDashboard = () => {
       await axios.patch(
         `${API_BASE_URL}/admin/users/${userId}/status`,
         { isActive },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, isActive } : u))
+        prev.map((u) => (u._id === userId ? { ...u, isActive } : u)),
       );
 
       toast({
@@ -123,11 +131,11 @@ const AdminDashboard = () => {
       await axios.patch(
         `${API_BASE_URL}/admin/users/${userId}/role`,
         { role },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, role } : u))
+        prev.map((u) => (u._id === userId ? { ...u, role } : u)),
       );
 
       toast({
@@ -156,7 +164,8 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              You don't have permission to view this page. Admin access required.
+              You don't have permission to view this page. Admin access
+              required.
             </p>
           </CardContent>
         </Card>
@@ -165,19 +174,35 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-muted/30">
-      <section className="border-b border-border/60 bg-card/40 px-8 py-10 backdrop-blur">
-        <div className="mx-auto max-w-7xl space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
+        <div className="mx-auto max-w-7xl px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
-            <h1 className="text-3xl font-semibold text-foreground">
-              Admin Dashboard
-            </h1>
+            <Shield className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <h1 className="text-lg font-semibold text-foreground leading-tight">
+                Admin Dashboard
+              </h1>
+              <p className="text-xs text-muted-foreground">
+                Manage users, monitor transactions, and oversee platform
+                operations
+              </p>
+            </div>
           </div>
-          <p className="text-muted-foreground">
-            Manage users, monitor transactions, and oversee platform operations
-          </p>
+          <Link to="/admin/eco-products">
+            <Button
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Leaf className="h-4 w-4 mr-2" />
+              Manage Eco Products
+            </Button>
+          </Link>
+        </div>
+      </div>
 
+      <section className="border-b border-border/60 bg-card/40 px-8 py-6">
+        <div className="mx-auto max-w-7xl">
           {loading ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
               {[...Array(4)].map((_, i) => (
@@ -201,7 +226,10 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <NumberTicker value={stats.totalUsers} className="text-3xl font-bold" />
+                  <NumberTicker
+                    value={stats.totalUsers}
+                    className="text-3xl font-bold"
+                  />
                   <p className="mt-1 text-xs text-muted-foreground">
                     {stats.verifiedUsers} verified
                   </p>
@@ -216,7 +244,10 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <NumberTicker value={stats.activeListings} className="text-3xl font-bold" />
+                  <NumberTicker
+                    value={stats.activeListings}
+                    className="text-3xl font-bold"
+                  />
                   <p className="mt-1 text-xs text-muted-foreground">
                     of {stats.totalListings} total
                   </p>
@@ -231,7 +262,10 @@ const AdminDashboard = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <NumberTicker value={stats.totalTransactions} className="text-3xl font-bold" />
+                  <NumberTicker
+                    value={stats.totalTransactions}
+                    className="text-3xl font-bold"
+                  />
                   <p className="mt-1 text-xs text-muted-foreground">
                     completed
                   </p>
@@ -267,7 +301,9 @@ const AdminDashboard = () => {
           <CardHeader>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <CardTitle className="text-xl font-semibold">User Management</CardTitle>
+                <CardTitle className="text-xl font-semibold">
+                  User Management
+                </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Manage user accounts and permissions
                 </p>
@@ -317,7 +353,10 @@ const AdminDashboard = () => {
                     </TableRow>
                   ) : users.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-8 text-muted-foreground"
+                      >
                         No users found
                       </TableCell>
                     </TableRow>
@@ -329,7 +368,9 @@ const AdminDashboard = () => {
                         <TableCell>
                           <Select
                             value={u.role || "user"}
-                            onValueChange={(value) => updateUserRole(u._id, value)}
+                            onValueChange={(value) =>
+                              updateUserRole(u._id, value)
+                            }
                           >
                             <SelectTrigger className="w-32">
                               <SelectValue />
@@ -341,12 +382,16 @@ const AdminDashboard = () => {
                           </Select>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={u.isActive ? "default" : "destructive"}>
+                          <Badge
+                            variant={u.isActive ? "default" : "destructive"}
+                          >
                             {u.isActive ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={u.isVerified ? "outline" : "secondary"}>
+                          <Badge
+                            variant={u.isVerified ? "outline" : "secondary"}
+                          >
                             {u.isVerified ? "Yes" : "No"}
                           </Badge>
                         </TableCell>
@@ -383,7 +428,9 @@ const AdminDashboard = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
                     disabled={currentPage === totalPages}
                   >
                     Next
@@ -396,7 +443,9 @@ const AdminDashboard = () => {
 
         <Card className="border border-border/60 bg-card shadow-lg">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">Recent Transactions</CardTitle>
+            <CardTitle className="text-xl font-semibold">
+              Recent Transactions
+            </CardTitle>
             <p className="text-sm text-muted-foreground">
               Latest platform transactions
             </p>
@@ -423,7 +472,10 @@ const AdminDashboard = () => {
                     </TableRow>
                   ) : transactions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-8 text-muted-foreground"
+                      >
                         No transactions yet
                       </TableCell>
                     </TableRow>
@@ -436,15 +488,17 @@ const AdminDashboard = () => {
                           {txn.listing?.title || "—"}
                         </TableCell>
                         <TableCell>{txn.quantity}</TableCell>
-                        <TableCell>₹{txn.totalAmount?.toLocaleString()}</TableCell>
+                        <TableCell>
+                          ₹{txn.totalAmount?.toLocaleString()}
+                        </TableCell>
                         <TableCell>
                           <Badge
                             variant={
                               txn.paymentStatus === "completed"
                                 ? "default"
                                 : txn.paymentStatus === "pending"
-                                ? "secondary"
-                                : "destructive"
+                                  ? "secondary"
+                                  : "destructive"
                             }
                           >
                             {txn.paymentStatus}
