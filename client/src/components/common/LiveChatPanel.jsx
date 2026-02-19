@@ -24,15 +24,46 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [loading, setLoading] = useState(true);
+  const [socketConnected, setSocketConnected] = useState(false);
   const activeChatRef = useRef(null);
   const initialParticipantRef = useRef(null);
+  const socketRef = useRef(null);
 
   const socket = useMemo(() => {
     if (!token) return null;
-    return io(SOCKET_BASE_URL, {
+    
+    console.log("🔌 Connecting to socket:", SOCKET_BASE_URL);
+    
+    const socketInstance = io(SOCKET_BASE_URL, {
       auth: { token },
       transports: ["websocket", "polling"]
     });
+
+    // Add connection event handlers for debugging
+    socketInstance.on("connect", () => {
+      console.log("✅ Socket connected:", socketInstance.id);
+      setSocketConnected(true);
+    });
+
+    socketInstance.on("connect_error", (error) => {
+      console.error("❌ Socket connection error:", error.message);
+      setSocketConnected(false);
+      toast.error("Chat connection failed");
+    });
+
+    socketInstance.on("disconnect", (reason) => {
+      console.log("🔌 Socket disconnected:", reason);
+      setSocketConnected(false);
+    });
+
+    socketInstance.on("error", (error) => {
+      console.error("❌ Socket error:", error);
+    });
+
+    // Store socket in ref for cleanup
+    socketRef.current = socketInstance;
+
+    return socketInstance;
   }, [token]);
 
   useEffect(() => {
@@ -63,6 +94,8 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
     if (!socket) return undefined;
 
     const handleMessage = ({ chatId, message }) => {
+      console.log("📨 Received message:", { chatId, message });
+      
       setChats((previous) =>
         previous.map((chat) =>
           chat._id === chatId
@@ -80,25 +113,37 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
       }
     };
 
+    const handleChatJoined = ({ chatId }) => {
+      console.log("✅ Successfully joined chat:", chatId);
+    };
+
     socket.on("chat:message", handleMessage);
+    socket.on("chat:joined", handleChatJoined);
 
     return () => {
       socket.off("chat:message", handleMessage);
+      socket.off("chat:joined", handleChatJoined);
     };
   }, [socket]);
 
+  // Cleanup socket only on component unmount
   useEffect(() => {
-    if (!socket) return undefined;
     return () => {
-      socket.disconnect();
+      if (socketRef.current && socketRef.current.connected) {
+        console.log("🔴 Disconnecting socket on component unmount");
+        socketRef.current.disconnect();
+      }
     };
-  }, [socket]);
+  }, []); // Empty dependency array - only run on mount/unmount
 
   useEffect(() => {
     if (!socket || !activeChat?._id) return;
+    
+    console.log("🔗 Joining chat:", activeChat._id);
     socket.emit("chat:join", { chatId: activeChat._id });
 
     return () => {
+      console.log("👋 Leaving chat:", activeChat._id);
       socket.emit("chat:leave", { chatId: activeChat._id });
     };
   }, [socket, activeChat]);
@@ -148,12 +193,24 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
 
     setMessageInput("");
 
-    if (!socket) {
+    if (!socket || !socket.connected) {
+      console.error("❌ Socket not connected");
       toast.error("Live connection unavailable");
       return;
     }
 
-    socket.emit("chat:message", { chatId: activeChat._id, content: trimmed });
+    console.log("📤 Sending message:", { chatId: activeChat._id, content: trimmed });
+
+    socket.emit("chat:message", { chatId: activeChat._id, content: trimmed }, (response) => {
+      if (response) {
+        if (response.success) {
+          console.log("✅ Message sent successfully");
+        } else {
+          console.error("❌ Message failed:", response.message);
+          toast.error(response.message || "Failed to send message");
+        }
+      }
+    });
   };
 
   const currentUserId = getUserId(user);
@@ -165,6 +222,17 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
           <CardTitle className="flex items-center gap-2 text-base">
             <MessageCircle className="h-4 w-4" />
             Chat List
+            {socketConnected ? (
+              <span className="ml-auto flex items-center gap-1 text-xs font-normal text-green-600">
+                <span className="h-2 w-2 rounded-full bg-green-600"></span>
+                Online
+              </span>
+            ) : (
+              <span className="ml-auto flex items-center gap-1 text-xs font-normal text-red-600">
+                <span className="h-2 w-2 rounded-full bg-red-600"></span>
+                Offline
+              </span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -277,9 +345,14 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                 <Input
                   value={messageInput}
                   onChange={(event) => setMessageInput(event.target.value)}
-                  placeholder="Type a message..."
+                  placeholder={socketConnected ? "Type a message..." : "Connecting..."}
+                  disabled={!socketConnected}
                 />
-                <Button type="submit" className="bg-brandMainColor hover:bg-brandMainColor/90">
+                <Button 
+                  type="submit" 
+                  className="bg-brandMainColor hover:bg-brandMainColor/90"
+                  disabled={!socketConnected}
+                >
                   <Send className="h-4 w-4" />
                 </Button>
               </form>
