@@ -17,6 +17,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getPostedListings, getTransactionData } from "@/services/listingService";
 import { toast } from "sonner";
+import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
+import MarketInsights from "@/components/MarketInsights";
 
 const ProducerDashboard = () => {
   const { user } = useAuth();
@@ -243,12 +245,16 @@ const ProducerDashboard = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="font-bold text-lg text-foreground">{formatCurrency(listing.pricePerCredit)}</p>
-                              <Badge variant="outline" className="text-green-600 border-green-600">
-                                {listing.status}
-                              </Badge>
+                            <div className="flex-1">
+                              <DynamicPriceDisplay
+                                itemId={listing._id}
+                                isProduct={false}
+                                basePrice={listing.pricePerCredit}
+                              />
                             </div>
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              {listing.status}
+                            </Badge>
                             <Button variant="outline" size="sm">
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -351,6 +357,11 @@ const ProducerDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Market Insights Section */}
+        <div className="mt-10">
+          <MarketInsights />
+        </div>
       </div>
     </div>
   );

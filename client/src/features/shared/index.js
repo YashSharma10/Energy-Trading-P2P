@@ -9,3 +9,4 @@ export { default as ReceiptViewer } from "./ReceiptViewer";
 export { default as TransactionPage } from "./Transaction/TransactionPage";
 export { default as CombinedDashboard } from "./CombinedDashboard";
 export { default as EcoMarketplace } from "./EcoMarketplace";
+export { default as MarketInsightsPage } from "./MarketInsightsPage";

@@ -23,6 +23,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
 
 const formatCurrency = (value) => {
   const amount = Number(value) || 0;
@@ -259,7 +260,11 @@ const SellerDashboard = () => {
                         {Number(listing.quantity || 0).toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        ₹{Number(listing.pricePerCredit || 0).toLocaleString()}
+                        <DynamicPriceDisplay
+                          itemId={listing._id}
+                          isProduct={false}
+                          basePrice={listing.pricePerCredit}
+                        />
                       </TableCell>
                       <TableCell>
                         <Badge

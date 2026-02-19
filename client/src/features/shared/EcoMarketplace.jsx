@@ -25,6 +25,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
+import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
 import {
   Search,
   Leaf,
@@ -396,11 +397,15 @@ const EcoMarketplace = () => {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center text-xl font-bold text-green-700 dark:text-green-400">
-                      <IndianRupee className="h-5 w-5" />
-                      {product.price?.toLocaleString()}
-                    </div>
+                  <div className="mb-3">
+                    <DynamicPriceDisplay
+                      itemId={product._id}
+                      isProduct={true}
+                      basePrice={product.price}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4">
                     <Button
                       size="sm"
                       className="bg-green-600 hover:bg-green-700 text-white"

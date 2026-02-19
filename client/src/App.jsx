@@ -12,6 +12,7 @@ import {
   ReceiptViewer,
   TransactionPage,
   EcoMarketplace,
+  MarketInsightsPage,
 } from "./features/shared";
 import UserDashboard from "./features/shared/UserDashboard";
 import CombinedDashboard from "./features/shared/CombinedDashboard";
@@ -162,6 +163,14 @@ const App = () => {
                 />
 
                 {/* Analytics */}
+                <Route
+                  path="/market-insights"
+                  element={
+                    <RoleBasedRoute allowedRoles={["PRODUCER", "CONSUMER", "BOTH"]}>
+                      <MarketInsightsPage />
+                    </RoleBasedRoute>
+                  }
+                />
                 <Route
                   path="/buyer-analytics"
                   element={

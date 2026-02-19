@@ -27,6 +27,8 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { NumberTicker } from "@/components/magicui/number-ticker";
 import { Link } from "react-router-dom";
+import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
+import MarketInsights from "@/components/MarketInsights";
 
 const BuyerDashboard = () => {
   const { user, token } = useAuth();
@@ -220,6 +222,8 @@ const BuyerDashboard = () => {
           </div>
 
           <aside className="space-y-6">
+            <MarketInsights />
+            
             <Card className="border border-border/70 bg-card/90 shadow-xl">
               <CardHeader>
                 <CardTitle className="text-xl font-semibold text-foreground">

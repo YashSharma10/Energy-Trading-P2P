@@ -93,6 +93,18 @@ const Navbar = () => {
             </Link>
           )}
 
+          {/* {user &&
+            (user.role === "PRODUCER" ||
+              user.role === "CONSUMER" ||
+              user.role === "BOTH") && (
+              <Link
+                to="/market-insights"
+                className="text-sm font-medium text-blue-600 dark:text-blue-400 transition-colors hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
+              >
+                📊 Insights
+              </Link>
+            )} */}
+
           {user &&
             (user.role === "PRODUCER" ||
               user.role === "CONSUMER" ||
@@ -228,6 +240,19 @@ const Navbar = () => {
                   Buy Energy
                 </Link>
               )}
+
+              {user &&
+                (user.role === "PRODUCER" ||
+                  user.role === "CONSUMER" ||
+                  user.role === "BOTH") && (
+                  <Link
+                    to="/market-insights"
+                    onClick={closeSheet}
+                    className="text-sm font-medium text-blue-600 dark:text-blue-400 transition-colors hover:text-blue-700 dark:hover:text-blue-300"
+                  >
+                    📊 Market Insights
+                  </Link>
+                )}
 
               {user &&
                 (user.role === "PRODUCER" ||

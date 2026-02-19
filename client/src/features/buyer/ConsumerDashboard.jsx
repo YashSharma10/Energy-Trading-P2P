@@ -16,6 +16,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getAllListings, getTransactionData } from "@/services/listingService";
 import { toast } from "sonner";
+import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
+import MarketInsights from "@/components/MarketInsights";
 
 const ConsumerDashboard = () => {
   const { user } = useAuth();
@@ -249,11 +251,12 @@ const ConsumerDashboard = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="font-bold text-lg text-foreground">
-                                {formatCurrency(listing.pricePerCredit)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">Per credit</p>
+                            <div className="flex-1">
+                              <DynamicPriceDisplay
+                                itemId={listing._id}
+                                isProduct={false}
+                                basePrice={listing.pricePerCredit}
+                              />
                             </div>
                             <Button 
                               size="sm"
@@ -367,6 +370,11 @@ const ConsumerDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Market Insights Section */}
+        <div className="mt-10">
+          <MarketInsights />
+        </div>
       </div>
     </div>
   );

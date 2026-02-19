@@ -18,6 +18,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { getAllListings, getPostedListings, getTransactionData } from "@/services/listingService";
 import { toast } from "sonner";
+import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
+import MarketInsights from "@/components/MarketInsights";
 
 const CombinedDashboard = () => {
   const { user } = useAuth();
@@ -399,9 +401,13 @@ const CombinedDashboard = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <p className="font-bold text-lg text-foreground">
-                              {formatCurrency(listing.pricePerCredit)}
-                            </p>
+                            <div className="flex-1">
+                              <DynamicPriceDisplay
+                                itemId={listing._id}
+                                isProduct={false}
+                                basePrice={listing.pricePerCredit}
+                              />
+                            </div>
                             <Button 
                               size="sm"
                               className="bg-brandMainColor hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:hover:bg-brandSubColor/90"
@@ -495,6 +501,11 @@ const CombinedDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Market Insights Section */}
+        <div className="mt-10">
+          <MarketInsights />
+        </div>
       </div>
     </div>
   );

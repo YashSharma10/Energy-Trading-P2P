@@ -9,6 +9,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -29,6 +36,8 @@ import {
   ShoppingCart,
   Sparkles,
   Leaf,
+  Eye,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -37,6 +46,7 @@ import {
   PAGINATION,
   LISTING_STATUS,
 } from "@/constants/api";
+import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
 
 const Marketplace = () => {
   const navigate = useNavigate();
@@ -51,6 +61,10 @@ const Marketplace = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [pricingData, setPricingData] = useState(null);
+  const [pricingLoading, setPricingLoading] = useState(false);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(PAGINATION.DEFAULT_PAGE);
@@ -62,6 +76,27 @@ const Marketplace = () => {
     fetchListings();
   }, [currentPage, filters, sortOrder]);
 
+  useEffect(() => {
+    if (selectedListing && showDetailsModal) {
+      fetchPricingData(selectedListing._id);
+    }
+  }, [selectedListing, showDetailsModal]);
+
+  const fetchPricingData = async (listingId) => {
+    setPricingLoading(true);
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/pricing/${listingId}?isProduct=false`,
+      );
+      if (response.data.data) {
+        setPricingData(response.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to load pricing data:", err);
+    }
+    setPricingLoading(false);
+  };
+
   const fetchListings = async () => {
     setLoading(true);
     try {
@@ -71,18 +106,31 @@ const Marketplace = () => {
         status: LISTING_STATUS.AVAILABLE,
       };
 
-      if (filters.title) params.search = filters.title;
-      if (filters.location) params.location = filters.location;
-      if (filters.minPrice) params.minPrice = filters.minPrice;
-      if (sortOrder) params.sortBy = `pricePerCredit:${sortOrder}`;
+      // Add filters only if they have values
+      if (filters.title?.trim()) params.search = filters.title.trim();
+      if (filters.location?.trim()) params.location = filters.location.trim();
+      if (filters.minPrice && parseFloat(filters.minPrice) > 0) {
+        params.minPrice = parseFloat(filters.minPrice);
+      }
+      
+      // Add sort parameter - asc for low to high, desc for high to low
+      if (sortOrder === "asc" || sortOrder === "desc") {
+        params.sortBy = `pricePerCredit:${sortOrder}`;
+      } else {
+        params.sortBy = "pricePerCredit:asc"; // Default to low to high
+      }
+
+      console.log("Fetching listings with params:", params);
 
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.CREDITS.BASE}`,
         { params },
       );
       const listings = response.data.data || [];
+      console.log("Received listings:", listings);
       setAllListings(listings);
       setFilteredListings(listings);
+      setError(null);
 
       if (response.data.pagination) {
         setTotalPages(response.data.pagination.totalPages);
@@ -99,25 +147,20 @@ const Marketplace = () => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  const applyFilters = (nextFilters = filters, nextSort = sortOrder) => {
-    setFilters(nextFilters);
-    setSortOrder(nextSort);
+  const handleApplyFilters = () => {
     setCurrentPage(PAGINATION.DEFAULT_PAGE);
   };
 
-  const handleApplyFilters = () => {
-    applyFilters(filters, sortOrder);
-  };
-
   const handleClearFilters = () => {
-    const cleared = { title: "", location: "", minPrice: "" };
-    setFilters(cleared);
-    applyFilters(cleared, sortOrder);
+    setFilters({ title: "", location: "", minPrice: "" });
+    setSortOrder("asc");
+    setCurrentPage(PAGINATION.DEFAULT_PAGE);
   };
 
   const handleSortChange = (value) => {
+    console.log("Sort changed to:", value);
     setSortOrder(value);
-    applyFilters(filters, value);
+    setCurrentPage(1); // Reset to first page when sorting
   };
 
   // Pagination Logic
@@ -165,7 +208,202 @@ const Marketplace = () => {
   }, [allListings]);
 
   return (
-    <div className="bg-background">
+    <>
+      {/* Details Modal */}
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedListing && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl">{selectedListing.title}</DialogTitle>
+                <DialogDescription>{selectedListing.projectType || "Carbon Credit Listing"}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6">
+                {/* Basic Info */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Location</p>
+                    <p className="font-semibold text-foreground flex items-center gap-1">
+                      <MapPin className="h-4 w-4" /> {selectedListing.location || "Not specified"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Available Credits</p>
+                    <p className="font-semibold text-foreground">{Number(selectedListing.quantity).toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Base Price</p>
+                    <p className="font-semibold text-foreground flex items-center gap-1">
+                      <IndianRupee className="h-4 w-4" /> {selectedListing.pricePerCredit.toFixed(2)} per credit
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Vintage Year</p>
+                    <p className="font-semibold text-foreground">{selectedListing.vintageYear || "Current"}</p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {selectedListing.description && (
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-2">Description</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{selectedListing.description}</p>
+                  </div>
+                )}
+
+                {/* Project Details */}
+                {selectedListing.projectDetails && (
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-2">Project Details</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-line">{selectedListing.projectDetails}</p>
+                  </div>
+                )}
+
+                {/* Pricing Analysis */}
+                {pricingLoading ? (
+                  <div className="rounded-lg border border-border/60 bg-background/50 p-4">
+                    <p className="text-sm text-muted-foreground">Loading pricing analysis...</p>
+                  </div>
+                ) : pricingData ? (
+                  <div className="space-y-4">
+                    {/* Recommended Price */}
+                    <div className="rounded-lg border border-brandMainColor/30 bg-brandMainColor/5 dark:bg-brandSubColor/5 p-4">
+                      <p className="text-sm text-muted-foreground mb-2">Dynamic Price</p>
+                      <div className="flex items-baseline justify-between">
+                        <div>
+                          <p className="text-3xl font-bold text-brandMainColor dark:text-brandSubColor">
+                            ₹{pricingData.recommendedPrice?.toFixed(2) || selectedListing.pricePerCredit}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Recommended price (multiplier: {pricingData.priceMultiplier?.toFixed(2)}x)</p>
+                        </div>
+                        <div className="text-right">
+                          {pricingData.savings > 0 && (
+                            <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                              Save ₹{pricingData.savings.toFixed(2)}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground">Market: {pricingData.currentMarketTemperature}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pricing Factors Grid */}
+                    <div>
+                      <p className="text-sm font-semibold text-foreground mb-3">Pricing Factors Analysis</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {pricingData.factors && (
+                          <>
+                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                              <p className="text-xs text-muted-foreground">Demand Factor</p>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-lg font-bold text-foreground">
+                                  {(pricingData.factors.demandFactor * 100).toFixed(0)}%
+                                </span>
+                                <span className="text-xs text-brandMainColor">↑ Impact</span>
+                              </div>
+                            </div>
+                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                              <p className="text-xs text-muted-foreground">Supply Factor</p>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-lg font-bold text-foreground">
+                                  {(pricingData.factors.supplyFactor * 100).toFixed(0)}%
+                                </span>
+                                <span className="text-xs text-amber-600">⚖ Impact</span>
+                              </div>
+                            </div>
+                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                              <p className="text-xs text-muted-foreground">Rate Factor</p>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-lg font-bold text-foreground">
+                                  {(pricingData.factors.rateFactor * 100).toFixed(0)}%
+                                </span>
+                                <span className="text-xs text-blue-600">✓ Quality</span>
+                              </div>
+                            </div>
+                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                              <p className="text-xs text-muted-foreground">Verification Factor</p>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-lg font-bold text-foreground">
+                                  {(pricingData.factors.verificationFactor * 100).toFixed(0)}%
+                                </span>
+                                <span className="text-xs text-green-600">✓ Verified</span>
+                              </div>
+                            </div>
+                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                              <p className="text-xs text-muted-foreground">Trend Factor</p>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-lg font-bold text-foreground">
+                                  {(pricingData.factors.trendFactor * 100).toFixed(0)}%
+                                </span>
+                                <span className="text-xs text-sky-600">📈 Trend</span>
+                              </div>
+                            </div>
+                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                              <p className="text-xs text-muted-foreground">Time Decay Factor</p>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-lg font-bold text-foreground">
+                                  {(pricingData.factors.timeDecayFactor * 100).toFixed(0)}%
+                                </span>
+                                <span className="text-xs text-slate-600">⏱ Age</span>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {pricingData.demandScore !== undefined && (
+                          <>
+                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                              <p className="text-xs text-muted-foreground">Demand Score</p>
+                              <p className="text-lg font-bold text-foreground mt-1">{pricingData.demandScore}/100</p>
+                            </div>
+                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
+                              <p className="text-xs text-muted-foreground">Supply Score</p>
+                              <p className="text-lg font-bold text-foreground mt-1">{pricingData.supplyScore}/100</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Verification & Documents */}
+                <div className="rounded-lg border border-border/60 bg-background/50 p-4 space-y-2">
+                  <p className="text-sm font-semibold text-foreground">Verification & Documents</p>
+                  <p className="text-sm text-muted-foreground">
+                    ✓ Includes verification reports
+                    {"\n"}✓ Registry attestations
+                    {"\n"}✓ Monitoring data for due diligence
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    className="flex-1 h-10 rounded-lg bg-brandMainColor text-sm font-semibold text-white hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
+                    onClick={() => {
+                      navigate(
+                        `/payment?id=${selectedListing._id}&price=${selectedListing.pricePerCredit}&title=${encodeURIComponent(selectedListing.title)}&maxQuantity=${selectedListing.quantity}`,
+                      );
+                      setShowDetailsModal(false);
+                    }}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" /> Purchase Now
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-10 rounded-lg"
+                    onClick={() => setShowDetailsModal(false)}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <div className="bg-background">
       <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -336,11 +574,11 @@ const Marketplace = () => {
 
           <section className="space-y-6">
             {loading ? (
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                 {Array.from({ length: 6 }).map((_, idx) => (
                   <Skeleton
                     key={`skeleton-${idx}`}
-                    className="h-64 w-full rounded-2xl"
+                    className="h-72 w-full rounded-lg"
                   />
                 ))}
               </div>
@@ -365,53 +603,65 @@ const Marketplace = () => {
               </Card>
             ) : (
               <>
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
                   {currentListings.map((listing) => (
                     <Card
                       key={listing._id}
-                      className="group border border-border/70 bg-card/90 shadow-xl transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl"
+                      className="group relative flex flex-col border border-border/70 bg-card/90 shadow-md transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl overflow-hidden"
                     >
                       <div className="h-1 w-full bg-gradient-to-r from-brandMainColor via-emerald-500 to-lime-400 dark:from-brandSubColor" />
-                      <CardHeader className="space-y-2 pb-2">
-                        <CardTitle className="text-lg font-semibold text-foreground">
+                      
+                      <CardHeader className="space-y-3 pb-3">
+                        <CardTitle className="line-clamp-2 text-lg font-bold text-foreground">
                           {listing.title}
                         </CardTitle>
-                        <CardDescription className="text-sm text-muted-foreground">
-                          {listing.description}
-                        </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-4 w-4 text-brandMainColor" />
-                          {listing.location || "Not specified"}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                            <IndianRupee className="h-4 w-4 text-brandMainColor" />
-                            {Number(listing.pricePerCredit).toLocaleString()} /
-                            credit
+                      
+                      <CardContent className="flex flex-1 flex-col justify-between space-y-4 pb-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
+                            <MapPin className="h-5 w-5 flex-shrink-0 text-brandMainColor" />
+                            <span className="truncate font-medium">{listing.location || "Not specified"}</span>
                           </div>
+                          
+                          <DynamicPriceDisplay
+                            itemId={listing._id}
+                            isProduct={false}
+                            basePrice={listing.pricePerCredit}
+                          />
+                          
                           <div className="text-sm text-muted-foreground">
-                            {Number(listing.quantity).toLocaleString()}{" "}
-                            available
+                            <span className="font-bold text-foreground text-base">
+                              {Number(listing.quantity).toLocaleString()}
+                            </span>
+                            <span className="text-sm"> credits available</span>
                           </div>
                         </div>
-                        <div className="rounded-2xl border border-border/60 bg-background/80 p-4 text-xs text-muted-foreground">
-                          Includes verification reports, registry attestations,
-                          and monitoring data for due diligence.
-                        </div>
+                      </CardContent>
+                      
+                      <div className="flex gap-3 px-4 pb-4">
                         <Button
-                          className="h-11 w-full rounded-xl bg-brandMainColor text-sm font-semibold text-white transition-colors hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
+                          variant="outline"
+                          className="h-10 flex-1 text-sm font-semibold"
+                          onClick={() => {
+                            setSelectedListing(listing);
+                            setPricingData(null);
+                            setShowDetailsModal(true);
+                          }}
+                        >
+                          <Eye className="mr-2 h-4 w-4" /> Details
+                        </Button>
+                        <Button
+                          className="h-10 flex-1 bg-brandMainColor text-sm font-semibold text-white hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
                           onClick={() => {
                             navigate(
                               `/payment?id=${listing._id}&price=${listing.pricePerCredit}&title=${encodeURIComponent(listing.title)}&maxQuantity=${listing.quantity}`,
                             );
                           }}
                         >
-                          <ShoppingCart className="mr-2 h-4 w-4" /> Purchase
-                          credits
+                          <ShoppingCart className="mr-2 h-4 w-4" /> Buy
                         </Button>
-                      </CardContent>
+                      </div>
                     </Card>
                   ))}
                 </div>
@@ -448,7 +698,8 @@ const Marketplace = () => {
           </section>
         </section>
       </main>
-    </div>
+      </div>
+    </>
   );
 };
 

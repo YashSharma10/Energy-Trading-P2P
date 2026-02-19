@@ -18,6 +18,7 @@ import adminRoutes from "./src/routes/adminRoute.js";
 import analyticsRoutes from "./src/routes/analyticsRoute.js";
 import chatbotRoutes from "./src/routes/chatbotRoute.js";
 import ecoProductRoutes from "./src/routes/ecoProductRoute.js";
+import pricingRoutes from "./src/routes/pricingRoute.js";
 
 app.use((req, res, next) => {
   logger.info(`Received ${req.method} request to ${req.url}`);
@@ -31,6 +32,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/eco-products", ecoProductRoutes);
+app.use("/api/pricing", pricingRoutes);
 
 // Start Server
 const PORT = config.port;
