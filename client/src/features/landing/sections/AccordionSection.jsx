@@ -47,7 +47,7 @@ export default function AccordionSection() {
   return (
     <div className="width mx-auto mb-8 rounded-lg border border-border bg-card/95 p-6 shadow-lg backdrop-blur-sm">
       <h2 className="mb-6 text-center text-3xl font-semibold text-foreground dark:text-white">
-        Questions? We've got answers
+        Questions? We've got answers,
       </h2>
       <Accordion type="single" collapsible>
         {faqs.map((faq, index) => (
