@@ -15,7 +15,7 @@ const LandingPage = () => {
       <FactSection />
       <HowItWorksSection />
       <ImpactSection />
-      <StatsSection />
+      {/* <StatsSection /> */}
       <FeatureSection />
       <TestimonialsSection />
       <AccordionSection />
