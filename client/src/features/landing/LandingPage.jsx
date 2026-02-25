@@ -14,12 +14,12 @@ const LandingPage = () => {
       <GlobeSection />
       <FactSection />
       <HowItWorksSection />
-      <ImpactSection />
-      {/* <StatsSection /> */}
+      {/* <ImpactSection /> */}
+      <StatsSection />
       <FeatureSection />
       <TestimonialsSection />
       <AccordionSection />
-      {/* <GeminiChatbot /> */}
+      <GeminiChatbot />
       <GeminiChatbot />
     </main>
   );
