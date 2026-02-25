@@ -20,7 +20,6 @@ const LandingPage = () => {
       <TestimonialsSection />
       <AccordionSection />
       <GeminiChatbot />
-      <GeminiChatbot />
     </main>
   );
 };
