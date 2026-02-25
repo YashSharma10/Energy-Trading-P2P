@@ -4,7 +4,6 @@ import FeatureSection from "./sections/FeatureSection";
 import GlobeSection from "./sections/GlobeSection";
 import StatsSection from "./sections/StatsSection";
 import HowItWorksSection from "./sections/HowItWorksSection";
-import ImpactSection from "./sections/ImpactSection";
 import TestimonialsSection from "./sections/TestimonialsSection";
 import GeminiChatbot from "@/components/common/GeminiChatbot";
 
@@ -14,7 +13,6 @@ const LandingPage = () => {
       <GlobeSection />
       <FactSection />
       <HowItWorksSection />
-      {/* <ImpactSection /> */}
       <StatsSection />
       <FeatureSection />
       <TestimonialsSection />
