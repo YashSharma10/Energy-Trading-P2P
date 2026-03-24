@@ -18,40 +18,33 @@ passport.use(
           return done(new Error("No email found in Google profile"), null);
         }
 
-        // Check if user already exists (by googleId or email)
-        let user = await User.findOne({
+        // Only allow Google login for accounts that already exist (registered via email)
+        const user = await User.findOne({
           $or: [{ googleId: profile.id }, { email }],
         });
 
-        if (user) {
-          // Link Google account if signed up via email before
-          if (!user.googleId) {
-            user.googleId = profile.id;
-            user.authProvider = "google";
-            user.isVerified = true;
-            if (!user.avatar && profile.photos?.[0]?.value) {
-              user.avatar = profile.photos[0].value;
-            }
-            await user.save();
-          }
-          return done(null, user);
+        if (!user) {
+          // No account found — reject with a known error code so the
+          // callback controller can redirect with a friendly message.
+          logger.warn(`Google OAuth: no account found for ${email} — registration required`);
+          const err = new Error("NOT_REGISTERED");
+          err.code = "NOT_REGISTERED";
+          return done(err, null);
         }
 
-        // Create new user via Google
-        const newUser = new User({
-          googleId: profile.id,
-          email,
-          name: profile.displayName || "",
-          avatar: profile.photos?.[0]?.value || "",
-          authProvider: "google",
-          isVerified: true,
-          // Default role — frontend will ask user to pick role on first login
-          role: "CONSUMER",
-        });
+        // Link Google to their existing email/password account (first time only)
+        if (!user.googleId) {
+          user.googleId = profile.id;
+          user.authProvider = "google";
+          user.isVerified = true;
+          if (!user.avatar && profile.photos?.[0]?.value) {
+            user.avatar = profile.photos[0].value;
+          }
+          await user.save();
+          logger.info(`Google account linked to existing user: ${email}`);
+        }
 
-        await newUser.save();
-        logger.info(`New Google OAuth user created: ${email}`);
-        return done(null, newUser);
+        return done(null, user);
       } catch (error) {
         logger.error("Google OAuth strategy error:", error);
         return done(error, null);
@@ -61,3 +54,4 @@ passport.use(
 );
 
 export default passport;
+

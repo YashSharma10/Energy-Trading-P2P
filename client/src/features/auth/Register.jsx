@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { registerUser } from "@/services/authService";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,16 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [agreed, setAgreed] = useState(false);
+  const [googleError, setGoogleError] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Show banner if redirected here because Google account isn't registered
+  useEffect(() => {
+    if (searchParams.get("error") === "google_not_registered") {
+      setGoogleError(true);
+    }
+  }, [searchParams]);
 
   const handleRegister = async () => {
     if (!agreed) {
@@ -149,6 +158,14 @@ const Register = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
+              {googleError && (
+                <Alert className="border-amber-500/50 bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+                  <AlertTitle className="font-semibold">No account found for your Google email</AlertTitle>
+                  <AlertDescription>
+                    Google sign-in is only available for existing users. Please register with your email and password below first — then you can link Google to your account on your next sign-in.
+                  </AlertDescription>
+                </Alert>
+              )}
               {error && (
                 <Alert variant="destructive">
                   <AlertTitle>Error</AlertTitle>

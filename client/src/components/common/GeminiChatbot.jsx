@@ -1,181 +1,221 @@
-import { useEffect, useMemo, useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Bot, Loader2, MessageCircle, Send, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const GEMINI_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+// ─── Constants ────────────────────────────────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const CHAT_URL = `${API_BASE}/chatbot/chat`;
 
+// ─── Module-level context cache ───────────────────────────────────────────────
+let _cachedContext = null;
+let _contextFetchPromise = null;
+
+const fetchPlatformContext = () => {
+  if (_cachedContext) return Promise.resolve(_cachedContext);
+  if (_contextFetchPromise) return _contextFetchPromise;
+
+  _contextFetchPromise = fetch(`${API_BASE}/chatbot/context`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) _cachedContext = data.context;
+      _contextFetchPromise = null;
+      return _cachedContext;
+    })
+    .catch((err) => {
+      console.error("Failed to fetch chatbot context:", err);
+      _contextFetchPromise = null;
+      return null;
+    });
+
+  return _contextFetchPromise;
+};
+
+// ─── Simple markdown renderer (bold + line breaks) ───────────────────────────
+const renderMarkdown = (text) =>
+  text.split("\n").map((line, li, arr) => {
+    const parts = line.split(/(\*\*[^*]+\*\*)/g);
+    return (
+      <span key={li}>
+        {parts.map((part, pi) =>
+          part.startsWith("**") && part.endsWith("**") ? (
+            <strong key={pi}>{part.slice(2, -2)}</strong>
+          ) : (
+            <span key={pi}>{part}</span>
+          )
+        )}
+        {li < arr.length - 1 && <br />}
+      </span>
+    );
+  });
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function GeminiChatbot() {
-  const apiKey = useMemo(() => import.meta.env.VITE_GEMINI_API_KEY?.trim(), []);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      text: "Hi there! I'm the CarbonEase assistant. Ask me anything about carbon credits, our platform, or available listings.",
+      text: "Hi! I'm the CarbonEase assistant. Ask me anything about carbon credits, our platform, or available listings.",
+      id: "welcome",
     },
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [platformContext, setPlatformContext] = useState(null);
+  const [contextReady, setContextReady] = useState(!!_cachedContext);
   const [contextLoading, setContextLoading] = useState(false);
 
-  // Fetch platform context when chatbot opens
+  const messagesEndRef = useRef(null);
+  // Stores clean completed exchanges for multi-turn history (role: "user"/"model")
+  const conversationRef = useRef([]);
+
+  // Auto-scroll
   useEffect(() => {
-    if (isOpen && !platformContext && !contextLoading) {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Prefetch context cache on mount
+  useEffect(() => {
+    if (!_cachedContext) {
       setContextLoading(true);
-      fetch("http://localhost:3000/api/chatbot/context")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            setPlatformContext(data.context);
-          }
-        })
-        .catch((err) => console.error("Failed to fetch context:", err))
-        .finally(() => setContextLoading(false));
-    }
-  }, [isOpen, platformContext, contextLoading]);
-
-  const handleToggle = () => {
-    setIsOpen((previous) => !previous);
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const trimmed = input.trim();
-    if (!trimmed || isLoading) {
-      return;
-    }
-
-    if (!apiKey) {
-      setError(
-        "Gemini API key is missing. Add VITE_GEMINI_API_KEY to your environment."
-      );
-      return;
-    }
-
-    const newMessages = [...messages, { role: "user", text: trimmed }];
-
-    setMessages(newMessages);
-    setInput("");
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Create system prompt with context restriction
-      const contextData = platformContext ? `
-PLATFORM DATA (Use this real-time data in your responses):
-- Total Listings: ${platformContext.statistics.totalListings}
-- Available Listings: ${platformContext.statistics.availableListings}
-- Total Users: ${platformContext.statistics.totalUsers}
-- Total Transactions: ${platformContext.statistics.totalTransactions}
-- Total Credits Available: ${platformContext.statistics.totalCreditsAvailable} tons
-- Price Range: ₹${platformContext.statistics.priceRange.minPrice} - ₹${platformContext.statistics.priceRange.maxPrice} (Avg: ₹${Math.round(platformContext.statistics.priceRange.avgPrice)})
-
-PROJECT TYPES AVAILABLE:
-${platformContext.projectTypes.map(pt => `- ${pt.type}: ${pt.count} projects`).join('\n')}
-
-CERTIFICATION STANDARDS:
-${platformContext.certifications.map(c => `- ${c.standard}: ${c.count} credits`).join('\n')}
-
-SAMPLE AVAILABLE LISTINGS:
-${platformContext.sampleListings.map((l, i) => `${i + 1}. ${l.title}
-   - Type: ${l.type}
-   - Quantity: ${l.quantity} tons
-   - Price: ₹${l.price}/credit
-   - Location: ${l.location}
-   - Certification: ${l.certification}`).join('\n\n')}
-` : "Platform data is loading...";
-
-      const systemPrompt = `You are CarbonEase Assistant, a specialized AI helper for the CarbonEase carbon credit trading platform.
-
-STRICT RULES:
-1. ONLY answer questions about:
-   - Carbon credits and carbon markets
-   - Climate change and emissions
-   - The CarbonEase platform and its features
-   - Available listings and transactions on our platform
-   - How to buy/sell carbon credits
-   - Renewable energy and sustainability
-   
-2. If asked about ANYTHING else (sports, entertainment, general knowledge, math problems, cooking, coding, etc.), respond EXACTLY with:
-   "I can only help with questions about carbon credits, climate action, and the CarbonEase platform. Please ask me something related to carbon trading or sustainability."
-
-3. Use the following real-time platform data when relevant:
-${contextData}
-
-4. Be helpful, concise, and professional.
-5. When discussing listings, use ACTUAL DATA from the platform context above.
-6. Format prices in Indian Rupees (₹).
-7. Mention specific project names, types, and certifications from the available listings.
-
-User question: ${trimmed}`;
-
-      const response = await fetch(GEMINI_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: systemPrompt,
-                },
-              ],
-            },
-          ],
-        }),
+      fetchPlatformContext().then((ctx) => {
+        if (ctx) setContextReady(true);
+        setContextLoading(false);
       });
-
-      if (!response.ok) {
-        throw new Error(`Gemini request failed with ${response.status}`);
-      }
-
-      const data = await response.json();
-      const reply =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
-        "I didn't understand that, but I'm here to help!";
-
-      setMessages((previous) => [
-        ...previous,
-        {
-          role: "assistant",
-          text: reply,
-        },
-      ]);
-    } catch (fetchError) {
-      console.error("Gemini request error", fetchError);
-      setError(
-        "Something went wrong while contacting Gemini. Please try again."
-      );
-      setMessages((previous) => [
-        ...previous,
-        {
-          role: "assistant",
-          text: "I ran into an issue reaching Gemini. Please try again in a moment.",
-        },
-      ]);
-    } finally {
-      setIsLoading(false);
+    } else {
+      setContextReady(true);
     }
+  }, []);
+
+  // Typewriter effect using rAF
+  const typewrite = useCallback((msgId, fullText) => {
+    return new Promise((resolve) => {
+      let i = 0;
+      const CHUNK = 8;
+      const tick = () => {
+        i = Math.min(i + CHUNK, fullText.length);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === msgId
+              ? { ...m, text: fullText.slice(0, i), streaming: i < fullText.length }
+              : m
+          )
+        );
+        if (i < fullText.length) requestAnimationFrame(tick);
+        else resolve();
+      };
+      requestAnimationFrame(tick);
+    });
+  }, []);
+
+  const handleToggle = useCallback(() => setIsOpen((v) => !v), []);
+
+  const handleSubmit = useCallback(
+    async (event) => {
+      event?.preventDefault();
+      const trimmed = input.trim();
+      if (!trimmed || isLoading) return;
+
+      const assistantMsgId = `a-${Date.now()}`;
+
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", text: trimmed, id: Date.now().toString() },
+        { role: "assistant", text: "", id: assistantMsgId, streaming: true },
+      ]);
+      setInput("");
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // Send to backend proxy — API key never leaves the server
+        const res = await fetch(CHAT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: trimmed,
+            // Send last 5 exchanges as history (role: "user"/"model" for Gemini)
+            history: conversationRef.current.slice(-10),
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          const errMsg =
+            res.status === 429
+              ? "⏳ Too many requests — please wait a moment and try again."
+              : data.message || "Something went wrong. Please try again.";
+          setError(errMsg);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, text: "Sorry, I couldn't respond right now. Please try again.", streaming: false }
+                : m
+            )
+          );
+          return;
+        }
+
+        const reply = data.reply;
+
+        // Store completed exchange in conversation history
+        conversationRef.current = [
+          ...conversationRef.current,
+          { role: "user", parts: [{ text: trimmed }] },
+          { role: "model", parts: [{ text: reply }] },
+        ].slice(-12);
+
+        await typewrite(assistantMsgId, reply);
+      } catch (err) {
+        console.error("Chat error:", err);
+        setError("Network error — please check your connection and try again.");
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMsgId
+              ? { ...m, text: "Sorry, I couldn't respond right now. Please try again.", streaming: false }
+              : m
+          )
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [input, isLoading, typewrite]
+  );
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) handleSubmit(e);
   };
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      {isOpen ? (
-        <div className="mb-3 w-[450px] rounded-xl border border-border/70 bg-card/95 shadow-lg backdrop-blur">
-          <div className="flex items-center justify-between rounded-t-xl border-b border-border/60 bg-primary/10 px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                CarbonEase Assistant
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Powered by Google Gemini
-              </p>
+      {isOpen && (
+        <div className="mb-3 flex w-[420px] flex-col rounded-2xl border border-border/70 bg-card/95 shadow-2xl backdrop-blur-md">
+          {/* Header */}
+          <div className="flex items-center justify-between rounded-t-2xl border-b border-border/60 bg-primary/10 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20">
+                <Bot className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">CarbonEase Assistant</p>
+                <div className="flex items-center gap-1">
+                  {contextLoading ? (
+                    <span className="flex items-center gap-1 text-xs text-amber-500">
+                      <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                      Loading platform data…
+                    </span>
+                  ) : contextReady ? (
+                    <span className="flex items-center gap-1 text-xs text-emerald-500">
+                      <Zap className="h-2.5 w-2.5 fill-emerald-500" />
+                      Live data ready
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Powered by Gemini</span>
+                  )}
+                </div>
+              </div>
             </div>
             <Button size="icon" variant="ghost" onClick={handleToggle}>
               <X className="h-4 w-4" />
@@ -183,69 +223,81 @@ User question: ${trimmed}`;
             </Button>
           </div>
 
+          {/* Messages */}
           <div className="h-96 space-y-3 overflow-y-auto px-4 py-3">
-            {contextLoading && (
-              <div className="flex justify-center py-2">
-                <p className="text-xs text-muted-foreground">Loading platform data...</p>
-              </div>
-            )}
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <div
-                key={`${message.role}-${index}`}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                key={message.id}
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm shadow-sm ${
+                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
                     message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground"
+                      ? "rounded-br-sm bg-primary text-primary-foreground"
+                      : "rounded-bl-sm bg-muted text-foreground"
                   }`}
                 >
-                  {message.text}
+                  {message.text ? (
+                    renderMarkdown(message.text)
+                  ) : message.streaming ? (
+                    <span className="flex items-center gap-1 py-0.5">
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
+                      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
+                    </span>
+                  ) : null}
                 </div>
               </div>
             ))}
+
             {error && (
               <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">
                 {error}
               </p>
             )}
+            <div ref={messagesEndRef} />
           </div>
 
-          <form
-            onSubmit={handleSubmit}
-            className="border-t border-border/60 px-4 py-3"
-          >
+          {/* Input */}
+          <form onSubmit={handleSubmit} className="border-t border-border/60 px-4 py-3">
             <div className="flex items-center gap-2">
               <Input
                 value={input}
-                onChange={(event) => setInput(event.target.value)}
-                placeholder="Ask something..."
-                className="flex-1"
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={contextLoading ? "Loading platform data…" : "Ask something…"}
+                className="flex-1 rounded-xl"
                 disabled={isLoading}
+                autoFocus
               />
-              <Button type="submit" size="icon" disabled={isLoading}>
-                <Send className="h-4 w-4" />
-                <span className="sr-only">Send message</span>
+              <Button
+                type="submit"
+                size="icon"
+                disabled={isLoading || !input.trim()}
+                className="shrink-0 rounded-xl"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                <span className="sr-only">Send</span>
               </Button>
             </div>
             <p className="mt-2 text-[10px] leading-4 text-muted-foreground">
-              Responses are generated by Gemini and may be inaccurate. Please
-              verify key details.
+              Powered by Gemini. Responses may be inaccurate — verify key details.
             </p>
           </form>
         </div>
-      ) : null}
+      )}
 
       <Button
         size="lg"
         className="h-12 w-12 rounded-full shadow-lg"
         onClick={handleToggle}
+        aria-label="Open CarbonEase chat assistant"
       >
         <MessageCircle className="h-5 w-5" />
-        <span className="sr-only">Open Gemini chat</span>
       </Button>
     </div>
   );

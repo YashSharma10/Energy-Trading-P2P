@@ -52,6 +52,24 @@ try {
 
   httpServer.listen(PORT, () => {
     logger.info(`🚀 Server is running on port ${PORT}`);
+
+    // Warm up the chatbot context cache in the background
+    // so the first user request is already cached.
+    import("./src/controllers/chatbotController.js").then(({ getChatbotContext }) => {
+      const fakeReq = {};
+      const fakeRes = {
+        status: () => fakeRes,
+        json: () => {},
+      };
+      getChatbotContext(fakeReq, fakeRes)
+        .then(() => logger.info("🤖 Chatbot context cache warmed"))
+        .catch((e) => logger.warn("Chatbot cache warm-up failed:", e));
+
+      // Auto-refresh cache every 5 minutes
+      setInterval(() => {
+        getChatbotContext(fakeReq, fakeRes).catch(() => {});
+      }, 5 * 60 * 1000);
+    });
   });
 } catch (err) {
   logger.error("❌ MongoDB connection error:", err);

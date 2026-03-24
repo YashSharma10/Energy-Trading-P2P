@@ -42,30 +42,19 @@ export const getPrice = async (req, res) => {
     const { isProduct = false } = req.query;
 
     if (!itemId) {
-      return res.status(400).json({
-        success: false,
-        message: "Item ID is required",
-      });
+      return res.status(400).json({ success: false, message: "Item ID is required" });
     }
 
-    // First try to get existing pricing, if not found calculate new
-    let result = await getDynamicPrice(itemId, isProduct === "true");
-
-    if (!result.success) {
-      // Calculate new dynamic price if not found
-      result = await calculateDynamicPrice(itemId, isProduct === "true");
-    }
-
+    // getDynamicPrice checks memory cache → DB (with staleness) → returns what it has.
+    // calculateDynamicPrice (which hits Gemini) is only called explicitly via POST /calculate.
+    const result = await getDynamicPrice(itemId, isProduct === "true");
     return res.status(result.success ? 200 : 404).json(result);
   } catch (error) {
     console.error("Error fetching price:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching dynamic price",
-      error: error.message,
-    });
+    res.status(500).json({ success: false, message: "Error fetching dynamic price", error: error.message });
   }
 };
+
 
 /**
  * Update all dynamic prices (admin only)

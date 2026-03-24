@@ -44,13 +44,31 @@ router.get(
 );
 
 // 2. Google redirects back here after consent
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=google_auth_failed`,
-  }),
-  googleAuthCallback
-);
+// Using a custom callback so we can distinguish NOT_REGISTERED from other errors.
+router.get("/google/callback", (req, res, next) => {
+  passport.authenticate("google", { session: false }, (err, user) => {
+    if (err) {
+      if (err.code === "NOT_REGISTERED" || err.message === "NOT_REGISTERED") {
+        // The Google email exists but no account is registered — send to register page
+        return res.redirect(
+          `${process.env.CLIENT_URL}/register?error=google_not_registered`
+        );
+      }
+      // All other passport/OAuth errors
+      return res.redirect(
+        `${process.env.CLIENT_URL}/login?error=google_auth_failed`
+      );
+    }
+    if (!user) {
+      return res.redirect(
+        `${process.env.CLIENT_URL}/login?error=google_auth_failed`
+      );
+    }
+    // Attach user to req so the controller can issue a JWT
+    req.user = user;
+    next();
+  })(req, res, next);
+}, googleAuthCallback);
 
 export default router;
+

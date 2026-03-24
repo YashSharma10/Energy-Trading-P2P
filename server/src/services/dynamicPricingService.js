@@ -7,85 +7,84 @@ import DynamicPrice from "../models/DynamicPrice.js";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
-/**
- * Calculate market metrics for dynamic pricing
- */
+// ─── In-memory pricing cache ───────────────────────────────────────────────────
+// Avoids Gemini calls for the same listing on every page load.
+// TTL: 30 minutes. Key: listingId string.
+const _priceCache = new Map();
+const PRICE_CACHE_TTL = 30 * 60 * 1000; // 30 min
+
+const getPriceFromCache = (id) => {
+  const entry = _priceCache.get(id);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > PRICE_CACHE_TTL) { _priceCache.delete(id); return null; }
+  return entry.data;
+};
+
+const setPriceInCache = (id, data) => {
+  _priceCache.set(id, { data, ts: Date.now() });
+};
+
+// ─── In-flight deduplication ───────────────────────────────────────────────────
+// If two concurrent requests ask for the same listing, share one Gemini call.
+const _inFlight = new Map();
+
+// ─── DB staleness threshold ────────────────────────────────────────────────────
+// Reuse the DB price if it was calculated within the last 6 hours.
+const DB_STALENESS_MS = 6 * 60 * 60 * 1000; // 6 hours
+
+const isDbPriceFresh = (lastUpdatedAt) =>
+  lastUpdatedAt && Date.now() - new Date(lastUpdatedAt).getTime() < DB_STALENESS_MS;
+
+// ─── Market metrics (unchanged logic) ─────────────────────────────────────────
 const calculateMarketMetrics = async (listing, isProduct = false) => {
   try {
     const projectType = isProduct ? listing.category : listing.projectType;
     const basePrice = isProduct ? listing.price : listing.pricePerCredit;
 
-    // Calculate demand score (popularity of similar items)
-    const similarItems = await (
-      isProduct ? EcoProduct : CarbonCredit
-    ).countDocuments({
-      [isProduct ? "category" : "projectType"]: projectType,
-      status: isProduct ? "Active" : "Available",
-    });
-
-    // Calculate supply score
-    const totalSupply = await (isProduct ? EcoProduct : CarbonCredit).aggregate(
-      [
+    const [similarItems, totalSupply, recentTransactions, seller] = await Promise.all([
+      (isProduct ? EcoProduct : CarbonCredit).countDocuments({
+        [isProduct ? "category" : "projectType"]: projectType,
+        status: isProduct ? "Active" : "Available",
+      }),
+      (isProduct ? EcoProduct : CarbonCredit).aggregate([
         {
           $match: {
             [isProduct ? "category" : "projectType"]: projectType,
             status: isProduct ? "Active" : "Available",
           },
         },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: isProduct ? "$stock" : "$quantity" },
-          },
-        },
-      ],
-    );
+        { $group: { _id: null, total: { $sum: isProduct ? "$stock" : "$quantity" } } },
+      ]),
+      transactionsModel
+        .find({
+          ...(isProduct ? {} : { listing: listing._id }),
+          purchaseDate: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        })
+        .select("pricePerCredit quantity")
+        .sort({ purchaseDate: -1 })
+        .limit(20),
+      userModel.findById(listing.seller || listing.addedBy).select("ratings").lean(),
+    ]);
 
-    // Recent transaction prices (market trend)
-    const recentTransactions = await transactionsModel
-      .find({
-        ...(isProduct ? {} : { listing: listing._id }),
-        purchaseDate: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // Last 30 days
-      })
-      .select("pricePerCredit quantity")
-      .sort({ purchaseDate: -1 })
-      .limit(20);
-
-    // Seller ratings
-    const seller = await userModel.findById(listing.seller || listing.addedBy);
     const sellerRating = seller?.ratings?.average || 3.5;
-
-    // Calculate metrics
     const demandScore = Math.min(similarItems * 5, 100);
     const supplyQuantity = totalSupply[0]?.total || 0;
     const supplyScore = Math.max(100 - (supplyQuantity / 1000) * 10, 10);
-
-    // Price trend (average of recent transactions)
     const avgRecentPrice =
       recentTransactions.length > 0
-        ? recentTransactions.reduce((sum, t) => sum + t.pricePerCredit, 0) /
-          recentTransactions.length
+        ? recentTransactions.reduce((sum, t) => sum + t.pricePerCredit, 0) / recentTransactions.length
         : basePrice;
-
     const trendFactor = avgRecentPrice / basePrice;
-
-    // Age decay (older listings get slight discount)
-    const ageInDays =
-      (Date.now() - new Date(listing.createdAt)) / (24 * 60 * 60 * 1000);
+    const ageInDays = (Date.now() - new Date(listing.createdAt)) / (24 * 60 * 60 * 1000);
     const timeDecay = Math.max(0.9, 1 - ageInDays / 100);
 
     return {
-      demandScore,
-      supplyScore,
-      sellerRating,
+      demandScore, supplyScore, sellerRating,
       recentTransactionCount: recentTransactions.length,
-      avgRecentPrice,
-      trendFactor,
-      timeDecay,
-      similarItemsCount: similarItems,
-      totalSupplyQuantity: supplyQuantity,
+      avgRecentPrice, trendFactor, timeDecay,
+      similarItemsCount: similarItems, totalSupplyQuantity: supplyQuantity,
     };
   } catch (error) {
     console.error("Error calculating market metrics:", error);
@@ -93,29 +92,19 @@ const calculateMarketMetrics = async (listing, isProduct = false) => {
   }
 };
 
-/**
- * Use Gemini AI to recommend dynamic pricing
- */
+// ─── Single-listing Gemini call (with backoff) ─────────────────────────────────
 const getAIRecommendedPrice = async (listing, metrics, isProduct = false) => {
   const MAX_RETRIES = 3;
-  const BASE_DELAY = 1000; // 1 second
+  const BASE_DELAY = 1500;
+  const basePrice = isProduct ? listing.price : listing.pricePerCredit;
+  const projectType = isProduct ? listing.category : listing.projectType;
 
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      if (!GEMINI_API_KEY) {
-        console.warn("GEMINI_API_KEY not configured");
-        return listing[isProduct ? "price" : "pricePerCredit"];
-      }
+  if (!GEMINI_API_KEY) {
+    console.warn("GEMINI_API_KEY not configured");
+    return basePrice;
+  }
 
-      const basePrice = isProduct ? listing.price : listing.pricePerCredit;
-      const projectType = isProduct ? listing.category : listing.projectType;
-      console.log(
-        `[AI Pricing] Calculating dynamic price for ${isProduct ? "product" : "listing"}: ${listing._id}, Base Price: ₹${basePrice}`,
-      );
-
-      const prompt = `You are an expert in dynamic pricing for carbon credits and eco-products. 
-    
-Analyze the following market data and provide a recommended price adjustment:
+  const prompt = `You are an expert in dynamic pricing for carbon credits and eco-products.
 
 PRODUCT INFO:
 - Type: ${isProduct ? "Eco Product" : "Carbon Credit Listing"}
@@ -125,81 +114,34 @@ PRODUCT INFO:
 - Seller Rating: ${metrics.sellerRating}/5
 
 MARKET METRICS:
-- Demand Score: ${metrics.demandScore}/100 (higher = higher demand)
-- Supply Score: ${metrics.supplyScore}/100 (higher = more supply available)
+- Demand Score: ${metrics.demandScore}/100
+- Supply Score: ${metrics.supplyScore}/100
 - Similar Items: ${metrics.similarItemsCount}
-- Recent Transaction Average Price: ₹${metrics.avgRecentPrice.toFixed(2)}
-- Market Trend: ${metrics.trendFactor > 1 ? "UPWARD" : "DOWNWARD"} (${(metrics.trendFactor * 100).toFixed(1)}% of recent average)
-- Age Decay Factor: ${(metrics.timeDecay * 100).toFixed(1)}%
-- Recent Sales: ${metrics.recentTransactionCount} in last 30 days
+- Recent Avg Price: ₹${metrics.avgRecentPrice.toFixed(2)}
+- Market Trend: ${metrics.trendFactor > 1 ? "UPWARD" : "DOWNWARD"} (${(metrics.trendFactor * 100).toFixed(1)}%)
+- Age Decay: ${(metrics.timeDecay * 100).toFixed(1)}%
+- Recent Sales: ${metrics.recentTransactionCount} (last 30 days)
 
-Based on this data, provide your analysis in the following JSON format ONLY:
-{
-  "recommendedPrice": <number>,
-  "priceMultiplier": <number between 0.5 and 2>,
-  "marketTemperature": "<cold|cool|moderate|warm|hot>",
-  "demandFactor": <0-1>,
-  "supplyFactor": <0-1>,
-  "rateFactor": <0-1>,
-  "verificationFactor": <0-1>,
-  "trendFactor": <0-1>,
-  "reasoning": "<brief explanation in max 100 chars>"
-}
+Return ONLY valid JSON:
+{"recommendedPrice":<number>,"priceMultiplier":<0.5-2>,"marketTemperature":"<cold|cool|moderate|warm|hot>","demandFactor":<0-1>,"supplyFactor":<0-1>,"rateFactor":<0-1>,"verificationFactor":<0-1>,"trendFactor":<0-1>,"reasoning":"<max 100 chars>"}`;
 
-Consider:
-1. High demand + low supply = higher price (premium)
-2. Low demand + high supply = lower price (discount)
-3. Good seller rating = can command premium
-4. Market trend following
-5. Age decay for older listings
-6. Realistic market bounds (0.5x to 2x base price)
-
-Return ONLY the JSON, no other text.`;
-
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
       const response = await axios.post(
         `${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`,
-        {
-          contents: [
-            {
-              parts: [{ text: prompt }],
-            },
-          ],
-        },
-        { timeout: 30000 },
+        { contents: [{ parts: [{ text: prompt }] }] },
+        { timeout: 30000 }
       );
 
-      const responseText =
-        response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!responseText) {
-        console.warn("No response from Gemini API");
-        console.warn(
-          "Gemini Response:",
-          JSON.stringify(response.data, null, 2),
-        );
-        return basePrice;
-      }
+      const responseText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!responseText) return basePrice;
 
-      console.log(
-        `[AI Pricing] Gemini Response Text: ${responseText.substring(0, 200)}...`,
-      );
-
-      // Extract JSON from response
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.warn("Could not parse JSON from Gemini response");
-        console.warn("Full Response:", responseText);
-        return basePrice;
-      }
+      if (!jsonMatch) return basePrice;
 
       const result = JSON.parse(jsonMatch[0]);
-      console.log(
-        `[AI Pricing] Parsed Result - Recommended Price: ₹${result.recommendedPrice}, Multiplier: ${result.priceMultiplier}, Temp: ${result.marketTemperature}`,
-      );
       return {
-        recommendedPrice: Math.max(
-          basePrice * 0.5,
-          Math.min(result.recommendedPrice, basePrice * 2),
-        ),
+        recommendedPrice: Math.max(basePrice * 0.5, Math.min(result.recommendedPrice, basePrice * 2)),
         priceMultiplier: result.priceMultiplier,
         marketTemperature: result.marketTemperature,
         factors: {
@@ -213,207 +155,296 @@ Return ONLY the JSON, no other text.`;
         reasoning: result.reasoning,
       };
     } catch (error) {
+      const isRateLimit = error.response?.status === 429;
       const delay = BASE_DELAY * Math.pow(2, attempt);
-      if (error.response?.status === 429 && attempt < MAX_RETRIES - 1) {
-        console.warn(
-          `[AI Pricing] Rate limited. Retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_RETRIES})`,
-        );
-        await new Promise((resolve) => setTimeout(resolve, delay));
+      if (isRateLimit && attempt < MAX_RETRIES - 1) {
+        console.warn(`[AI Pricing] Rate limited. Retrying in ${delay}ms (${attempt + 1}/${MAX_RETRIES})`);
+        await new Promise((r) => setTimeout(r, delay));
         continue;
       }
-      if (attempt === MAX_RETRIES - 1) {
-        console.error(
-          `[AI Pricing] Max retries exceeded for listing ${listing._id}:`,
-          error.message,
-        );
-        break;
-      }
+      console.error(`[AI Pricing] Failed for ${listing._id}:`, error.message);
+      break;
     }
   }
-
-  // Fallback: return base price if all retries failed
-  console.warn(
-    `[AI Pricing] Falling back to base price for listing ${listing._id}`,
-  );
-  return listing[isProduct ? "price" : "pricePerCredit"];
+  return basePrice;
 };
 
-/**
- * Calculate dynamic price for a listing or product
- */
-export const calculateDynamicPrice = async (listingId, isProduct = false) => {
-  try {
-    const model = isProduct ? EcoProduct : CarbonCredit;
-    // EcoProduct uses 'addedBy', CarbonCredit uses 'seller'
-    const populateField = isProduct ? "addedBy" : "seller";
-    const listing = await model
-      .findById(listingId)
-      .populate(populateField, "ratings");
+// ─── BATCH Gemini call — prices up to 5 listings in ONE API request ────────────
+const getBatchAIPrices = async (items) => {
+  // items: [{ listing, metrics, isProduct }]
+  if (!GEMINI_API_KEY || items.length === 0) return [];
 
-    if (!listing) {
-      return { success: false, message: "Listing not found" };
-    }
-
-    // Calculate market metrics
-    const metrics = await calculateMarketMetrics(listing, isProduct);
-    if (!metrics) {
-      return { success: false, message: "Could not calculate market metrics" };
-    }
-
-    // Get AI recommendation
-    const aiRecommendation = await getAIRecommendedPrice(
-      listing,
-      metrics,
-      isProduct,
-    );
-    if (!aiRecommendation) {
-      return { success: false, message: "Could not get AI recommendation" };
-    }
-
-    // Handle fallback case where aiRecommendation is just a number (base price)
-    const recommendedPrice =
-      typeof aiRecommendation === "number"
-        ? aiRecommendation
-        : aiRecommendation.recommendedPrice;
-
-    const aiData =
-      typeof aiRecommendation === "number"
-        ? {
-            recommendedPrice,
-            priceMultiplier: 1.0,
-            marketTemperature: "moderate",
-            factors: {
-              demandFactor: 0.5,
-              supplyFactor: 0.5,
-              rateFactor: 0.5,
-              verificationFactor: 0.5,
-              trendFactor: 1.0,
-              timeDecayFactor: metrics.timeDecay,
-            },
-            reasoning: "Fallback: Using base price due to API issues",
-          }
-        : aiRecommendation;
-
-    // Store or update dynamic pricing
+  const snippets = items.map((item, i) => {
+    const { listing, metrics, isProduct } = item;
     const basePrice = isProduct ? listing.price : listing.pricePerCredit;
-    const dynamicPriceDoc = await DynamicPrice.findOneAndUpdate(
-      { [isProduct ? "product" : "listing"]: listingId },
-      {
-        [isProduct ? "product" : "listing"]: listingId,
-        basePrice,
-        recommendedPrice: aiData.recommendedPrice,
-        priceMultiplier: aiData.priceMultiplier,
-        demandScore: metrics.demandScore,
-        supplyScore: metrics.supplyScore,
-        marketTemperature: aiData.marketTemperature,
-        factors: aiData.factors,
-        lastUpdatedAt: new Date(),
-        $push: {
-          priceHistory: {
-            price: aiData.recommendedPrice,
-            timestamp: new Date(),
-            reason: aiData.reasoning,
-          },
-        },
-      },
-      { upsert: true, new: true },
-    );
+    return `ITEM ${i + 1} (id: ${listing._id}):
+- Category: ${isProduct ? listing.category : listing.projectType}
+- BasePrice: ₹${basePrice}
+- Demand: ${metrics.demandScore}/100, Supply: ${metrics.supplyScore}/100
+- AvgRecentPrice: ₹${metrics.avgRecentPrice.toFixed(2)}
+- Trend: ${metrics.trendFactor > 1 ? "UP" : "DOWN"}, Decay: ${(metrics.timeDecay * 100).toFixed(1)}%`;
+  }).join("\n\n");
 
-    console.log(
-      `[AI Pricing] Saved Dynamic Price - Base: ₹${basePrice}, Recommended: ₹${aiData.recommendedPrice}, Savings: ₹${basePrice - aiData.recommendedPrice}`,
-    );
+  const prompt = `You are an expert dynamic pricing AI for carbon credits and eco-products.
+Analyze each item and return JSON array of exactly ${items.length} objects in the same order:
+[{"id":"<id>","recommendedPrice":<n>,"priceMultiplier":<0.5-2>,"marketTemperature":"<cold|cool|moderate|warm|hot>","demandFactor":<0-1>,"supplyFactor":<0-1>,"rateFactor":<0-1>,"verificationFactor":<0-1>,"trendFactor":<0-1>,"reasoning":"<max 80 chars>"}]
 
-    return {
-      success: true,
-      data: {
-        basePrice,
-        recommendedPrice: aiData.recommendedPrice,
-        priceMultiplier: aiData.priceMultiplier,
-        currentMarketTemperature: aiData.marketTemperature,
-        savings: basePrice - aiData.recommendedPrice,
-        demandScore: metrics.demandScore,
-        supplyScore: metrics.supplyScore,
-        sellerRating: metrics.sellerRating,
-        recentSales: metrics.recentTransactionCount,
-        factors: aiData.factors,
-        reasoning: aiData.reasoning,
-      },
-    };
-  } catch (error) {
-    console.error("Error calculating dynamic price:", error);
-    return { success: false, message: error.message };
+Rules: recommendedPrice must be between 0.5x–2x base price. Reply ONLY with the JSON array.
+
+${snippets}`;
+
+  const MAX_RETRIES = 3;
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      const response = await axios.post(
+        `${GEMINI_ENDPOINT}?key=${GEMINI_API_KEY}`,
+        { contents: [{ parts: [{ text: prompt }] }] },
+        { timeout: 45000 }
+      );
+
+      const text = response.data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) return [];
+
+      return JSON.parse(jsonMatch[0]);
+    } catch (error) {
+      const isRateLimit = error.response?.status === 429;
+      const delay = 2000 * Math.pow(2, attempt);
+      if (isRateLimit && attempt < MAX_RETRIES - 1) {
+        console.warn(`[Batch Pricing] Rate limited. Retrying in ${delay}ms`);
+        await new Promise((r) => setTimeout(r, delay));
+        continue;
+      }
+      console.error("[Batch Pricing] Failed:", error.message);
+      return [];
+    }
   }
+  return [];
 };
 
-/**
- * Get stored dynamic pricing info
- */
+// ─── Core: calculate dynamic price for one item ────────────────────────────────
+export const calculateDynamicPrice = async (listingId, isProduct = false) => {
+  const id = listingId.toString();
+
+  // 1. Check in-memory cache first
+  const cached = getPriceFromCache(id);
+  if (cached) {
+    console.log(`[AI Pricing] Memory cache hit for ${id}`);
+    return { success: true, data: cached, cached: true };
+  }
+
+  // 2. Deduplicate concurrent requests for the same ID
+  if (_inFlight.has(id)) {
+    console.log(`[AI Pricing] Deduplicating in-flight request for ${id}`);
+    return _inFlight.get(id);
+  }
+
+  const promise = (async () => {
+    try {
+      const model = isProduct ? EcoProduct : CarbonCredit;
+      const populateField = isProduct ? "addedBy" : "seller";
+      const listing = await model.findById(listingId).populate(populateField, "ratings");
+
+      if (!listing) return { success: false, message: "Listing not found" };
+
+      // 3. Check DB for a fresh price (skip Gemini entirely if recent)
+      const existingPrice = await DynamicPrice.findOne(
+        isProduct ? { product: listingId } : { listing: listingId }
+      ).lean();
+
+      if (existingPrice && isDbPriceFresh(existingPrice.lastUpdatedAt)) {
+        const data = buildResponseData(existingPrice, existingPrice.basePrice);
+        setPriceInCache(id, data);
+        console.log(`[AI Pricing] DB cache hit for ${id} (age: ${Math.round((Date.now() - new Date(existingPrice.lastUpdatedAt)) / 60000)}min)`);
+        return { success: true, data, cached: true };
+      }
+
+      // 4. Calculate fresh metrics + call Gemini
+      const metrics = await calculateMarketMetrics(listing, isProduct);
+      if (!metrics) return { success: false, message: "Could not calculate market metrics" };
+
+      const aiRecommendation = await getAIRecommendedPrice(listing, metrics, isProduct);
+
+      const basePrice = isProduct ? listing.price : listing.pricePerCredit;
+      const aiData = normalizeAIResult(aiRecommendation, basePrice, metrics);
+
+      // 5. Persist to DB
+      await DynamicPrice.findOneAndUpdate(
+        { [isProduct ? "product" : "listing"]: listingId },
+        {
+          [isProduct ? "product" : "listing"]: listingId,
+          basePrice,
+          ...aiData,
+          lastUpdatedAt: new Date(),
+          $push: { priceHistory: { price: aiData.recommendedPrice, timestamp: new Date(), reason: aiData.reasoning } },
+        },
+        { upsert: true, new: true }
+      );
+
+      const data = buildResponseData(aiData, basePrice, metrics);
+      setPriceInCache(id, data);
+      return { success: true, data };
+    } finally {
+      _inFlight.delete(id);
+    }
+  })();
+
+  _inFlight.set(id, promise);
+  return promise;
+};
+
+// ─── Get stored price (prefers DB if fresh, else calculates) ──────────────────
 export const getDynamicPrice = async (listingId, isProduct = false) => {
+  const id = listingId.toString();
+
+  // In-memory cache hit
+  const cached = getPriceFromCache(id);
+  if (cached) return { success: true, data: cached, cached: true };
+
   try {
     const query = isProduct ? { product: listingId } : { listing: listingId };
-    const dynamicPrice = await DynamicPrice.findOne(query);
+    const dynamicPrice = await DynamicPrice.findOne(query).lean();
 
-    if (!dynamicPrice) {
-      return {
-        success: false,
-        message: "No dynamic pricing data found",
-      };
-    }
+    if (!dynamicPrice) return { success: false, message: "No dynamic pricing data found" };
 
-    return {
-      success: true,
-      data: {
-        basePrice: dynamicPrice.basePrice,
-        recommendedPrice: dynamicPrice.recommendedPrice,
-        priceMultiplier: dynamicPrice.priceMultiplier,
-        currentMarketTemperature: dynamicPrice.marketTemperature,
-        demandScore: dynamicPrice.demandScore,
-        supplyScore: dynamicPrice.supplyScore,
-        savings: dynamicPrice.basePrice - dynamicPrice.recommendedPrice,
-        factors: dynamicPrice.factors,
-        lastUpdatedAt: dynamicPrice.lastUpdatedAt,
-        priceHistory: dynamicPrice.priceHistory.slice(-10), // Last 10 prices
-      },
+    const data = {
+      basePrice: dynamicPrice.basePrice,
+      recommendedPrice: dynamicPrice.recommendedPrice,
+      priceMultiplier: dynamicPrice.priceMultiplier,
+      currentMarketTemperature: dynamicPrice.marketTemperature,
+      demandScore: dynamicPrice.demandScore,
+      supplyScore: dynamicPrice.supplyScore,
+      savings: dynamicPrice.basePrice - dynamicPrice.recommendedPrice,
+      factors: dynamicPrice.factors,
+      lastUpdatedAt: dynamicPrice.lastUpdatedAt,
+      priceHistory: dynamicPrice.priceHistory.slice(-10),
     };
+
+    // Cache in memory for next time
+    setPriceInCache(id, data);
+    return { success: true, data };
   } catch (error) {
     console.error("Error fetching dynamic price:", error);
     return { success: false, message: error.message };
   }
 };
 
-/**
- * Batch update all listings with dynamic pricing
- */
+// ─── Batch update all listings (OPTIMIZED) ─────────────────────────────────────
+// - Skips listings updated within the last 1 hour
+// - Groups up to 5 listings per Gemini call
+// - 2-second throttle between batches to respect RPM
 export const updateAllDynamicPrices = async () => {
   try {
-    const listings = await CarbonCredit.find({ status: "Available" }).select(
-      "_id",
-    );
-    const products = await EcoProduct.find({ status: "Active" }).select("_id");
+    const STALE_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
+    const BATCH_SIZE = 5;
+    const BATCH_DELAY_MS = 2000;
 
-    const results = {
-      listings: 0,
-      products: 0,
-      errors: 0,
+    const staleAfter = new Date(Date.now() - STALE_THRESHOLD_MS);
+
+    // Only fetch listings that don't have a fresh price
+    const [allListings, allProducts] = await Promise.all([
+      CarbonCredit.find({ status: "Available" }).select("_id projectType pricePerCredit quantity createdAt seller").lean(),
+      EcoProduct.find({ status: "Active" }).select("_id category price stock createdAt addedBy").lean(),
+    ]);
+
+    // Find which ones already have fresh prices in DB (skip them)
+    const [freshListingIds, freshProductIds] = await Promise.all([
+      DynamicPrice.find({ listing: { $in: allListings.map((l) => l._id) }, lastUpdatedAt: { $gte: staleAfter } })
+        .select("listing").lean().then((docs) => new Set(docs.map((d) => d.listing.toString()))),
+      DynamicPrice.find({ product: { $in: allProducts.map((p) => p._id) }, lastUpdatedAt: { $gte: staleAfter } })
+        .select("product").lean().then((docs) => new Set(docs.map((d) => d.product.toString()))),
+    ]);
+
+    const staleListings = allListings.filter((l) => !freshListingIds.has(l._id.toString()));
+    const staleProducts = allProducts.filter((p) => !freshProductIds.has(p._id.toString()));
+
+    console.log(`[Batch Pricing] ${staleListings.length} listings and ${staleProducts.length} products need updates (skipping ${freshListingIds.size + freshProductIds.size} fresh)`);
+
+    const results = { listings: 0, products: 0, errors: 0, skipped: freshListingIds.size + freshProductIds.size };
+
+    const processItems = async (items, isProduct) => {
+      // Prefetch metrics for all items in parallel (DB queries, not Gemini)
+      const withMetrics = (
+        await Promise.all(
+          items.map(async (listing) => {
+            const metrics = await calculateMarketMetrics(listing, isProduct).catch(() => null);
+            return metrics ? { listing, metrics, isProduct } : null;
+          })
+        )
+      ).filter(Boolean);
+
+      // Chunk into batches of BATCH_SIZE
+      for (let i = 0; i < withMetrics.length; i += BATCH_SIZE) {
+        const batch = withMetrics.slice(i, i + BATCH_SIZE);
+
+        console.log(`[Batch Pricing] Calling Gemini for ${batch.length} ${isProduct ? "products" : "listings"} (batch ${Math.floor(i / BATCH_SIZE) + 1})`);
+
+        // ONE Gemini call for the whole batch
+        const batchResults = await getBatchAIPrices(batch);
+
+        for (let j = 0; j < batch.length; j++) {
+          const { listing, metrics, isProduct: isProd } = batch[j];
+          const aiResult = batchResults[j];
+          const basePrice = isProd ? listing.price : listing.pricePerCredit;
+
+          try {
+            const aiData = aiResult
+              ? {
+                  recommendedPrice: Math.max(basePrice * 0.5, Math.min(aiResult.recommendedPrice, basePrice * 2)),
+                  priceMultiplier: aiResult.priceMultiplier,
+                  marketTemperature: aiResult.marketTemperature,
+                  factors: {
+                    demandFactor: aiResult.demandFactor,
+                    supplyFactor: aiResult.supplyFactor,
+                    rateFactor: aiResult.rateFactor,
+                    verificationFactor: aiResult.verificationFactor,
+                    trendFactor: aiResult.trendFactor,
+                    timeDecayFactor: metrics.timeDecay,
+                  },
+                  reasoning: aiResult.reasoning,
+                }
+              : { recommendedPrice: basePrice, priceMultiplier: 1.0, marketTemperature: "moderate", factors: {}, reasoning: "Fallback" };
+
+            await DynamicPrice.findOneAndUpdate(
+              { [isProd ? "product" : "listing"]: listing._id },
+              {
+                [isProd ? "product" : "listing"]: listing._id,
+                basePrice,
+                ...aiData,
+                demandScore: metrics.demandScore,
+                supplyScore: metrics.supplyScore,
+                lastUpdatedAt: new Date(),
+                $push: { priceHistory: { price: aiData.recommendedPrice, timestamp: new Date(), reason: aiData.reasoning } },
+              },
+              { upsert: true, new: true }
+            );
+
+            // Update in-memory cache too
+            setPriceInCache(listing._id.toString(), buildResponseData(aiData, basePrice, metrics));
+
+            if (isProd) results.products++;
+            else results.listings++;
+          } catch (err) {
+            console.error(`[Batch Pricing] Failed to save ${listing._id}:`, err.message);
+            results.errors++;
+          }
+        }
+
+        // Throttle between batches to respect Gemini RPM
+        if (i + BATCH_SIZE < withMetrics.length) {
+          await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
+        }
+      }
     };
 
-    // Update listings
-    for (const listing of listings) {
-      const result = await calculateDynamicPrice(listing._id, false);
-      if (result.success) results.listings++;
-      else results.errors++;
-    }
+    await processItems(staleListings, false);
+    await processItems(staleProducts, true);
 
-    // Update products
-    for (const product of products) {
-      const result = await calculateDynamicPrice(product._id, true);
-      if (result.success) results.products++;
-      else results.errors++;
-    }
+    console.log(`[Batch Pricing] Done — ${results.listings} listings, ${results.products} products, ${results.errors} errors, ${results.skipped} skipped`);
 
     return {
       success: true,
-      message: `Updated dynamic pricing for ${results.listings} listings and ${results.products} products`,
+      message: `Updated ${results.listings} listings and ${results.products} products (${results.skipped} already fresh, ${results.errors} errors)`,
       results,
     };
   } catch (error) {
@@ -422,25 +453,17 @@ export const updateAllDynamicPrices = async () => {
   }
 };
 
-/**
- * Get market insights (aggregated data across all listings)
- */
+// ─── Market insights (unchanged) ──────────────────────────────────────────────
 export const getMarketInsights = async () => {
   try {
     const dynamicPrices = await DynamicPrice.aggregate([
       {
         $group: {
           _id: null,
-          avgPriceChange: {
-            $avg: {
-              $subtract: ["$recommendedPrice", "$basePrice"],
-            },
-          },
+          avgPriceChange: { $avg: { $subtract: ["$recommendedPrice", "$basePrice"] } },
           avgDemandScore: { $avg: "$demandScore" },
           avgSupplyScore: { $avg: "$supplyScore" },
-          temperatureDistribution: {
-            $push: "$marketTemperature",
-          },
+          temperatureDistribution: { $push: "$marketTemperature" },
           priceMultiplierMin: { $min: "$priceMultiplier" },
           priceMultiplierMax: { $max: "$priceMultiplier" },
           priceMultiplierAvg: { $avg: "$priceMultiplier" },
@@ -448,12 +471,7 @@ export const getMarketInsights = async () => {
       },
     ]);
 
-    if (!dynamicPrices.length) {
-      return {
-        success: false,
-        message: "No market data available",
-      };
-    }
+    if (!dynamicPrices.length) return { success: false, message: "No market data available" };
 
     const data = dynamicPrices[0];
     const tempDist = data.temperatureDistribution.reduce((acc, temp) => {
@@ -480,3 +498,32 @@ export const getMarketInsights = async () => {
     return { success: false, message: error.message };
   }
 };
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const normalizeAIResult = (aiRecommendation, basePrice, metrics) => {
+  if (typeof aiRecommendation === "number") {
+    return {
+      recommendedPrice: aiRecommendation,
+      priceMultiplier: 1.0,
+      marketTemperature: "moderate",
+      factors: { demandFactor: 0.5, supplyFactor: 0.5, rateFactor: 0.5, verificationFactor: 0.5, trendFactor: 1.0, timeDecayFactor: metrics.timeDecay },
+      reasoning: "Fallback: base price (API unavailable)",
+    };
+  }
+  return aiRecommendation;
+};
+
+const buildResponseData = (aiData, basePrice, metrics) => ({
+  basePrice,
+  recommendedPrice: aiData.recommendedPrice,
+  priceMultiplier: aiData.priceMultiplier,
+  currentMarketTemperature: aiData.marketTemperature || aiData.currentMarketTemperature,
+  savings: basePrice - aiData.recommendedPrice,
+  demandScore: metrics?.demandScore ?? aiData.demandScore,
+  supplyScore: metrics?.supplyScore ?? aiData.supplyScore,
+  sellerRating: metrics?.sellerRating,
+  recentSales: metrics?.recentTransactionCount,
+  factors: aiData.factors,
+  reasoning: aiData.reasoning,
+  lastUpdatedAt: aiData.lastUpdatedAt || new Date(),
+});

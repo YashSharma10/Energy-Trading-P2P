@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { loginUser } from "@/services/authService";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,15 @@ const Login = () => {
   const [error, setError] = useState("");
   const { setUser } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Show error from Google OAuth redirect
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (err === "google_auth_failed") {
+      toast.error("Google sign-in failed. Please try again.");
+    }
+  }, [searchParams]);
 
   const handleLogin = async () => {
     setLoading(true);
