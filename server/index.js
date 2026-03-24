@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import http from "http";
+import passport from "./src/config/passport.js";
 import connect from "./src/db/index.js";
 import logger from "./src/utils/logger.js";
 import config from "./src/config/index.js";
@@ -12,6 +13,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
 
 // import routes
 import userRoutes from "./src/routes/authRoute.js";

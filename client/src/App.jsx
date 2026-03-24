@@ -11,6 +11,7 @@ import {
   Profile,
   ForgotPassword,
   ResetPassword,
+  GoogleAuthSuccess,
 } from "./features/auth";
 import { AuthProvider } from "./context/AuthContext";
 import {
@@ -61,6 +62,7 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route
                   path="/calculator"

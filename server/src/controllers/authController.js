@@ -372,3 +372,39 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+
+// ─── Google OAuth ──────────────────────────────────────────────────────────────
+
+/**
+ * Called by Passport after successful Google authentication.
+ * Issues a JWT and redirects back to the client.
+ */
+export const googleAuthCallback = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.redirect(`${process.env.CLIENT_URL}/login?error=google_auth_failed`);
+    }
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save();
+
+    const token = user.generateAuthToken();
+
+    // Redirect to client with token — client reads query param and stores it
+    const params = new URLSearchParams({
+      token,
+      id: user._id.toString(),
+      name: user.name || "",
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar || "",
+    });
+
+    res.redirect(`${process.env.CLIENT_URL}/auth/google/success?${params}`);
+  } catch (error) {
+    logger.error("Google auth callback error:", error);
+    res.redirect(`${process.env.CLIENT_URL}/login?error=google_auth_failed`);
+  }
+};

@@ -4,7 +4,10 @@ import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, default: null },
+  googleId: { type: String, default: null },
+  avatar: { type: String, default: "" },
+  authProvider: { type: String, enum: ["local", "google"], default: "local" },
   name: { type: String, default: "" },
   company: { type: String, default: "" },
   phone: { type: String, default: "" },
@@ -40,7 +43,7 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password") || !this.password) return next();
   try {
     this.password = await bcrypt.hash(this.password, 10);
     next();
@@ -50,6 +53,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) return false;
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
