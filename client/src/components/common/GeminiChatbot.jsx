@@ -31,23 +31,7 @@ const fetchPlatformContext = () => {
   return _contextFetchPromise;
 };
 
-// ─── Simple markdown renderer (bold + line breaks) ───────────────────────────
-const renderMarkdown = (text) =>
-  text.split("\n").map((line, li, arr) => {
-    const parts = line.split(/(\*\*[^*]+\*\*)/g);
-    return (
-      <span key={li}>
-        {parts.map((part, pi) =>
-          part.startsWith("**") && part.endsWith("**") ? (
-            <strong key={pi}>{part.slice(2, -2)}</strong>
-          ) : (
-            <span key={pi}>{part}</span>
-          )
-        )}
-        {li < arr.length - 1 && <br />}
-      </span>
-    );
-  });
+import ReactMarkdown from "react-markdown";
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function GeminiChatbot() {
@@ -238,7 +222,19 @@ export default function GeminiChatbot() {
                   }`}
                 >
                   {message.text ? (
-                    renderMarkdown(message.text)
+                    <div className="text-sm leading-relaxed">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-2" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-2" {...props} />,
+                          li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-semibold text-foreground/90" {...props} />,
+                        }}
+                      >
+                        {message.text}
+                      </ReactMarkdown>
+                    </div>
                   ) : message.streaming ? (
                     <span className="flex items-center gap-1 py-0.5">
                       <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />

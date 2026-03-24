@@ -143,7 +143,7 @@ export const getChatbotContext = async (req, res) => {
 // and retries on 429 with exponential backoff.
 
 const GEMINI_CHAT_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 // Simple LRU-style response cache: question → answer (max 200 entries, 30-min TTL)
 const _replyCache = new Map();
@@ -220,12 +220,13 @@ export const chatWithGemini = async (req, res) => {
   if (!contextCache) await buildContext().then((c) => { contextCache = c; cacheTimestamp = Date.now(); }).catch(() => {});
 
   const systemPrompt = buildSystemPrompt(contextCache);
-  const isFirstTurn = history.length === 0;
-  const userText = isFirstTurn ? `${systemPrompt}\n\nUser: ${message}` : message;
 
   const contents = [
-    ...history.map((h) => ({ role: h.role, parts: [{ text: h.text }] })),
-    { role: "user", parts: [{ text: userText }] },
+    ...history.map((h) => ({ 
+      role: h.role, 
+      parts: [{ text: h.text || (h.parts && h.parts[0]?.text) || "" }] 
+    })),
+    { role: "user", parts: [{ text: message }] },
   ];
 
   // Retry with exponential backoff on 429
@@ -240,8 +241,11 @@ export const chatWithGemini = async (req, res) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: systemPrompt }]
+            },
             contents,
-            generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
           }),
         }
       );

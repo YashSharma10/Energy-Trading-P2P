@@ -7,7 +7,7 @@ import DynamicPrice from "../models/DynamicPrice.js";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_ENDPOINT =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 // ─── In-memory pricing cache ───────────────────────────────────────────────────
 // Avoids Gemini calls for the same listing on every page load.

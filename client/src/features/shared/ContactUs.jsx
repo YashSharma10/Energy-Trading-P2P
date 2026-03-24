@@ -12,9 +12,9 @@ import {
 import { motion } from "framer-motion";
 
 const teamMembers = [
-  { name: "Yash Sharma", role: "Full-Stack Developer", linkedin: "#" },
-  { name: "Mukul Yadav", role: "Frontend Developer", linkedin: "#" },
-  { name: "Nilesh Sharma", role: "Backend Developer", linkedin: "#" },
+  { name: "Yash Sharma", role: "Full-Stack Developer", linkedin: "https://in.linkedin.com/in/yashsharma0406" },
+  { name: "Mukul Yadav", role: "Frontend Developer", linkedin: "https://www.linkedin.com/in/rao-mukul/" },
+  { name: "Nilesh Sharma", role: "Backend Developer", linkedin: "https://www.linkedin.com/in/nxtnilesh/" },
   { name: "Mohit Ghanghas", role: "UI/UX Designer", linkedin: "#" },
 ];
 
