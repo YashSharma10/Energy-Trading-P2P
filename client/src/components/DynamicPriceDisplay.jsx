@@ -1,6 +1,14 @@
 import { useDynamicPricing } from "@/hooks/useDynamicPricing";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, Zap } from "lucide-react";
+import { TrendingDown, Zap, Clock } from "lucide-react";
+
+const temperatureConfig = {
+  cold:     { bg: "bg-blue-100 dark:bg-blue-900/30",   text: "text-blue-700 dark:text-blue-300" },
+  cool:     { bg: "bg-cyan-100 dark:bg-cyan-900/30",   text: "text-cyan-700 dark:text-cyan-300" },
+  moderate: { bg: "bg-muted",                           text: "text-muted-foreground" },
+  warm:     { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-700 dark:text-orange-300" },
+  hot:      { bg: "bg-red-100 dark:bg-red-900/30",     text: "text-red-700 dark:text-red-300" },
+};
 
 const DynamicPriceDisplay = ({ itemId, isProduct = false, basePrice }) => {
   const { pricing, loading, error, isDiscounted, getDiscountPercentage } =
@@ -8,137 +16,97 @@ const DynamicPriceDisplay = ({ itemId, isProduct = false, basePrice }) => {
 
   if (loading) {
     return (
-      <div className="space-y-2">
-        <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+      <div className="space-y-2 w-full">
+        <div className="h-7 bg-muted rounded-lg animate-pulse w-24" />
+        <div className="h-4 bg-muted rounded animate-pulse w-16" />
+        <div className="h-4 bg-muted rounded animate-pulse w-20" />
       </div>
     );
   }
 
   if (error || !pricing) {
     return (
-      <div className="text-sm text-gray-500">
-        <p>Base Price: ₹{basePrice?.toLocaleString()}</p>
+      <div className="text-right">
+        <p className="text-xs text-muted-foreground mb-0.5">Base Price</p>
+        <p className="text-lg font-bold text-foreground">₹{basePrice?.toLocaleString() ?? "—"}</p>
       </div>
     );
   }
 
-  const temperatureColors = {
-    cold: "bg-blue-100 text-blue-800",
-    cool: "bg-cyan-100 text-cyan-800",
-    moderate: "bg-gray-100 text-gray-800",
-    warm: "bg-orange-100 text-orange-800",
-    hot: "bg-red-100 text-red-800",
-  };
-
   const discountPercent = getDiscountPercentage();
-  const recommendedPrice = pricing?.recommendedPrice || basePrice;
-  const marketTemp = pricing?.currentMarketTemperature || "moderate";
-  const demandScore = pricing?.demandScore || 0;
-  const supplyScore = pricing?.supplyScore || 0;
+  const recommendedPrice = pricing?.recommendedPrice ?? basePrice;
+  const marketTemp = pricing?.currentMarketTemperature ?? "moderate";
+  const demandScore = pricing?.demandScore ?? 0;
+  const supplyScore = pricing?.supplyScore ?? 0;
+  const tempStyle = temperatureConfig[marketTemp] ?? temperatureConfig.moderate;
 
   return (
-    <div className="space-y-3">
-      {/* Pricing Section */}
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex-1">
-          <p className="text-sm text-gray-600 mb-1">AI-Recommended Price</p>
-          <p className="text-2xl font-bold text-green-600">
+    <div className="space-y-2.5 w-full text-right">
+      {/* Price */}
+      <div>
+        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+          AI-Recommended Price
+        </p>
+        <div className="flex items-center justify-end gap-2">
+          <p className="text-xl font-bold text-primary">
             ₹{recommendedPrice.toLocaleString()}
           </p>
-          {basePrice && (
-            <p className="text-sm text-gray-500 line-through">
-              Regular: ₹{basePrice.toLocaleString()}
-            </p>
+          {isDiscounted() && (
+            <Badge className="bg-green-600 hover:bg-green-700 text-white text-[10px] px-1.5 py-0 h-5">
+              <TrendingDown className="w-2.5 h-2.5 mr-0.5" />
+              -{discountPercent}%
+            </Badge>
           )}
         </div>
-
-        {/* Status Badge */}
-        {isDiscounted() && (
-          <Badge variant="default" className="h-fit bg-green-600 hover:bg-green-700">
-            <TrendingDown className="w-3 h-3 mr-1" />
-            Save {discountPercent}%
-          </Badge>
+        {basePrice && basePrice !== recommendedPrice && (
+          <p className="text-xs text-muted-foreground line-through">
+            ₹{basePrice.toLocaleString()}
+          </p>
         )}
       </div>
 
-      {/* Market Temperature */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-medium text-gray-600">Market Heat:</span>
-        <Badge
-          className={`${
-            temperatureColors[marketTemp]
-          } capitalize`}
-          variant="outline"
+      {/* Market temperature */}
+      <div className="flex items-center justify-end gap-1.5">
+        <span className="text-[10px] text-muted-foreground">Market:</span>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${tempStyle.bg} ${tempStyle.text}`}
         >
-          <Zap className="w-3 h-3 mr-1" />
+          <Zap className="w-2.5 h-2.5" />
           {marketTemp}
-        </Badge>
+        </span>
       </div>
 
-      {/* Market Metrics */}
-      <div className="grid grid-cols-2 gap-2 text-xs">
-        <div className="bg-gray-50 p-2 rounded">
-          <p className="text-gray-600">Demand</p>
-          <p className="font-semibold text-gray-800">
-            {demandScore}/100
-          </p>
-        </div>
-        <div className="bg-gray-50 p-2 rounded">
-          <p className="text-gray-600">Supply</p>
-          <p className="font-semibold text-gray-800">
-            {supplyScore}/100
-          </p>
-        </div>
-      </div>
-
-      {/* Price Factors */}
-      {pricing.factors && (
-        <details className="text-xs">
-          <summary className="cursor-pointer font-medium text-gray-700 hover:text-gray-900">
-            View Pricing Factors
-          </summary>
-          <div className="mt-2 space-y-1 bg-gray-50 p-2 rounded text-gray-600">
-            {pricing.factors.demandFactor && (
-              <p>
-                Demand Factor:{" "}
-                <span className="font-semibold">
-                  {(pricing.factors.demandFactor * 100).toFixed(0)}%
-                </span>
-              </p>
-            )}
-            {pricing.factors.supplyFactor && (
-              <p>
-                Supply Factor:{" "}
-                <span className="font-semibold">
-                  {(pricing.factors.supplyFactor * 100).toFixed(0)}%
-                </span>
-              </p>
-            )}
-            {pricing.factors.rateFactor && (
-              <p>
-                Rating Factor:{" "}
-                <span className="font-semibold">
-                  {(pricing.factors.rateFactor * 100).toFixed(0)}%
-                </span>
-              </p>
-            )}
-            {pricing.factors.trendFactor && (
-              <p>
-                Trend Factor:{" "}
-                <span className="font-semibold">
-                  {(pricing.factors.trendFactor * 100).toFixed(0)}%
-                </span>
-              </p>
-            )}
+      {/* Demand / Supply bars */}
+      <div className="grid grid-cols-2 gap-2 text-left">
+        <div className="rounded-lg bg-muted/60 px-2.5 py-1.5">
+          <p className="text-[10px] text-muted-foreground">Demand</p>
+          <p className="text-xs font-semibold text-foreground">{demandScore}/100</p>
+          <div className="mt-1 h-1 w-full rounded-full bg-border">
+            <div
+              className="h-1 rounded-full bg-primary transition-all"
+              style={{ width: `${demandScore}%` }}
+            />
           </div>
-        </details>
-      )}
+        </div>
+        <div className="rounded-lg bg-muted/60 px-2.5 py-1.5">
+          <p className="text-[10px] text-muted-foreground">Supply</p>
+          <p className="text-xs font-semibold text-foreground">{supplyScore}/100</p>
+          <div className="mt-1 h-1 w-full rounded-full bg-border">
+            <div
+              className="h-1 rounded-full bg-blue-500 transition-all"
+              style={{ width: `${supplyScore}%` }}
+            />
+          </div>
+        </div>
+      </div>
 
-      {/* Last Updated */}
-      <p className="text-xs text-gray-500">
-        Last updated: {new Date(pricing.lastUpdatedAt).toLocaleString()}
-      </p>
+      {/* Last updated */}
+      {pricing.lastUpdatedAt && (
+        <p className="flex items-center justify-end gap-1 text-[10px] text-muted-foreground">
+          <Clock className="w-2.5 h-2.5" />
+          Updated {new Date(pricing.lastUpdatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </p>
+      )}
     </div>
   );
 };

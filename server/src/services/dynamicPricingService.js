@@ -37,13 +37,13 @@ const DB_STALENESS_MS = 6 * 60 * 60 * 1000; // 6 hours
 const isDbPriceFresh = (lastUpdatedAt) =>
   lastUpdatedAt && Date.now() - new Date(lastUpdatedAt).getTime() < DB_STALENESS_MS;
 
-// ─── Market metrics (unchanged logic) ─────────────────────────────────────────
+// ─── Market metrics (IMPROVED logic) ─────────────────────────────────────────
 const calculateMarketMetrics = async (listing, isProduct = false) => {
   try {
     const projectType = isProduct ? listing.category : listing.projectType;
     const basePrice = isProduct ? listing.price : listing.pricePerCredit;
 
-    const [similarItems, totalSupply, recentTransactions, seller] = await Promise.all([
+    const [similarItems, totalSupply, itemTransactions, allTransactions, seller] = await Promise.all([
       (isProduct ? EcoProduct : CarbonCredit).countDocuments({
         [isProduct ? "category" : "projectType"]: projectType,
         status: isProduct ? "Active" : "Available",
@@ -57,6 +57,7 @@ const calculateMarketMetrics = async (listing, isProduct = false) => {
         },
         { $group: { _id: null, total: { $sum: isProduct ? "$stock" : "$quantity" } } },
       ]),
+      // Item's own recent sales
       transactionsModel
         .find({
           ...(isProduct ? {} : { listing: listing._id }),
@@ -65,26 +66,50 @@ const calculateMarketMetrics = async (listing, isProduct = false) => {
         .select("pricePerCredit quantity")
         .sort({ purchaseDate: -1 })
         .limit(20),
+      // Platform-wide recent sales (proxy for general market health)
+      transactionsModel.countDocuments({
+        purchaseDate: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+      }),
       userModel.findById(listing.seller || listing.addedBy).select("ratings").lean(),
     ]);
 
     const sellerRating = seller?.ratings?.average || 3.5;
-    const demandScore = Math.min(similarItems * 5, 100);
     const supplyQuantity = totalSupply[0]?.total || 0;
-    const supplyScore = Math.max(100 - (supplyQuantity / 1000) * 10, 10);
+
+    // SUPPLY SCORE (0-100): High score means high supply on the market (drives price DOWN)
+    // Based on how many similar listings exist and total available volume.
+    // Example: 20 similar items or 5000 units = score of ~90.
+    const supplyScore = Math.floor(Math.min(100, Math.max(10, (similarItems * 2.5) + (supplyQuantity / 50))));
+
+    // DEMAND SCORE (0-100): High score means high buyer interest (drives price UP)
+    // Built from: Seller reputation (40%), item's local sales velocity (40%), global platform trend (20%)
+    const sellerPoints = (sellerRating / 5) * 40;
+    const localSalesPoints = Math.min(itemTransactions.length * 8, 40);
+    const globalTrendPoints = Math.min(allTransactions * 2, 20);
+    const demandScore = Math.floor(sellerPoints + localSalesPoints + globalTrendPoints);
+
+    // Calculate recent average price paid to find trends
     const avgRecentPrice =
-      recentTransactions.length > 0
-        ? recentTransactions.reduce((sum, t) => sum + t.pricePerCredit, 0) / recentTransactions.length
+      itemTransactions.length > 0
+        ? itemTransactions.reduce((sum, t) => sum + t.pricePerCredit, 0) / itemTransactions.length
         : basePrice;
+        
     const trendFactor = avgRecentPrice / basePrice;
     const ageInDays = (Date.now() - new Date(listing.createdAt)) / (24 * 60 * 60 * 1000);
-    const timeDecay = Math.max(0.9, 1 - ageInDays / 100);
+    
+    // Older items that haven't sold decay in value (down to max 80% penalty over 100 days)
+    const timeDecay = Math.max(0.8, 1 - ageInDays / 100);
 
     return {
-      demandScore, supplyScore, sellerRating,
-      recentTransactionCount: recentTransactions.length,
-      avgRecentPrice, trendFactor, timeDecay,
-      similarItemsCount: similarItems, totalSupplyQuantity: supplyQuantity,
+      demandScore,
+      supplyScore,
+      sellerRating,
+      recentTransactionCount: itemTransactions.length,
+      avgRecentPrice,
+      trendFactor,
+      timeDecay,
+      similarItemsCount: similarItems,
+      totalSupplyQuantity: supplyQuantity,
     };
   } catch (error) {
     console.error("Error calculating market metrics:", error);

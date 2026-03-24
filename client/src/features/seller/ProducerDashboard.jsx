@@ -234,42 +234,65 @@ const ProducerDashboard = () => {
                     </div>
                   ) : (
                     <>
-                      {listings.slice(0, 3).map((listing) => (
-                        <div
-                          key={listing._id}
-                          className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg">
+                      <div className="grid gap-4">
+                        {listings.slice(0, 3).map((listing) => (
+                          <div
+                            key={listing._id}
+                            className="grid grid-cols-[auto_1fr_auto] gap-4 items-start p-5 border border-border rounded-xl hover:bg-muted/40 transition-colors"
+                          >
+                            {/* Icon */}
+                            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/20 rounded-xl mt-0.5">
                               <Zap className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                             </div>
-                            <div>
-                              <p className="font-semibold text-foreground">{listing.quantity} {listing.unit || 'kWh'}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {listing.projectType || 'Energy'}
+
+                            {/* Listing info */}
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <p className="font-semibold text-foreground truncate">
+                                  {listing.title || `${listing.quantity} ${listing.unit || 'kWh'}`}
+                                </p>
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    listing.status === "Available"
+                                      ? "text-green-600 border-green-500 bg-green-50 dark:bg-green-900/20 shrink-0"
+                                      : "text-muted-foreground shrink-0"
+                                  }
+                                >
+                                  {listing.status}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-1">
+                                {listing.projectType || "Energy"} · {listing.quantity} {listing.unit || "credits"}
                               </p>
+                              {listing.location && (
+                                <p className="text-xs text-muted-foreground">{listing.location}</p>
+                              )}
                             </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="flex-1">
+
+                            {/* Price + actions */}
+                            <div className="flex flex-col items-end gap-3 min-w-[200px]">
                               <DynamicPriceDisplay
                                 itemId={listing._id}
                                 isProduct={false}
                                 basePrice={listing.pricePerCredit}
                               />
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full"
+                                onClick={() => navigate(`/listing/${listing._id}`)}
+                              >
+                                <Eye className="h-3.5 w-3.5 mr-1.5" />
+                                View
+                              </Button>
                             </div>
-                            <Badge variant="outline" className="text-green-600 border-green-600">
-                              {listing.status}
-                            </Badge>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
                           </div>
-                        </div>
-                      ))}
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
+                        ))}
+                      </div>
+                      <Button
+                        variant="outline"
+                        className="w-full mt-2"
                         onClick={() => navigate("/listings")}
                       >
                         View All Listings

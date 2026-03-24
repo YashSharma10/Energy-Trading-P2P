@@ -35,11 +35,19 @@ export const useDynamicPricing = (itemId, isProduct = false, autoFetch = true) =
         setPricing(null);
       }
     } catch (err) {
+      if (err.response?.status === 404) {
+        // If no DB record exists yet, automatically trigger a calculation
+        console.log(`[Pricing] No price found for ${itemId}, calculating now...`);
+        return calculatePrice();
+      }
+      
       console.error("Error fetching pricing:", err);
       setError(err.response?.data?.message || "Failed to fetch pricing data");
       setPricing(null);
     } finally {
-      setLoading(false);
+      if (!err || err.response?.status !== 404) {
+        setLoading(false);
+      }
     }
   }, [itemId, isProduct]);
 
