@@ -29,7 +29,7 @@ const DesktopNavLink = ({ to, children, isGreen = false, exact = false, hoveredP
       {isHovered && (
         <motion.div
           layoutId="navbar-hover"
-          className="absolute inset-0 z-0 rounded-lg bg-black/10 dark:bg-white/10 backdrop-blur-md shadow-sm border border-black/5 dark:border-white/5"
+          className="absolute inset-0 z-0 rounded-lg bg-brandMainColor/15 dark:bg-brandMainColor/20 backdrop-blur-md shadow-sm border border-brandMainColor/20 dark:border-brandMainColor/30"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -72,11 +72,11 @@ const Navbar = () => {
   const closeSheet = () => setIsOpen(false);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/80 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex min-h-[10vh] w-full max-w-7xl items-center justify-between px-4 sm:px-6">
+    <div className="fixed inset-x-0 top-0 z-50 p-2 sm:p-4 transition-all duration-300">
+      <nav className="mx-auto flex h-16 sm:h-[4.5rem] w-full max-w-7xl items-center justify-between rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-black/40 px-4 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
         {/* Logo */}
-        <Link to="/" className="text-xl font-bold text-foreground">
-          <img src={logo} alt="CarbonEase logo" width={160} />
+        <Link to="/" className="text-xl font-bold text-foreground transition-transform hover:scale-[1.02]">
+          <img src={logo} alt="CarbonEase logo" width={140} className="object-contain drop-shadow-sm" />
         </Link>
 
         <div className="hidden lg:flex items-center gap-1" onMouseLeave={() => setHoveredPath(null)}>
@@ -151,17 +151,17 @@ const Navbar = () => {
             {user ? (
               <Button
                 onClick={logoutUser}
-                className="bg-brandMainColor text-white transition-all shadow-sm hover:shadow hover:bg-brandMainColor/90 focus-visible:ring-brandMainColor"
+                className="rounded-full bg-brandMainColor px-6 text-white transition-all duration-300 hover:-translate-y-[1px] hover:bg-brandMainColor/90 hover:shadow-lg focus-visible:ring-brandMainColor"
               >
                 Logout <LogOut size={16} className="ml-2" />
               </Button>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="outline" className="transition-all hover:bg-muted/50">Login</Button>
+                  <Button variant="ghost" className="rounded-full px-5 transition-all hover:bg-muted/50 font-medium">Login</Button>
                 </Link>
                 <Link to="/register">
-                  <Button className="bg-brandMainColor text-white transition-all shadow-sm hover:shadow hover:bg-brandMainColor/90">
+                  <Button className="rounded-full bg-brandMainColor px-6 font-medium text-white shadow-md shadow-brandMainColor/20 transition-all duration-300 hover:-translate-y-[1px] hover:bg-brandMainColor/90 hover:shadow-lg hover:shadow-brandMainColor/30">
                     Sign Up
                   </Button>
                 </Link>
@@ -277,8 +277,8 @@ const Navbar = () => {
             </SheetContent>
           </Sheet>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 };
 

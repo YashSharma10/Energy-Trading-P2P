@@ -19,7 +19,7 @@ function GlobeSection() {
       </div>
       
       {/* Title and description */}
-      <div className="text-center max-w-3xl z-20 px-4 absolute top-8">
+      <div className="text-center max-w-3xl z-20 px-4 absolute top-24">
         <h1 className="mt-8 bg-gradient-to-b from-[#1f4d24] to-[#5CB338] bg-clip-text text-3xl font-semibold text-transparent leading-tight sm:text-5xl sm:leading-tight dark:from-[#9BEA6C] dark:to-[#5CB338]">
           Trade Carbon Credits & Renewable Energy Transparently with
           <span className="text-brandMainColor"> CarbonEase!</span>
