@@ -36,6 +36,18 @@ export const createListing = async (listingData) => {
   return data;
 };
 
+// Admin: get pending listings awaiting approval
+export const getPendingListings = async (params = {}) => {
+  const { data } = await api.get("/admin/listings/pending", { params });
+  return data;
+};
+
+// Admin: approve or reject a listing
+export const reviewListing = async (listingId, payload) => {
+  const { data } = await api.patch(`/admin/listings/${listingId}/review`, payload);
+  return data;
+};
+
 // Make payment for listing
 export const makePayment = async (paymentData) => {
   const { data } = await api.post("/credits/payment", paymentData);

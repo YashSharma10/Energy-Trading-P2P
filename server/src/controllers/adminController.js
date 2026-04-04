@@ -227,3 +227,99 @@ export const adminDeleteListing = async (req, res) => {
     });
   }
 };
+
+// Get pending listings for review (admin only)
+export const getPendingListings = async (req, res) => {
+  try {
+    const { page = 1, limit = 20 } = req.query;
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const skip = (pageNum - 1) * limitNum;
+
+    const query = {
+      status: "Pending",
+      "moderation.adminApproval.state": "pending",
+    };
+
+    const total = await CarbonCredit.countDocuments(query);
+    const listings = await CarbonCredit.find(query)
+      .populate("seller", "name email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    return res.json({
+      success: true,
+      data: listings,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(total / limitNum),
+        totalItems: total,
+        itemsPerPage: limitNum,
+      },
+    });
+  } catch (error) {
+    logger.error("Error fetching pending listings:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch pending listings",
+    });
+  }
+};
+
+// Approve or reject a listing (admin only)
+export const reviewListing = async (req, res) => {
+  try {
+    const { listingId } = req.params;
+    const { action, rejectionReason } = req.body;
+
+    if (!["approve", "reject"].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: "Action must be either 'approve' or 'reject'",
+      });
+    }
+
+    if (action === "reject" && (!rejectionReason || !String(rejectionReason).trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Rejection reason is required when rejecting a listing",
+      });
+    }
+
+    const listing = await CarbonCredit.findById(listingId);
+    if (!listing) {
+      return res.status(404).json({
+        success: false,
+        message: "Listing not found",
+      });
+    }
+
+    listing.status = action === "approve" ? "Available" : "Rejected";
+    listing.moderation = listing.moderation || {};
+    listing.moderation.adminApproval = {
+      state: action === "approve" ? "approved" : "rejected",
+      reviewedBy: req.user.userId,
+      reviewedAt: new Date(),
+      rejectionReason: action === "reject" ? String(rejectionReason).trim() : undefined,
+    };
+    listing.updatedAt = new Date();
+
+    await listing.save();
+
+    return res.json({
+      success: true,
+      message:
+        action === "approve"
+          ? "Listing approved and published"
+          : "Listing rejected",
+      data: listing,
+    });
+  } catch (error) {
+    logger.error("Error reviewing listing:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to review listing",
+    });
+  }
+};

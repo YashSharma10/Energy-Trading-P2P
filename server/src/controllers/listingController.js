@@ -5,14 +5,34 @@ import logger from "../utils/logger.js";
 import mongoose from "mongoose";
 import { sendNotificationEmail, emailTemplates } from "../utils/emailNotifications.js";
 import { generateReceiptData } from "../utils/receiptGenerator.js";
+import { validateListingAuthenticity } from "../services/listingModerationService.js";
 
 // ✅ Create a new listing
 export const createListing = async (req, res) => {
   try {
     const userId = req.user.userId;
+
+    const moderationResult = await validateListingAuthenticity(req.body);
+    if (!moderationResult.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Listing failed AI validation. Please fix the flagged issues.",
+        errors: moderationResult.reasons || ["Listing appears invalid or potentially fraudulent."],
+        errorFields: moderationResult.errorFields || [],
+        validation: moderationResult,
+      });
+    }
+
     const listingData = {
       ...req.body,
       seller: userId,
+      status: "Pending",
+      moderation: {
+        aiValidation: moderationResult,
+        adminApproval: {
+          state: "pending",
+        },
+      },
     };
     
     const newListing = new CarbonCredit(listingData);
@@ -26,7 +46,7 @@ export const createListing = async (req, res) => {
     
     res.status(201).json({
       success: true,
-      message: "Listing created successfully",
+      message: "Listing submitted for admin approval",
       data: savedListing,
     });
   } catch (error) {
@@ -45,8 +65,7 @@ export const getListings = async (req, res) => {
     const { 
       page = 1, 
       limit = 10, 
-      search = "",
-      status = "Available"
+      search = ""
     } = req.query;
 
     const pageNum = parseInt(page, 10);
@@ -60,10 +79,8 @@ export const getListings = async (req, res) => {
       query.$text = { $search: search };
     }
     
-    // Filter by status
-    if (status && status !== "all") {
-      query.status = status;
-    }
+    // Public listings should only show live/approved listings.
+    query.status = "Available";
 
     // Get total count for pagination
     const total = await CarbonCredit.countDocuments(query);
@@ -101,7 +118,9 @@ export const getListings = async (req, res) => {
 export const getListingById = async (req, res) => {
   try {
     const listing = await CarbonCredit.findById(req.params.id);
-    if (!listing) return res.status(404).json({ message: "Listing not found" });
+    if (!listing || listing.status !== "Available") {
+      return res.status(404).json({ success: false, message: "Listing not found" });
+    }
     res.status(200).json(listing);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -132,7 +151,7 @@ export const filterListings = async (req, res) => {
     let filter = {};
 
     if (projectType) filter.projectType = projectType;
-    if (status) filter.status = status;
+    filter.status = "Available";
     if (location) filter.location = { $regex: location, $options: "i" };
     if (verifiedBy) filter["verification.verifiedBy"] = verifiedBy;
     
@@ -187,13 +206,31 @@ export const filterListings = async (req, res) => {
 // ✅ Update a listing
 export const updateListing = async (req, res) => {
   try {
-    const updatedListing = await CarbonCredit.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedListing)
+    const existingListing = await CarbonCredit.findById(req.params.id);
+    if (!existingListing) {
       return res.status(404).json({ message: "Listing not found" });
+    }
+
+    // Seller can only update their own listing; admin can update any.
+    const isAdmin = req.user.role === "admin";
+    if (!isAdmin && existingListing.seller.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own listings",
+      });
+    }
+
+    // Prevent bypassing moderation workflow through direct updates.
+    const updates = { ...req.body };
+    delete updates.status;
+    delete updates.moderation;
+    delete updates.seller;
+
+    const updatedListing = await CarbonCredit.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
     res.status(200).json(updatedListing);
   } catch (error) {
     res.status(400).json({ error: error.message });

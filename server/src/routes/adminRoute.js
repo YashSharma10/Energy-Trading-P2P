@@ -6,6 +6,8 @@ import {
   updateUserRole,
   getRecentTransactions,
   adminDeleteListing,
+  getPendingListings,
+  reviewListing,
 } from "../controllers/adminController.js";
 import { isAdmin } from "../middlewares/adminMiddleware.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
@@ -32,5 +34,9 @@ router.get("/transactions", getRecentTransactions);
 
 // Delete listing
 router.delete("/listings/:listingId", adminDeleteListing);
+
+// Listing moderation
+router.get("/listings/pending", getPendingListings);
+router.patch("/listings/:listingId/review", reviewListing);
 
 export default router;

@@ -45,7 +45,6 @@ const createInitialFormState = () => ({
     verifiedBy: "",
     certificateUrl: "",
   },
-  status: "Available",
 });
 
 const FormComponent = ({ isOpen, setIsOpen }) => {
@@ -99,7 +98,6 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
         ...formData,
         quantity: Number(formData.quantity) || 0,
         pricePerCredit: Number(formData.pricePerCredit) || 0,
-        totalPrice,
         verification: {
           verifiedBy: formData.verification.verifiedBy || "Others",
           certificateUrl: formData.verification.certificateUrl || "",
@@ -115,18 +113,32 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
       });
 
       toast({
-        title: "Listing created",
-        description: "Your project is now available in the marketplace.",
+        title: "Listing submitted",
+        description: "Sent to admin for review. It will go live after approval.",
       });
 
       setFormData(createInitialFormState());
       setIsOpen(false);
     } catch (error) {
       console.error("Error creating listing:", error);
+
+      const apiData = error.response?.data || {};
+      const reasons = Array.isArray(apiData.errors) ? apiData.errors : [];
+      const flaggedFields = Array.isArray(apiData.errorFields) ? apiData.errorFields : [];
+
+      const reasonText = reasons.length
+        ? reasons.map((reason, index) => `${index + 1}. ${reason}`).join("\n")
+        : null;
+
+      const fieldText = flaggedFields.length
+        ? `\nFields: ${flaggedFields.join(", ")}`
+        : "";
+
       toast({
         title: "Unable to create listing",
         description:
-          error.response?.data?.message ||
+          reasonText ||
+          (apiData.message ? `${apiData.message}${fieldText}` : null) ||
           "Please review your details and try again.",
         variant: "destructive",
       });

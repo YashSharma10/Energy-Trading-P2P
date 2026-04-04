@@ -54,11 +54,10 @@ export const createListingSchema = Joi.object({
       "string.uri": "Certificate URL must be a valid URL",
     }),
   }).required(),
-  status: Joi.string()
-    .valid("Available", "Sold", "Pending")
-    .default("Available")
-    .optional(),
-  totalPrice: Joi.number().optional(),
+  // Backward compatibility: client may still send these fields.
+  // They are ignored so server controls workflow and price integrity.
+  status: Joi.any().strip().optional(),
+  totalPrice: Joi.any().strip().optional(),
 });
 
 export const paymentSchema = Joi.object({

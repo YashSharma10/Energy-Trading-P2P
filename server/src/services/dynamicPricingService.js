@@ -330,7 +330,10 @@ export const getDynamicPrice = async (listingId, isProduct = false) => {
     const query = isProduct ? { product: listingId } : { listing: listingId };
     const dynamicPrice = await DynamicPrice.findOne(query).lean();
 
-    if (!dynamicPrice) return { success: false, message: "No dynamic pricing data found" };
+    // Self-heal GET requests: if record is missing or stale, compute a fresh one.
+    if (!dynamicPrice || !isDbPriceFresh(dynamicPrice.lastUpdatedAt)) {
+      return calculateDynamicPrice(listingId, isProduct);
+    }
 
     const data = {
       basePrice: dynamicPrice.basePrice,

@@ -32,6 +32,7 @@ import {
   AlertCircle,
   Leaf,
   BookOpen,
+  ClipboardCheck,
 } from "lucide-react";
 import { NumberTicker } from "@/components/magicui/number-ticker";
 import { Link } from "react-router-dom";
@@ -191,6 +192,15 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="flex gap-2">
+            <Link to="/admin/listings">
+              <Button
+                size="sm"
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                <ClipboardCheck className="h-4 w-4 mr-2" />
+                Approve Listings
+              </Button>
+            </Link>
             <Link to="/admin/blogs">
               <Button
                 size="sm"

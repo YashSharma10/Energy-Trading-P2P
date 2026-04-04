@@ -38,7 +38,7 @@ import {
 import ProducerDashboard from "./features/seller/ProducerDashboard";
 import { Marketplace, TransactionListing } from "./features/buyer";
 import ConsumerDashboard from "./features/buyer/ConsumerDashboard";
-import { AdminDashboard, AdminEcoProducts, AdminBlogs } from "./features/admin";
+import { AdminDashboard, AdminEcoProducts, AdminBlogs, AdminListings } from "./features/admin";
 import BuyerAnalytics from "./features/buyer/pages/BuyerAnalytics";
 import SellerAnalytics from "./features/seller/pages/SellerAnalytics";
 
@@ -217,6 +217,14 @@ const App = () => {
                   element={
                     <RoleBasedRoute allowedRoles={["admin"]}>
                       <AdminEcoProducts />
+                    </RoleBasedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/listings"
+                  element={
+                    <RoleBasedRoute allowedRoles={["admin"]}>
+                      <AdminListings />
                     </RoleBasedRoute>
                   }
                 />

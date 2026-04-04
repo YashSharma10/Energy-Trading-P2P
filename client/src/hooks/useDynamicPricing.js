@@ -23,6 +23,8 @@ export const useDynamicPricing = (itemId, isProduct = false, autoFetch = true) =
     setLoading(true);
     setError(null);
 
+    let shouldFallbackCalculate = false;
+
     try {
       const response = await axios.get(
         `${API_BASE_URL}/${itemId}?isProduct=${isProduct}`
@@ -36,16 +38,38 @@ export const useDynamicPricing = (itemId, isProduct = false, autoFetch = true) =
       }
     } catch (err) {
       if (err.response?.status === 404) {
-        // If no DB record exists yet, automatically trigger a calculation
+        // Backward-compatible fallback if server still returns 404.
         console.log(`[Pricing] No price found for ${itemId}, calculating now...`);
-        return calculatePrice();
+        shouldFallbackCalculate = true;
+      } else {
+        console.error("Error fetching pricing:", err);
+        setError(err.response?.data?.message || "Failed to fetch pricing data");
+        setPricing(null);
       }
-      
-      console.error("Error fetching pricing:", err);
-      setError(err.response?.data?.message || "Failed to fetch pricing data");
-      setPricing(null);
     } finally {
-      if (!err || err.response?.status !== 404) {
+      if (!shouldFallbackCalculate) {
+        setLoading(false);
+      }
+    }
+
+    if (shouldFallbackCalculate) {
+      try {
+        const response = await axios.post(`${API_BASE_URL}/calculate`, {
+          itemId,
+          isProduct,
+        });
+
+        if (response.data.success) {
+          setPricing(response.data.data);
+        } else {
+          setError(response.data.message || "Failed to calculate price");
+          setPricing(null);
+        }
+      } catch (calcErr) {
+        console.error("Error calculating price:", calcErr);
+        setError(calcErr.response?.data?.message || "Failed to calculate price");
+        setPricing(null);
+      } finally {
         setLoading(false);
       }
     }
