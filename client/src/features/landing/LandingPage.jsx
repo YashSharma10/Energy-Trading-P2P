@@ -26,7 +26,7 @@ const LandingPage = () => {
 
       {/* Video playlist section — cycles through all 3 videos in order */}
       <FactSection />
-      <section
+      {/* <section
         style={{
           padding: "0",
           lineHeight: 0,
@@ -54,8 +54,8 @@ const LandingPage = () => {
             borderRadius: "1.5rem",
           }}
         />
-      </section>
-      <HowItWorksSection />
+      </section> */}
+      {/* <HowItWorksSection /> */}
       <StatsSection />
       <FeatureSection />
       <TestimonialsSection />
