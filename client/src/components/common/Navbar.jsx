@@ -1,6 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { LogOut, Menu, Leaf } from "lucide-react";
+import { motion } from "framer-motion";
+import { 
+  LogOut, Menu, Leaf, Home, Calculator, BookOpen, Info, Mail, 
+  Zap, Settings, ShieldCheck, ShoppingCart
+} from "lucide-react";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "../ui/button";
@@ -8,9 +12,62 @@ import { useAuth } from "@/context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
 import logo from "../../../public/logo.png";
 
+const DesktopNavLink = ({ to, children, isGreen = false, exact = false, hoveredPath, setHoveredPath }) => {
+  const location = useLocation();
+  const active = exact ? location.pathname === to : location.pathname.startsWith(to);
+  const isHovered = hoveredPath === to;
+  
+  const baseActive = isGreen ? 'text-green-600 dark:text-green-400' : 'text-brandMainColor';
+  const baseInactive = 'text-foreground/80';
+  
+  return (
+    <Link
+      to={to}
+      onMouseEnter={() => setHoveredPath(to)}
+      className={`relative rounded-xl px-3 py-2 text-sm font-medium transition-colors ${active ? baseActive : baseInactive} hover:${isGreen ? 'text-green-600 dark:text-green-400' : 'text-foreground'}`}
+    >
+      {isHovered && (
+        <motion.div
+          layoutId="navbar-hover"
+          className="absolute inset-0 z-0 rounded-lg bg-black/10 dark:bg-white/10 backdrop-blur-md shadow-sm border border-black/5 dark:border-white/5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+        />
+      )}
+      <div className="relative z-10 flex items-center gap-1.5">{children}</div>
+    </Link>
+  );
+};
+
+const MobileNavLink = ({ to, onClick, children, icon: Icon, isGreen = false, exact = false }) => {
+  const location = useLocation();
+  const active = exact ? location.pathname === to : location.pathname.startsWith(to);
+  
+  const baseColor = isGreen ? 'text-green-600 dark:text-green-400' : 'text-brandMainColor';
+  const inactiveColor = 'text-foreground/70';
+  
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+        active 
+          ? `bg-muted shadow-sm ${baseColor}` 
+          : `hover:bg-muted/50 hover:${baseColor} ${inactiveColor}`
+      }`}
+    >
+      {Icon && <Icon className={`h-4 w-4 ${active ? 'opacity-100' : 'opacity-70'}`} />}
+      {children}
+    </Link>
+  );
+};
+
 const Navbar = () => {
   const { user, logoutUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [hoveredPath, setHoveredPath] = useState(null);
 
   const closeSheet = () => setIsOpen(false);
 
@@ -22,94 +79,36 @@ const Navbar = () => {
           <img src={logo} alt="CarbonEase logo" width={160} />
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link
-            to="/calculator"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-          >
-            Calculator
-          </Link>
-          <Link
-            to="/about"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-          >
-            About Us
-          </Link>
-          <Link
-            to="/contact"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-          >
-            Contact Us
-          </Link>
-          <Link
-            to="/blog"
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-          >
-            Blog
-          </Link>
-          <Link
-            to="/eco-marketplace"
-            className="text-sm font-medium text-green-600 dark:text-green-400 transition-colors hover:text-green-700 dark:hover:text-green-300 flex items-center gap-1"
-          >
-            <Leaf className="h-3.5 w-3.5" />
-            Eco Shop
-          </Link>
-
-          {/* Role-based navigation */}
+        <div className="hidden lg:flex items-center gap-1" onMouseLeave={() => setHoveredPath(null)}>
           {user?.role === "admin" && (
-            <Link
-              to="/admin"
-              className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
-            >
+            <DesktopNavLink to="/admin" exact hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
               Admin Panel
-            </Link>
+            </DesktopNavLink>
           )}
 
           {user?.role === "admin" && (
-            <Link
-              to="/admin/eco-products"
-              className="text-sm font-medium text-green-600 dark:text-green-400 transition-colors hover:text-green-700 dark:hover:text-green-300"
-            >
+            <DesktopNavLink to="/admin/eco-products" isGreen hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
               Manage Eco Products
-            </Link>
+            </DesktopNavLink>
           )}
 
           {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
-            <Link
-              to="/form"
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-            >
+            <DesktopNavLink to="/form" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
               Sell Energy
-            </Link>
+            </DesktopNavLink>
           )}
 
           {(user?.role === "CONSUMER" || user?.role === "BOTH") && (
-            <Link
-              to="/marketplace"
-              className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-            >
+            <DesktopNavLink to="/marketplace" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
               Buy Energy
-            </Link>
+            </DesktopNavLink>
           )}
-
-          {/* {user &&
-            (user.role === "PRODUCER" ||
-              user.role === "CONSUMER" ||
-              user.role === "BOTH") && (
-              <Link
-                to="/market-insights"
-                className="text-sm font-medium text-blue-600 dark:text-blue-400 transition-colors hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
-              >
-                📊 Insights
-              </Link>
-            )} */}
 
           {user &&
             (user.role === "PRODUCER" ||
               user.role === "CONSUMER" ||
               user.role === "BOTH") && (
-              <Link
+              <DesktopNavLink
                 to={
                   user.role === "PRODUCER"
                     ? "/dashboard/producer"
@@ -117,32 +116,52 @@ const Navbar = () => {
                       ? "/dashboard/consumer"
                       : "/dashboard"
                 }
-                className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
+                hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}
               >
                 Dashboard
-              </Link>
+              </DesktopNavLink>
             )}
+
+          <DesktopNavLink to="/eco-marketplace" isGreen hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            <Leaf className="h-3.5 w-3.5" /> Eco Shop
+          </DesktopNavLink>
+
+          <DesktopNavLink to="/calculator" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            Calculator
+          </DesktopNavLink>
+
+          <DesktopNavLink to="/blog" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            Blog
+          </DesktopNavLink>
+
+          <DesktopNavLink to="/about" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            About Us
+          </DesktopNavLink>
+
+          <DesktopNavLink to="/contact" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            Contact Us
+          </DesktopNavLink>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 lg:gap-4">
           <ThemeToggle />
 
           {/* Desktop Auth Actions */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             {user ? (
               <Button
                 onClick={logoutUser}
-                className="bg-brandMainColor text-white hover:bg-brandMainColor/90 focus-visible:ring-brandMainColor"
+                className="bg-brandMainColor text-white transition-all shadow-sm hover:shadow hover:bg-brandMainColor/90 focus-visible:ring-brandMainColor"
               >
                 Logout <LogOut size={16} className="ml-2" />
               </Button>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="outline">Login</Button>
+                  <Button variant="outline" className="transition-all hover:bg-muted/50">Login</Button>
                 </Link>
                 <Link to="/register">
-                  <Button className="bg-brandMainColor text-white hover:bg-brandMainColor/90">
+                  <Button className="bg-brandMainColor text-white transition-all shadow-sm hover:shadow hover:bg-brandMainColor/90">
                     Sign Up
                   </Button>
                 </Link>
@@ -152,113 +171,50 @@ const Navbar = () => {
 
           {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger className="md:hidden rounded-md p-2 hover:bg-muted">
+            <SheetTrigger className="lg:hidden rounded-md p-2 hover:bg-muted transition-colors">
               <Menu size={22} />
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col gap-4 p-6">
-              <Link
-                to="/"
-                onClick={closeSheet}
-                className="text-xl font-bold text-foreground"
-              >
-                <img src={logo} alt="CarbonEase logo" width={140} />
-              </Link>
-              <Link
-                to="/calculator"
-                onClick={closeSheet}
-                className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-              >
-                Calculator
-              </Link>
-              <Link
-                to="/about"
-                onClick={closeSheet}
-                className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-              >
-                About Us
-              </Link>
-              <Link
-                to="/contact"
-                onClick={closeSheet}
-                className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-              >
-                Contact Us
-              </Link>
-              <Link
-                to="/blog"
-                onClick={closeSheet}
-                className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-              >
-                Blog
-              </Link>
-              <Link
-                to="/eco-marketplace"
-                onClick={closeSheet}
-                className="text-sm font-medium text-green-600 dark:text-green-400 transition-colors hover:text-green-700 dark:hover:text-green-300 flex items-center gap-1"
-              >
-                <Leaf className="h-3.5 w-3.5" />
-                Eco Shop
-              </Link>
+            <SheetContent side="left" className="flex flex-col gap-1 p-6">
+              <div className="mb-4">
+                <Link
+                  to="/"
+                  onClick={closeSheet}
+                  className="text-xl font-bold text-foreground"
+                >
+                  <img src={logo} alt="CarbonEase logo" width={140} />
+                </Link>
+              </div>
 
               {/* Role-based mobile navigation */}
               {user?.role === "admin" && (
-                <Link
-                  to="/admin"
-                  onClick={closeSheet}
-                  className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
-                >
+                <MobileNavLink to="/admin" onClick={closeSheet} icon={ShieldCheck} exact>
                   Admin Panel
-                </Link>
+                </MobileNavLink>
               )}
 
               {user?.role === "admin" && (
-                <Link
-                  to="/admin/eco-products"
-                  onClick={closeSheet}
-                  className="text-sm font-medium text-green-600 dark:text-green-400 transition-colors hover:text-green-700 dark:hover:text-green-300"
-                >
+                <MobileNavLink to="/admin/eco-products" onClick={closeSheet} icon={Settings} isGreen>
                   Manage Eco Products
-                </Link>
+                </MobileNavLink>
               )}
 
               {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
-                <Link
-                  to="/form"
-                  onClick={closeSheet}
-                  className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-                >
+                <MobileNavLink to="/form" onClick={closeSheet} icon={Zap}>
                   Sell Energy
-                </Link>
+                </MobileNavLink>
               )}
 
               {(user?.role === "CONSUMER" || user?.role === "BOTH") && (
-                <Link
-                  to="/marketplace"
-                  onClick={closeSheet}
-                  className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
-                >
+                <MobileNavLink to="/marketplace" onClick={closeSheet} icon={ShoppingCart}>
                   Buy Energy
-                </Link>
+                </MobileNavLink>
               )}
 
               {user &&
                 (user.role === "PRODUCER" ||
                   user.role === "CONSUMER" ||
                   user.role === "BOTH") && (
-                  <Link
-                    to="/market-insights"
-                    onClick={closeSheet}
-                    className="text-sm font-medium text-blue-600 dark:text-blue-400 transition-colors hover:text-blue-700 dark:hover:text-blue-300"
-                  >
-                    📊 Market Insights
-                  </Link>
-                )}
-
-              {user &&
-                (user.role === "PRODUCER" ||
-                  user.role === "CONSUMER" ||
-                  user.role === "BOTH") && (
-                  <Link
+                  <MobileNavLink
                     to={
                       user.role === "PRODUCER"
                         ? "/dashboard/producer"
@@ -267,11 +223,31 @@ const Navbar = () => {
                           : "/dashboard"
                     }
                     onClick={closeSheet}
-                    className="text-sm font-medium text-foreground/80 transition-colors hover:text-brandMainColor"
+                    icon={Home}
                   >
                     Dashboard
-                  </Link>
+                  </MobileNavLink>
                 )}
+
+              <MobileNavLink to="/eco-marketplace" onClick={closeSheet} icon={Leaf} isGreen>
+                Eco Shop
+              </MobileNavLink>
+
+              <MobileNavLink to="/calculator" onClick={closeSheet} icon={Calculator}>
+                Calculator
+              </MobileNavLink>
+
+              <MobileNavLink to="/blog" onClick={closeSheet} icon={BookOpen}>
+                Blog
+              </MobileNavLink>
+
+              <MobileNavLink to="/about" onClick={closeSheet} icon={Info}>
+                About Us
+              </MobileNavLink>
+
+              <MobileNavLink to="/contact" onClick={closeSheet} icon={Mail}>
+                Contact Us
+              </MobileNavLink>
               <div className="mt-2 border-t border-border pt-4">
                 {user ? (
                   <Button
