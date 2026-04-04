@@ -60,7 +60,7 @@ const insights = [
 
 function IndiaInsightsSection() {
   return (
-    <section className="relative overflow-hidden border-t border-border/40 bg-background px-6 py-20">
+    <section className="relative overflow-hidden border-t border-border/40 bg-background px-6 py-12 md:py-16">
       <div className="pointer-events-none absolute -left-16 top-24 h-56 w-56 rounded-full bg-brandMainColor/10 blur-3xl" />
       <div className="mx-auto max-w-6xl">
         <motion.div
@@ -89,7 +89,7 @@ function IndiaInsightsSection() {
               whileHover={{ y: -6 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.45, delay: i * 0.07 }}
-              className="group flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/95 p-6 transition-all duration-300 hover:border-brandMainColor/30 hover:shadow-[0_18px_36px_-24px_rgba(92,179,56,0.6)]"
+              className="group flex flex-col gap-3 rounded-2xl border border-border bg-card/95 p-6 transition-all duration-300 hover:border-brandMainColor/30 hover:shadow-[0_18px_36px_-24px_rgba(92,179,56,0.6)]"
             >
               <span
                 className={`self-start rounded-full border px-3 py-1 text-[11px] font-semibold ${item.tagColor}`}

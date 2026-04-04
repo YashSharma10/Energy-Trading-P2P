@@ -31,7 +31,7 @@ const steps = [
 
 const HowItWorksSection = () => {
   return (
-    <section className="relative overflow-hidden border-t border-border/40 bg-background px-6 py-20">
+    <section className="relative overflow-hidden border-t border-border/40 bg-muted/30 px-6 py-12 md:py-16">
       <div className="pointer-events-none absolute left-[-6rem] top-20 h-52 w-52 rounded-full bg-brandMainColor/10 blur-3xl" />
       <div className="mx-auto max-w-6xl">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">

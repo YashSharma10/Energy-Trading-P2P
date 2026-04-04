@@ -60,7 +60,7 @@ const keyPoints = [
 
 const StatsSection = () => {
   return (
-    <section className="relative overflow-hidden border-t border-border/40 bg-background px-6 py-20">
+    <section className="relative overflow-hidden border-t border-border/40 bg-muted/30 px-6 py-12 md:py-16">
       <div className="pointer-events-none absolute right-[-8rem] top-8 h-64 w-64 rounded-full bg-brandMainColor/10 blur-3xl" />
       <div className="mx-auto max-w-6xl">
         <motion.div

@@ -74,7 +74,7 @@ const TestimonialsSection = () => {
               whileHover={{ y: -6 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.4, delay: i * 0.07 }}
-              className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/95 p-6 transition-all duration-300 hover:border-brandMainColor/30 hover:shadow-[0_18px_36px_-24px_rgba(92,179,56,0.58)]"
+              className="flex flex-col gap-4 rounded-2xl border border-border bg-card/95 p-6 transition-all duration-300 hover:border-brandMainColor/30 hover:shadow-[0_18px_36px_-24px_rgba(92,179,56,0.58)]"
             >
               <p className="text-sm text-muted-foreground leading-relaxed flex-1">
                 &ldquo;{t.content}&rdquo;

@@ -57,7 +57,7 @@ const FactCard = ({ stat, label, sub, cite, citeUrl }) => (
   <motion.div
     whileHover={{ y: -6, scale: 1.01 }}
     transition={{ type: "spring", stiffness: 260, damping: 20 }}
-    className="mx-3 flex w-72 flex-col gap-2 rounded-2xl border border-border/60 bg-card/95 px-6 py-5 shadow-sm transition-all duration-300 hover:border-brandMainColor/35 hover:shadow-[0_18px_40px_-26px_rgba(92,179,56,0.65)]"
+    className="mx-3 flex w-72 flex-col gap-2 rounded-2xl border border-border bg-card/95 px-6 py-5 shadow-sm transition-all duration-300 hover:border-brandMainColor/35 hover:shadow-[0_18px_40px_-26px_rgba(92,179,56,0.65)]"
   >
     <span className="text-2xl font-bold text-brandMainColor">{stat}</span>
     <span className="text-sm font-semibold text-foreground leading-snug">
@@ -77,7 +77,7 @@ const FactCard = ({ stat, label, sub, cite, citeUrl }) => (
 
 function FactSection() {
   return (
-    <section className="relative overflow-hidden border-t border-border/40 bg-background py-20">
+    <section className="relative overflow-hidden border-t border-border/40 bg-muted/30 py-12 md:py-16">
       <div className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-brandMainColor/10 blur-3xl" />
       <motion.div
         initial={{ opacity: 0, y: 24 }}

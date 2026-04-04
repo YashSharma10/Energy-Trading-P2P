@@ -46,7 +46,7 @@ const faqs = [
 
 const AccordionSection = () => {
   return (
-    <section className="relative overflow-hidden border-t border-border/40 bg-background px-6 py-20">
+    <section className="relative overflow-hidden border-t border-border/40 bg-muted/30 px-6 py-12 md:py-16">
       <div className="pointer-events-none absolute right-[-6rem] top-10 h-52 w-52 rounded-full bg-brandMainColor/10 blur-3xl" />
       <div className="mx-auto max-w-3xl">
         <motion.div
@@ -70,7 +70,7 @@ const AccordionSection = () => {
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <Accordion type="single" collapsible className="flex flex-col gap-2">
+          <Accordion type="single" collapsible className="flex flex-col gap-4">
             {faqs.map((faq, i) => (
               <motion.div
                 key={i}
@@ -82,12 +82,12 @@ const AccordionSection = () => {
               >
                 <AccordionItem
                   value={`item-${i}`}
-                  className="rounded-xl border border-border/60 bg-card/95 px-5 shadow-sm data-[state=open]:border-brandMainColor/30 transition-all duration-300"
+                  className="overflow-hidden rounded-2xl border border-border bg-background/50 px-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-brandMainColor/30 hover:shadow-md data-[state=open]:border-brandMainColor/50 data-[state=open]:bg-brandMainColor/5 data-[state=open]:shadow-lg"
                 >
-                  <AccordionTrigger className="text-sm font-medium text-foreground hover:no-underline py-4 text-left">
+                  <AccordionTrigger className="text-[15.5px] font-semibold tracking-tight text-foreground/90 hover:text-brandMainColor hover:no-underline py-5 text-left transition-colors data-[state=open]:text-brandMainColor">
                     {faq.question}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed pb-4">
+                  <AccordionContent className="text-[15px] text-muted-foreground leading-relaxed pb-6 pt-1">
                     {faq.answer}
                   </AccordionContent>
                 </AccordionItem>

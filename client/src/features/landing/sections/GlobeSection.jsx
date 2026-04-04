@@ -101,7 +101,7 @@ function GlobeSection() {
           </Link>
           <Link
             to="/about"
-            className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/70 px-8 py-3.5 text-sm font-semibold text-foreground backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-brandMainColor/60 hover:bg-brandMainColor/10 hover:text-brandMainColor focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandMainColor/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-background/70 px-8 py-3.5 text-sm font-semibold text-foreground backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-brandMainColor/60 hover:bg-brandMainColor/10 hover:text-brandMainColor focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandMainColor/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0"
           >
             Learn More
           </Link>
@@ -119,16 +119,16 @@ function GlobeSection() {
           <span className="rounded-xl border border-brandMainColor/30 bg-gradient-to-b from-brandMainColor/16 to-background/90 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground shadow-[0_10px_24px_-18px_rgba(92,179,56,0.65)] backdrop-blur-sm sm:text-xs">
             UN Paris Agreement
           </span>
-          <span className="rounded-xl border border-border/70 bg-background/85 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground/85 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:text-xs">
+          <span className="rounded-xl border border-border bg-background/85 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground/85 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:text-xs">
             India CCTS 2023
           </span>
-          <span className="rounded-xl border border-border/70 bg-background/85 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground/85 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:text-xs">
+          <span className="rounded-xl border border-border bg-background/85 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground/85 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:text-xs">
             Verra
           </span>
-          <span className="rounded-xl border border-border/70 bg-background/85 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground/85 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:text-xs">
+          <span className="rounded-xl border border-border bg-background/85 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground/85 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:text-xs">
             Gold Standard
           </span>
-          <span className="rounded-xl border border-border/70 bg-background/85 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground/85 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:text-xs">
+          <span className="rounded-xl border border-border bg-background/85 px-3.5 py-1.5 text-[11px] font-medium tracking-wide text-foreground/85 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.35)] backdrop-blur-sm sm:text-xs">
             ACR
           </span>
         </motion.div>
