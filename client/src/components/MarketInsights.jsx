@@ -7,10 +7,10 @@ const MarketInsights = () => {
 
   if (loading || !insights) {
     return (
-      <Card className="p-4">
+      <Card className="border-border/60 bg-card/95 p-4 shadow-lg dark:bg-card/90">
         <div className="space-y-3">
-          <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+          <div className="h-6 animate-pulse rounded bg-muted"></div>
+          <div className="h-4 w-3/4 animate-pulse rounded bg-muted"></div>
         </div>
       </Card>
     );
@@ -25,18 +25,18 @@ const MarketInsights = () => {
   const priceChangePercent = ((Math.abs(avgPriceChange) / 100) * 100).toFixed(1);
 
   return (
-    <Card className="bg-gradient-to-br from-blue-50 to-indigo-50">
+    <Card className="border border-border/60 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 shadow-lg dark:border-border/60 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-foreground">
           <span className="text-2xl">📊</span>
           Market Insights
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Average Price Change */}
-        <div className="bg-white rounded-lg p-4 space-y-2">
+        <div className="space-y-2 rounded-lg border border-border/60 bg-white p-4 shadow-sm dark:border-border/60 dark:bg-slate-900/80">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
               Average Price Movement
             </span>
             <div className="flex items-center gap-1">
@@ -54,7 +54,7 @@ const MarketInsights = () => {
               </span>
             </div>
           </div>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Market prices are{" "}
             {isPriceUp ? "increasing" : "decreasing"} on average
           </p>
@@ -62,17 +62,17 @@ const MarketInsights = () => {
 
         {/* Demand & Supply Scores */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white rounded-lg p-3">
-            <p className="text-xs font-medium text-gray-600 mb-1">
+          <div className="rounded-lg border border-border/60 bg-white p-3 shadow-sm dark:border-border/60 dark:bg-slate-900/80">
+            <p className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-300">
               Avg Demand Score
             </p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-blue-600">
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {avgDemandScore}
               </span>
-              <span className="text-xs text-gray-500">/100</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">/100</span>
             </div>
-            <div className="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
               <div
                 className="h-full bg-blue-500"
                 style={{ width: `${avgDemandScore}%` }}
@@ -80,17 +80,17 @@ const MarketInsights = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-3">
-            <p className="text-xs font-medium text-gray-600 mb-1">
+          <div className="rounded-lg border border-border/60 bg-white p-3 shadow-sm dark:border-border/60 dark:bg-slate-900/80">
+            <p className="mb-1 text-xs font-medium text-slate-600 dark:text-slate-300">
               Avg Supply Score
             </p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-purple-600">
+              <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 {avgSupplyScore}
               </span>
-              <span className="text-xs text-gray-500">/100</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">/100</span>
             </div>
-            <div className="mt-2 h-1 bg-gray-200 rounded-full overflow-hidden">
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
               <div
                 className="h-full bg-purple-500"
                 style={{ width: `${avgSupplyScore}%` }}
@@ -100,8 +100,8 @@ const MarketInsights = () => {
         </div>
 
         {/* Market Temperature Distribution */}
-        <div className="bg-white rounded-lg p-4">
-          <p className="text-sm font-medium text-gray-700 mb-3">
+        <div className="rounded-lg border border-border/60 bg-white p-4 shadow-sm dark:border-border/60 dark:bg-slate-900/80">
+          <p className="mb-3 text-sm font-medium text-slate-700 dark:text-slate-200">
             Market Temperature Distribution
           </p>
           <div className="space-y-2">
@@ -131,17 +131,17 @@ const MarketInsights = () => {
               return (
                 <div
                   key={temp}
-                  className={`${tempBgColors[temp]} rounded p-2 flex items-center justify-between`}
+                  className={`${tempBgColors[temp]} flex items-center justify-between rounded border border-border/40 p-2 dark:border-border/60 dark:bg-slate-800/70`}
                 >
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-3 h-3 rounded-full ${tempColors[temp]}`}
                     ></div>
-                    <span className="text-sm font-medium capitalize text-gray-700">
+                    <span className="text-sm font-medium capitalize text-slate-700 dark:text-slate-200">
                       {temp}
                     </span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-700">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                     {count} ({percentage}%)
                   </span>
                 </div>
@@ -152,26 +152,26 @@ const MarketInsights = () => {
 
         {/* Price Multiplier Range */}
         {insights.priceMultiplierRange && (
-          <div className="bg-white rounded-lg p-4">
-            <p className="text-sm font-medium text-gray-700 mb-2">
+          <div className="rounded-lg border border-border/60 bg-white p-4 shadow-sm dark:border-border/60 dark:bg-slate-900/80">
+            <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">
               Price Multiplier Range
             </p>
-            <div className="flex justify-between text-xs text-gray-600">
+            <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300">
               <div>
-                <p className="text-gray-500">Min</p>
-                <p className="font-semibold text-gray-800">
+                <p className="text-slate-500 dark:text-slate-400">Min</p>
+                <p className="font-semibold text-slate-800 dark:text-slate-100">
                   {insights.priceMultiplierRange.min.toFixed(2)}x
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-gray-500">Average</p>
-                <p className="font-semibold text-gray-800">
+                <p className="text-slate-500 dark:text-slate-400">Average</p>
+                <p className="font-semibold text-slate-800 dark:text-slate-100">
                   {insights.priceMultiplierRange.avg.toFixed(2)}x
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-gray-500">Max</p>
-                <p className="font-semibold text-gray-800">
+                <p className="text-slate-500 dark:text-slate-400">Max</p>
+                <p className="font-semibold text-slate-800 dark:text-slate-100">
                   {insights.priceMultiplierRange.max.toFixed(2)}x
                 </p>
               </div>
@@ -179,7 +179,7 @@ const MarketInsights = () => {
           </div>
         )}
 
-        <p className="text-xs text-gray-500 pt-2">
+        <p className="pt-2 text-xs text-slate-500 dark:text-slate-400">
           💡 Use these insights to make informed pricing decisions
         </p>
       </CardContent>

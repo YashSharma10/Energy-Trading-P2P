@@ -135,7 +135,7 @@ const ConsumerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-8">
+      <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-10">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">

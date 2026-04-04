@@ -192,8 +192,20 @@ const Marketplace = () => {
         totalProjects: 0,
         averagePrice: 0,
         regions: 0,
+        totalCarbonReduced: 0,
       };
     }
+
+    const getEmissionReductionPerCredit = (projectType = "") => {
+      const normalizedType = projectType.toLowerCase();
+
+      if (normalizedType.includes("renewable")) return 0.92;
+      if (normalizedType.includes("reforestation")) return 1.15;
+      if (normalizedType.includes("blue carbon")) return 1.3;
+      if (normalizedType.includes("waste")) return 0.75;
+      if (normalizedType.includes("agriculture")) return 0.65;
+      return 0.8;
+    };
 
     const totalProjects = allListings.length;
     const totalPrice = allListings.reduce(
@@ -205,11 +217,17 @@ const Marketplace = () => {
         .map((project) => project.location?.toLowerCase().trim())
         .filter(Boolean),
     ).size;
+    const totalCarbonReduced = allListings.reduce((sum, project) => {
+      const quantity = Number(project.quantity) || 0;
+      const perCreditReduction = getEmissionReductionPerCredit(project.projectType);
+      return sum + quantity * perCreditReduction;
+    }, 0);
 
     return {
       totalProjects,
       averagePrice: totalPrice / totalProjects || 0,
       regions,
+      totalCarbonReduced,
     };
   }, [allListings]);
 
@@ -468,6 +486,12 @@ const Marketplace = () => {
             </span>{" "}
             regions
           </div>
+          <div className="text-xs text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {marketInsights.totalCarbonReduced.toFixed(0)}
+            </span>{" "}
+            tons CO2e reduced
+          </div>
         </div>
       </div>
 
@@ -700,6 +724,25 @@ const Marketplace = () => {
                               {Number(listing.quantity).toLocaleString()}
                             </span>
                             <span className="text-sm"> credits available</span>
+                          </div>
+
+                          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                            <Leaf className="h-3.5 w-3.5" />
+                            Carbon emission reduced: ~
+                            {(
+                              Number(listing.quantity || 0) *
+                              ((listing.projectType || "").toLowerCase().includes("renewable")
+                                ? 0.92
+                                : (listing.projectType || "").toLowerCase().includes("reforestation")
+                                  ? 1.15
+                                  : (listing.projectType || "").toLowerCase().includes("blue carbon")
+                                    ? 1.3
+                                    : (listing.projectType || "").toLowerCase().includes("waste")
+                                      ? 0.75
+                                      : (listing.projectType || "").toLowerCase().includes("agriculture")
+                                        ? 0.65
+                                        : 0.8)
+                            ).toFixed(0)} tons CO2e
                           </div>
                         </div>
                       </CardContent>

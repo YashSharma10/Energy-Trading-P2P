@@ -89,11 +89,14 @@ const ReceiptViewer = () => {
         </div>
       </div>
 
-      <div className="p-8">
-        <div
-          dangerouslySetInnerHTML={{ __html: receiptHTML }}
-          className="mx-auto"
-        />
+      <div className="bg-muted/20 p-4 sm:p-8">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-3xl border border-border/60 bg-background shadow-2xl print:border-0 print:shadow-none">
+          <iframe
+            title={`Receipt ${transactionId}`}
+            srcDoc={receiptHTML}
+            className="h-[calc(100vh-10rem)] w-full bg-white print:h-auto"
+          />
+        </div>
       </div>
     </div>
   );
