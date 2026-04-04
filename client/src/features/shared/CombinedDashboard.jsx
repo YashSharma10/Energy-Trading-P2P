@@ -168,7 +168,7 @@ const CombinedDashboard = () => {
   ].sort((a, b) => new Date(b.purchaseDate || b.createdAt) - new Date(a.purchaseDate || a.createdAt));
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pt-24 lg:pt-28">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">

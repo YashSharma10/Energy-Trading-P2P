@@ -76,29 +76,6 @@ const DynamicPriceDisplay = ({ itemId, isProduct = false, basePrice }) => {
         </span>
       </div>
 
-      {/* Demand / Supply bars */}
-      <div className="grid grid-cols-2 gap-2 text-left">
-        <div className="rounded-lg bg-muted/60 px-2.5 py-1.5">
-          <p className="text-[10px] text-muted-foreground">Demand</p>
-          <p className="text-xs font-semibold text-foreground">{demandScore}/100</p>
-          <div className="mt-1 h-1 w-full rounded-full bg-border">
-            <div
-              className="h-1 rounded-full bg-primary transition-all"
-              style={{ width: `${demandScore}%` }}
-            />
-          </div>
-        </div>
-        <div className="rounded-lg bg-muted/60 px-2.5 py-1.5">
-          <p className="text-[10px] text-muted-foreground">Supply</p>
-          <p className="text-xs font-semibold text-foreground">{supplyScore}/100</p>
-          <div className="mt-1 h-1 w-full rounded-full bg-border">
-            <div
-              className="h-1 rounded-full bg-blue-500 transition-all"
-              style={{ width: `${supplyScore}%` }}
-            />
-          </div>
-        </div>
-      </div>
 
       {/* Last updated */}
       {pricing.lastUpdatedAt && (

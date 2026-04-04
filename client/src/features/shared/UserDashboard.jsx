@@ -12,7 +12,7 @@ const UserDashboard = () => {
   const [activeTab, setActiveTab] = useState("buy");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-muted/30">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background/95 to-muted/30 pt-24 lg:pt-28">
       <section className="border-b border-border/60 bg-card/40 px-8 py-10 backdrop-blur">
         <div className="mx-auto max-w-7xl space-y-6">
           <div className="flex items-center justify-between">

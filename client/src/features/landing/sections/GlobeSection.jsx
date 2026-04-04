@@ -2,6 +2,7 @@ import { Globe } from "@/components/animations/globe";
 import { Link } from "react-router-dom";
 import { ArrowRight, Leaf } from "lucide-react";
 import { motion } from "motion/react";
+import { useAuth } from "@/context/AuthContext";
 
 // phi ≈ 1.35 rad puts India (~77°E) roughly centered on the right hemisphere
 // theta tilts the view slightly north to frame the subcontinent nicely
@@ -41,6 +42,20 @@ const INDIA_GLOBE_CONFIG = {
 };
 
 function GlobeSection() {
+  const { user } = useAuth();
+
+  const startTradingPath = !user
+    ? "/register"
+    : user.role === "PRODUCER"
+      ? "/form"
+      : user.role === "CONSUMER"
+        ? "/marketplace"
+        : user.role === "BOTH"
+          ? "/dashboard"
+          : user.role === "admin"
+            ? "/admin"
+            : "/profile";
+
   return (
     <section className="relative flex min-h-screen flex-col justify-start overflow-hidden bg-background">
       {/* Radial fade at center so globe shows through */}
@@ -93,7 +108,7 @@ function GlobeSection() {
           className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start"
         >
           <Link
-            to="/register"
+            to={startTradingPath}
             className="group relative inline-flex items-center gap-2 rounded-full bg-brandMainColor px-8 py-3.5 text-sm font-semibold text-white shadow-[0_10px_28px_-12px_rgba(92,179,56,0.7)] ring-1 ring-brandMainColor/40 transition-all duration-300 hover:-translate-y-0.5 hover:bg-brandMainColor/90 hover:shadow-[0_16px_34px_-14px_rgba(92,179,56,0.85)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandMainColor focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0"
           >
             <span>Start Trading</span>

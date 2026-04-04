@@ -29,6 +29,7 @@ import {
   IndianRupee,
   Link as LinkIcon,
   Loader2,
+  Leaf
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -149,60 +150,70 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-3xl overflow-hidden border border-border/70 bg-card/95 p-0 shadow-xl">
+      <DialogContent className="max-w-3xl overflow-hidden border border-border bg-background/95 p-0 shadow-2xl sm:rounded-3xl backdrop-blur-xl">
         <form
           onSubmit={handleSubmit}
-          className="flex max-h-[75vh] flex-col gap-6"
+          className="flex max-h-[85vh] flex-col gap-6"
         >
-          <DialogHeader className="space-y-2 px-6 pt-6">
-            <DialogTitle className="text-2xl font-semibold">
-              Create a marketplace listing
-            </DialogTitle>
-            <DialogDescription>
-              Share project details, pricing, and verification so buyers can act
-              with confidence.
-            </DialogDescription>
+          {/* Beautiful Header */}
+          <DialogHeader className="relative overflow-hidden border-b border-border bg-card/50 px-8 py-6">
+            <div className="absolute right-[-4rem] top-[-4rem] h-32 w-32 rounded-full bg-brandMainColor/10 blur-3xl" />
+            <div className="relative flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brandMainColor/10 border border-brandMainColor/20 shadow-inner">
+                <Leaf className="h-6 w-6 text-brandMainColor" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
+                  Create a marketplace listing
+                </DialogTitle>
+                <DialogDescription className="text-[15px] mt-1 text-muted-foreground/90">
+                  Share project details, pricing, and verification so buyers can act with absolute confidence.
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto px-6">
-            <div className="grid gap-6 pb-2">
+          {/* Form Body */}
+          <div className="flex-1 overflow-y-auto px-8 custom-scrollbar">
+            <div className="grid gap-7 pb-4">
+              
               <div className="grid gap-3">
-                <Label htmlFor="title">Project title</Label>
-                <div className="relative">
-                  <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="title" className="text-sm font-semibold text-foreground/90">Project title</Label>
+                <div className="relative group">
+                  <FileText className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted-foreground transition-colors group-focus-within:text-brandMainColor" />
                   <Input
                     id="title"
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
                     placeholder="e.g. Mangrove restoration in Bali"
-                    className="pl-10"
+                    className="pl-11 h-12 rounded-xl transition-all border-border/80 bg-card focus-visible:border-brandMainColor focus-visible:ring-1 focus-visible:ring-brandMainColor"
                     required
                   />
                 </div>
               </div>
 
               <div className="grid gap-3">
-                <Label htmlFor="description">Summary</Label>
-                <div className="relative">
-                  <ClipboardList className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Label htmlFor="description" className="text-sm font-semibold text-foreground/90">Project Summary</Label>
+                <div className="relative group">
+                  <ClipboardList className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted-foreground transition-colors group-focus-within:text-brandMainColor" />
                   <Textarea
                     id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
                     placeholder="Outline the climate impact, methodology, and project milestones."
-                    className="min-h-[120px] resize-y pl-10"
+                    className="min-h-[120px] resize-y pl-11 py-3 rounded-xl transition-all border-border/80 bg-card focus-visible:border-brandMainColor focus-visible:ring-1 focus-visible:ring-brandMainColor"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2">
                 <div className="grid gap-3">
-                  <Label htmlFor="quantity">Available credits</Label>
-                  <div className="relative">
-                    <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Label htmlFor="quantity" className="text-sm font-semibold text-foreground/90">Available credits (tCO₂e)</Label>
+                  <div className="relative group">
+                    <Tag className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted-foreground transition-colors group-focus-within:text-brandMainColor" />
                     <Input
                       id="quantity"
                       name="quantity"
@@ -211,15 +222,15 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
                       value={formData.quantity}
                       onChange={handleChange}
                       placeholder="e.g. 5,000"
-                      className="pl-10"
+                      className="pl-11 h-12 rounded-xl transition-all border-border/80 bg-card focus-visible:border-brandMainColor focus-visible:ring-1 focus-visible:ring-brandMainColor"
                       required
                     />
                   </div>
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="pricePerCredit">Price per credit (₹)</Label>
-                  <div className="relative">
-                    <IndianRupee className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Label htmlFor="pricePerCredit" className="text-sm font-semibold text-foreground/90">Price per credit (₹)</Label>
+                  <div className="relative group">
+                    <IndianRupee className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted-foreground transition-colors group-focus-within:text-brandMainColor" />
                     <Input
                       id="pricePerCredit"
                       name="pricePerCredit"
@@ -229,44 +240,44 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
                       value={formData.pricePerCredit}
                       onChange={handleChange}
                       placeholder="e.g. 12"
-                      className="pl-10"
+                      className="pl-11 h-12 rounded-xl transition-all border-border/80 bg-card focus-visible:border-brandMainColor focus-visible:ring-1 focus-visible:ring-brandMainColor"
                       required
                     />
                   </div>
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="totalPrice">Estimated contract value</Label>
-                  <div className="relative">
-                    <CheckCircle className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Label htmlFor="totalPrice" className="text-sm font-semibold text-foreground/90">Estimated contract value (₹)</Label>
+                  <div className="relative group">
+                    <CheckCircle className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-brandMainColor" />
                     <Input
                       id="totalPrice"
                       name="totalPrice"
                       value={totalPrice ? totalPrice.toLocaleString() : "0"}
                       readOnly
-                      className="pl-10 font-semibold text-foreground"
+                      className="pl-11 h-12 rounded-xl bg-brandMainColor/5 border-brandMainColor/20 font-bold text-brandMainColor focus-visible:ring-0"
                     />
                   </div>
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="location">Project location</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Label htmlFor="location" className="text-sm font-semibold text-foreground/90">Project location</Label>
+                  <div className="relative group">
+                    <MapPin className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted-foreground transition-colors group-focus-within:text-brandMainColor" />
                     <Input
                       id="location"
                       name="location"
                       value={formData.location}
                       onChange={handleChange}
                       placeholder="City, Country"
-                      className="pl-10"
+                      className="pl-11 h-12 rounded-xl transition-all border-border/80 bg-card focus-visible:border-brandMainColor focus-visible:ring-1 focus-visible:ring-brandMainColor"
                       required
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2">
                 <div className="grid gap-3">
-                  <Label htmlFor="projectType">Project type</Label>
+                  <Label htmlFor="projectType" className="text-sm font-semibold text-foreground/90">Project type</Label>
                   <Select
                     value={formData.projectType || undefined}
                     onValueChange={(value) =>
@@ -276,19 +287,13 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
                       }))
                     }
                   >
-                    <SelectTrigger id="projectType">
-                      <SelectValue placeholder="Select project type" />
+                    <SelectTrigger id="projectType" className="h-12 rounded-xl border-border/80 bg-card pl-4 focus:ring-1 focus:ring-brandMainColor">
+                      <SelectValue placeholder="Select classification" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Reforestation">
-                        Reforestation
-                      </SelectItem>
-                      <SelectItem value="Renewable Energy">
-                        Renewable Energy
-                      </SelectItem>
-                      <SelectItem value="Waste Management">
-                        Waste Management
-                      </SelectItem>
+                    <SelectContent className="rounded-xl border-border/80">
+                      <SelectItem value="Reforestation">Reforestation</SelectItem>
+                      <SelectItem value="Renewable Energy">Renewable Energy</SelectItem>
+                      <SelectItem value="Waste Management">Waste Management</SelectItem>
                       <SelectItem value="Agriculture">Agriculture</SelectItem>
                       <SelectItem value="Blue Carbon">Blue Carbon</SelectItem>
                       <SelectItem value="Others">Others</SelectItem>
@@ -296,7 +301,7 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
                   </Select>
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="status">Listing status</Label>
+                  <Label htmlFor="status" className="text-sm font-semibold text-foreground/90">Listing status</Label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) =>
@@ -306,53 +311,48 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
                       }))
                     }
                   >
-                    <SelectTrigger id="status">
-                      <SelectValue placeholder="Select status" />
+                    <SelectTrigger id="status" className="h-12 rounded-xl border-border/80 bg-card pl-4 focus:ring-1 focus:ring-brandMainColor">
+                      <SelectValue placeholder="Select initial status" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Available">Available</SelectItem>
-                      <SelectItem value="Pending">Pending</SelectItem>
-                      <SelectItem value="Sold">Sold</SelectItem>
+                    <SelectContent className="rounded-xl border-border/80">
+                      <SelectItem value="Available">Available (Live)</SelectItem>
+                      <SelectItem value="Pending">Draft / Pending</SelectItem>
+                      <SelectItem value="Sold">Sold (Archive)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-6 md:grid-cols-2">
                 <div className="grid gap-3">
-                  <Label>Verified by</Label>
+                  <Label className="text-sm font-semibold text-foreground/90">Verified by</Label>
                   <Select
                     value={formData.verification.verifiedBy || undefined}
                     onValueChange={(value) =>
                       handleVerificationChange("verifiedBy", value)
                     }
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select standard" />
+                    <SelectTrigger className="h-12 rounded-xl border-border/80 bg-card pl-4 focus:ring-1 focus:ring-brandMainColor">
+                      <SelectValue placeholder="Select registry standard" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="VCS">
-                        Verified Carbon Standard
-                      </SelectItem>
-                      <SelectItem value="Gold Standard">
-                        Gold Standard
-                      </SelectItem>
-                      <SelectItem value="CDM">
-                        Clean Development Mechanism
-                      </SelectItem>
-                      <SelectItem value="Others">Others</SelectItem>
+                    <SelectContent className="rounded-xl border-border/80">
+                      <SelectItem value="VCS">Verified Carbon Standard (Verra)</SelectItem>
+                      <SelectItem value="Gold Standard">Gold Standard</SelectItem>
+                      <SelectItem value="CDM">Clean Development Mechanism</SelectItem>
+                      <SelectItem value="ACR">American Carbon Registry</SelectItem>
+                      <SelectItem value="Others">Other / Independent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="certificateUrl">Certificate URL</Label>
-                  <div className="relative">
-                    <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Label htmlFor="certificateUrl" className="text-sm font-semibold text-foreground/90">Public Certificate URL</Label>
+                  <div className="relative group">
+                    <LinkIcon className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-muted-foreground transition-colors group-focus-within:text-brandMainColor" />
                     <Input
                       id="certificateUrl"
                       name="certificateUrl"
                       type="url"
-                      placeholder="Link to verification or registry entry"
+                      placeholder="https://registry..."
                       value={formData.verification.certificateUrl}
                       onChange={(event) =>
                         handleVerificationChange(
@@ -360,34 +360,37 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
                           event.target.value
                         )
                       }
-                      className="pl-10"
+                      className="pl-11 h-12 rounded-xl transition-all border-border/80 bg-card focus-visible:border-brandMainColor focus-visible:ring-1 focus-visible:ring-brandMainColor"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-lg border border-dashed border-border/60 bg-muted/30 p-4 text-xs text-muted-foreground">
-                Attach supporting documentation such as monitoring reports,
-                methodologies, or imagery to help buyers validate your claims.
+              <div className="mt-2 rounded-xl border border-dashed border-brandMainColor/30 bg-brandMainColor/5 px-5 py-4 text-sm text-foreground/85 flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-brandMainColor shrink-0 mt-0.5" />
+                <p>
+                  <span className="font-semibold text-brandMainColor">Document Trust Protocol: </span> 
+                  Attach supporting documentation such as MRV (Monitoring, Reporting, Validation) reports, methodologies, or imagery file to help buyers validate your claims.
+                </p>
               </div>
 
               <FileUpload />
             </div>
           </div>
 
-          <DialogFooter className="gap-2 border-t border-border/70 bg-card/80 px-6 py-4">
+          <DialogFooter className="gap-3 border-t border-border bg-card/50 px-8 py-5 sm:justify-end">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isSubmitting}>
+              <Button type="button" variant="ghost" disabled={isSubmitting} className="rounded-full px-6 transition-all hover:bg-muted font-semibold">
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="rounded-full bg-brandMainColor px-8 font-semibold text-white shadow-[0_8px_20px_-10px_rgba(92,179,56,0.6)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-brandMainColor/90 hover:shadow-[0_12px_25px_-10px_rgba(92,179,56,0.8)]">
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Publishing
+                  <Loader2 className="h-4.5 w-4.5 animate-spin" /> Enacting
                 </span>
               ) : (
-                "Publish listing"
+                "Publish Official Listing"
               )}
             </Button>
           </DialogFooter>

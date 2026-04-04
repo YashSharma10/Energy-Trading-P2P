@@ -82,7 +82,7 @@ const BuyerDashboard = () => {
   }, [recentPurchases, totalAmount]);
 
   return (
-    <div className="bg-background">
+    <div className="bg-background pt-24 lg:pt-28">
       <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">

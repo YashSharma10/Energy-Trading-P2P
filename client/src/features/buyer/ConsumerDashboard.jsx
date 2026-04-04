@@ -134,7 +134,7 @@ const ConsumerDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pt-24 lg:pt-28">
       <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-10">
         {/* Header */}
         <div className="mb-8">

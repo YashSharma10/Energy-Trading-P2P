@@ -151,7 +151,7 @@ const SellerDashboard = () => {
   const statsCards = overviewCards;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background pt-24 lg:pt-28">
       <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
         <div className="mx-auto max-w-6xl px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">

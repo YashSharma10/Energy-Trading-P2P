@@ -1,9 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  LogOut, Menu, Leaf, Home, Calculator, BookOpen, Info, Mail, 
-  Zap, Settings, ShieldCheck, ShoppingCart
+import {
+  LogOut,
+  Menu,
+  Leaf,
+  Home,
+  Calculator,
+  BookOpen,
+  Info,
+  Mail,
+  Zap,
+  Settings,
+  ShieldCheck,
+  ShoppingCart,
 } from "lucide-react";
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -12,19 +22,30 @@ import { useAuth } from "@/context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
 import Logo from "./Logo";
 
-const DesktopNavLink = ({ to, children, isGreen = false, exact = false, hoveredPath, setHoveredPath }) => {
+const DesktopNavLink = ({
+  to,
+  children,
+  isGreen = false,
+  exact = false,
+  hoveredPath,
+  setHoveredPath,
+}) => {
   const location = useLocation();
-  const active = exact ? location.pathname === to : location.pathname.startsWith(to);
+  const active = exact
+    ? location.pathname === to
+    : location.pathname.startsWith(to);
   const isHovered = hoveredPath === to;
-  
-  const baseActive = isGreen ? 'text-green-600 dark:text-green-400' : 'text-brandMainColor';
-  const baseInactive = 'text-foreground/80';
-  
+
+  const baseActive = isGreen
+    ? "text-green-600 dark:text-green-400"
+    : "text-brandMainColor";
+  const baseInactive = "text-foreground/80";
+
   return (
     <Link
       to={to}
       onMouseEnter={() => setHoveredPath(to)}
-      className={`relative rounded-xl px-3 py-2 text-sm font-medium transition-colors ${active ? baseActive : baseInactive} hover:${isGreen ? 'text-green-600 dark:text-green-400' : 'text-foreground'}`}
+      className={`relative rounded-xl px-3 py-2 text-sm font-medium transition-colors ${active ? baseActive : baseInactive} hover:${isGreen ? "text-green-600 dark:text-green-400" : "text-foreground"}`}
     >
       {isHovered && (
         <motion.div
@@ -41,24 +62,37 @@ const DesktopNavLink = ({ to, children, isGreen = false, exact = false, hoveredP
   );
 };
 
-const MobileNavLink = ({ to, onClick, children, icon: Icon, isGreen = false, exact = false }) => {
+const MobileNavLink = ({
+  to,
+  onClick,
+  children,
+  icon: Icon,
+  isGreen = false,
+  exact = false,
+}) => {
   const location = useLocation();
-  const active = exact ? location.pathname === to : location.pathname.startsWith(to);
-  
-  const baseColor = isGreen ? 'text-green-600 dark:text-green-400' : 'text-brandMainColor';
-  const inactiveColor = 'text-foreground/70';
-  
+  const active = exact
+    ? location.pathname === to
+    : location.pathname.startsWith(to);
+
+  const baseColor = isGreen
+    ? "text-green-600 dark:text-green-400"
+    : "text-brandMainColor";
+  const inactiveColor = "text-foreground/70";
+
   return (
     <Link
       to={to}
       onClick={onClick}
       className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
-        active 
-          ? `bg-muted shadow-sm ${baseColor}` 
+        active
+          ? `bg-muted shadow-sm ${baseColor}`
           : `hover:bg-muted/50 hover:${baseColor} ${inactiveColor}`
       }`}
     >
-      {Icon && <Icon className={`h-4 w-4 ${active ? 'opacity-100' : 'opacity-70'}`} />}
+      {Icon && (
+        <Icon className={`h-4 w-4 ${active ? "opacity-100" : "opacity-70"}`} />
+      )}
       {children}
     </Link>
   );
@@ -75,31 +109,55 @@ const Navbar = () => {
     <div className="fixed inset-x-0 top-0 z-50 p-2 sm:p-4 transition-all duration-300">
       <nav className="mx-auto flex h-16 sm:h-[4.5rem] w-full max-w-7xl items-center justify-between rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-black/40 px-4 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
         {/* Logo */}
-        <Link to="/" className="text-xl font-bold text-foreground transition-transform hover:scale-[1.02] flex items-center">
+        <Link
+          to="/"
+          className="text-xl font-bold text-foreground transition-transform hover:scale-[1.02] flex items-center"
+        >
           <Logo className="h-11 w-auto object-contain" />
         </Link>
 
-        <div className="hidden lg:flex items-center gap-1" onMouseLeave={() => setHoveredPath(null)}>
+        <div
+          className="hidden lg:flex items-center gap-1"
+          onMouseLeave={() => setHoveredPath(null)}
+        >
           {user?.role === "admin" && (
-            <DesktopNavLink to="/admin" exact hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            <DesktopNavLink
+              to="/admin"
+              exact
+              hoveredPath={hoveredPath}
+              setHoveredPath={setHoveredPath}
+            >
               Admin Panel
             </DesktopNavLink>
           )}
 
           {user?.role === "admin" && (
-            <DesktopNavLink to="/admin/eco-products" isGreen hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            <DesktopNavLink
+              to="/admin/eco-products"
+              isGreen
+              hoveredPath={hoveredPath}
+              setHoveredPath={setHoveredPath}
+            >
               Manage Eco Products
             </DesktopNavLink>
           )}
 
           {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
-            <DesktopNavLink to="/form" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            <DesktopNavLink
+              to="/form"
+              hoveredPath={hoveredPath}
+              setHoveredPath={setHoveredPath}
+            >
               Sell Energy
             </DesktopNavLink>
           )}
 
           {(user?.role === "CONSUMER" || user?.role === "BOTH") && (
-            <DesktopNavLink to="/marketplace" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+            <DesktopNavLink
+              to="/marketplace"
+              hoveredPath={hoveredPath}
+              setHoveredPath={setHoveredPath}
+            >
               Buy Energy
             </DesktopNavLink>
           )}
@@ -116,29 +174,51 @@ const Navbar = () => {
                       ? "/dashboard/consumer"
                       : "/dashboard"
                 }
-                hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
               >
                 Dashboard
               </DesktopNavLink>
             )}
 
-          <DesktopNavLink to="/eco-marketplace" isGreen hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+          <DesktopNavLink
+            to="/eco-marketplace"
+            isGreen
+            hoveredPath={hoveredPath}
+            setHoveredPath={setHoveredPath}
+          >
             <Leaf className="h-3.5 w-3.5" /> Eco Shop
           </DesktopNavLink>
 
-          <DesktopNavLink to="/calculator" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+          <DesktopNavLink
+            to="/calculator"
+            hoveredPath={hoveredPath}
+            setHoveredPath={setHoveredPath}
+          >
             Calculator
           </DesktopNavLink>
 
-          <DesktopNavLink to="/blog" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+          <DesktopNavLink
+            to="/blog"
+            hoveredPath={hoveredPath}
+            setHoveredPath={setHoveredPath}
+          >
             Blog
           </DesktopNavLink>
 
-          <DesktopNavLink to="/about" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+          <DesktopNavLink
+            to="/about"
+            hoveredPath={hoveredPath}
+            setHoveredPath={setHoveredPath}
+          >
             About Us
           </DesktopNavLink>
 
-          <DesktopNavLink to="/contact" hoveredPath={hoveredPath} setHoveredPath={setHoveredPath}>
+          <DesktopNavLink
+            to="/contact"
+            hoveredPath={hoveredPath}
+            setHoveredPath={setHoveredPath}
+          >
             Contact Us
           </DesktopNavLink>
         </div>
@@ -158,7 +238,12 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="ghost" className="rounded-full px-5 transition-all hover:bg-muted/50 font-medium">Login</Button>
+                  <Button
+                    variant="ghost"
+                    className="rounded-full px-5 transition-all hover:bg-muted/50 font-medium"
+                  >
+                    Login
+                  </Button>
                 </Link>
                 <Link to="/register">
                   <Button className="rounded-full bg-brandMainColor px-6 font-medium text-white shadow-md shadow-brandMainColor/20 transition-all duration-300 hover:-translate-y-[1px] hover:bg-brandMainColor/90 hover:shadow-lg hover:shadow-brandMainColor/30">
@@ -187,13 +272,23 @@ const Navbar = () => {
 
               {/* Role-based mobile navigation */}
               {user?.role === "admin" && (
-                <MobileNavLink to="/admin" onClick={closeSheet} icon={ShieldCheck} exact>
+                <MobileNavLink
+                  to="/admin"
+                  onClick={closeSheet}
+                  icon={ShieldCheck}
+                  exact
+                >
                   Admin Panel
                 </MobileNavLink>
               )}
 
               {user?.role === "admin" && (
-                <MobileNavLink to="/admin/eco-products" onClick={closeSheet} icon={Settings} isGreen>
+                <MobileNavLink
+                  to="/admin/eco-products"
+                  onClick={closeSheet}
+                  icon={Settings}
+                  isGreen
+                >
                   Manage Eco Products
                 </MobileNavLink>
               )}
@@ -205,7 +300,11 @@ const Navbar = () => {
               )}
 
               {(user?.role === "CONSUMER" || user?.role === "BOTH") && (
-                <MobileNavLink to="/marketplace" onClick={closeSheet} icon={ShoppingCart}>
+                <MobileNavLink
+                  to="/marketplace"
+                  onClick={closeSheet}
+                  icon={ShoppingCart}
+                >
                   Buy Energy
                 </MobileNavLink>
               )}
@@ -229,11 +328,20 @@ const Navbar = () => {
                   </MobileNavLink>
                 )}
 
-              <MobileNavLink to="/eco-marketplace" onClick={closeSheet} icon={Leaf} isGreen>
+              <MobileNavLink
+                to="/eco-marketplace"
+                onClick={closeSheet}
+                icon={Leaf}
+                isGreen
+              >
                 Eco Shop
               </MobileNavLink>
 
-              <MobileNavLink to="/calculator" onClick={closeSheet} icon={Calculator}>
+              <MobileNavLink
+                to="/calculator"
+                onClick={closeSheet}
+                icon={Calculator}
+              >
                 Calculator
               </MobileNavLink>
 

@@ -325,24 +325,7 @@ const Marketplace = () => {
                       <div className="grid grid-cols-2 gap-3">
                         {pricingData.factors && (
                           <>
-                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
-                              <p className="text-xs text-muted-foreground">Demand Factor</p>
-                              <div className="flex items-center justify-between mt-1">
-                                <span className="text-lg font-bold text-foreground">
-                                  {(pricingData.factors.demandFactor * 100).toFixed(0)}%
-                                </span>
-                                <span className="text-xs text-brandMainColor">↑ Impact</span>
-                              </div>
-                            </div>
-                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
-                              <p className="text-xs text-muted-foreground">Supply Factor</p>
-                              <div className="flex items-center justify-between mt-1">
-                                <span className="text-lg font-bold text-foreground">
-                                  {(pricingData.factors.supplyFactor * 100).toFixed(0)}%
-                                </span>
-                                <span className="text-xs text-amber-600">⚖ Impact</span>
-                              </div>
-                            </div>
+
                             <div className="rounded-lg border border-border/60 bg-background/50 p-3">
                               <p className="text-xs text-muted-foreground">Rate Factor</p>
                               <div className="flex items-center justify-between mt-1">
@@ -381,18 +364,7 @@ const Marketplace = () => {
                             </div>
                           </>
                         )}
-                        {pricingData.demandScore !== undefined && (
-                          <>
-                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
-                              <p className="text-xs text-muted-foreground">Demand Score</p>
-                              <p className="text-lg font-bold text-foreground mt-1">{pricingData.demandScore}/100</p>
-                            </div>
-                            <div className="rounded-lg border border-border/60 bg-background/50 p-3">
-                              <p className="text-xs text-muted-foreground">Supply Score</p>
-                              <p className="text-lg font-bold text-foreground mt-1">{pricingData.supplyScore}/100</p>
-                            </div>
-                          </>
-                        )}
+
                       </div>
                     </div>
                   </div>
@@ -447,7 +419,7 @@ const Marketplace = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="bg-background">
+      <div className="bg-background pt-24 lg:pt-28">
       <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
         <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -726,24 +698,7 @@ const Marketplace = () => {
                             <span className="text-sm"> credits available</span>
                           </div>
 
-                          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                            <Leaf className="h-3.5 w-3.5" />
-                            Carbon emission reduced: ~
-                            {(
-                              Number(listing.quantity || 0) *
-                              ((listing.projectType || "").toLowerCase().includes("renewable")
-                                ? 0.92
-                                : (listing.projectType || "").toLowerCase().includes("reforestation")
-                                  ? 1.15
-                                  : (listing.projectType || "").toLowerCase().includes("blue carbon")
-                                    ? 1.3
-                                    : (listing.projectType || "").toLowerCase().includes("waste")
-                                      ? 0.75
-                                      : (listing.projectType || "").toLowerCase().includes("agriculture")
-                                        ? 0.65
-                                        : 0.8)
-                            ).toFixed(0)} tons CO2e
-                          </div>
+
                         </div>
                       </CardContent>
                       

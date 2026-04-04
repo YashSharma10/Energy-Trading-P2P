@@ -1,11 +1,42 @@
 import { Github, Twitter, Linkedin, Mail, Phone, MapPin, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Logo from "./Logo";
 
 export default function Footer() {
+  const location = useLocation();
+  
+  // Hide the footer on web-app specific paths to maintain an immersive dashboard experience
+  const hideFooterPaths = [
+    "/dashboard",
+    "/admin",
+    "/marketplace",
+    "/market",
+    "/eco-marketplace",
+    "/listings",
+    "/form",
+    "/payment",
+    "/transaction",
+    "/buyer-analytics",
+    "/seller-analytics",
+    "/market-insights",
+    "/profile",
+    "/receipt",
+    "/login",
+    "/register",
+    "/verify-otp",
+    "/forgot-password",
+    "/reset-password"
+  ];
+
+  const shouldHideFooter = hideFooterPaths.some(path => location.pathname.startsWith(path));
+
+  if (shouldHideFooter) return null;
+
   return (
-    <footer className="border-t border-border/40 bg-background/95 backdrop-blur-xl pt-16 pb-8">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <footer className="relative mt-8 border-t border-border bg-muted/50 dark:bg-muted/20 pt-16 pb-8">
+      {/* Subtle decorative glow to help separation */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px bg-gradient-to-r from-transparent via-brandMainColor/30 to-transparent" />
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 gap-12 xl:grid-cols-4 lg:gap-8">
           
           {/* Column 1 - Brand & Mission */}
