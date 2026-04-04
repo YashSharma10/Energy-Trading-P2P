@@ -80,7 +80,15 @@ const Marketplace = () => {
 
   useEffect(() => {
     fetchListings();
-  }, [currentPage, filters, sortOrder]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (allListings.length > 0) {
+      applyFiltersAndSort(allListings, filters, sortOrder);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, sortOrder, allListings]);
 
   useEffect(() => {
     if (selectedListing && showDetailsModal) {
@@ -106,47 +114,79 @@ const Marketplace = () => {
   const fetchListings = async () => {
     setLoading(true);
     try {
-      const params = {
-        page: currentPage,
-        limit: itemsPerPage,
-        status: LISTING_STATUS.AVAILABLE,
-      };
-
-      // Add filters only if they have values
-      if (filters.title?.trim()) params.search = filters.title.trim();
-      if (filters.location?.trim()) params.location = filters.location.trim();
-      if (filters.minPrice && parseFloat(filters.minPrice) > 0) {
-        params.minPrice = parseFloat(filters.minPrice);
-      }
-      
-      // Add sort parameter - asc for low to high, desc for high to low
-      if (sortOrder === "asc" || sortOrder === "desc") {
-        params.sortBy = `pricePerCredit:${sortOrder}`;
-      } else {
-        params.sortBy = "pricePerCredit:asc"; // Default to low to high
-      }
-
-      console.log("Fetching listings with params:", params);
-
+      // Fetch all available listings to allow frontend sorting and filtering
       const response = await axios.get(
         `${API_BASE_URL}${API_ENDPOINTS.CREDITS.BASE}`,
-        { params },
+        { params: { status: LISTING_STATUS.AVAILABLE, limit: 1000 } }
       );
-      const listings = response.data.data || [];
-      console.log("Received listings:", listings);
-      setAllListings(listings);
-      setFilteredListings(listings);
-      setError(null);
+      
+      const rawListings = response.data.data || [];
 
-      if (response.data.pagination) {
-        setTotalPages(response.data.pagination.totalPages);
-        setTotalItems(response.data.pagination.totalItems);
-      }
+      // Optimized chunking processor to prevent network flooding/rate limits
+      const fetchInChunks = async (items, chunkSize = 5) => {
+        const results = [];
+        for (let i = 0; i < items.length; i += chunkSize) {
+          const chunk = items.slice(i, i + chunkSize);
+          const chunkPromises = chunk.map(async (listing) => {
+            try {
+              const pRes = await axios.get(`${API_BASE_URL}/api/pricing/${listing._id}?isProduct=false`);
+              const recommendedPrice = pRes.data?.data?.recommendedPrice || listing.pricePerCredit;
+              return { ...listing, dynamicPrice: recommendedPrice };
+            } catch (err) {
+              return { ...listing, dynamicPrice: listing.pricePerCredit };
+            }
+          });
+          const completedChunk = await Promise.all(chunkPromises);
+          results.push(...completedChunk);
+        }
+        return results;
+      };
+
+      const listingsWithPricing = await fetchInChunks(rawListings, 5);
+      
+      setAllListings(listingsWithPricing);
+      setError(null);
     } catch (err) {
       console.error("Failed to load listings:", err);
       setError("Failed to load listings");
     }
     setLoading(false);
+  };
+
+  const applyFiltersAndSort = (listings, currentFilters, currentSort) => {
+    let result = [...listings];
+    
+    // Apply filters
+    if (currentFilters.title?.trim()) {
+      const q = currentFilters.title.trim().toLowerCase();
+      result = result.filter(item => 
+        (item.title && item.title.toLowerCase().includes(q)) || 
+        (item.projectType && item.projectType.toLowerCase().includes(q))
+      );
+    }
+    
+    if (currentFilters.location?.trim()) {
+      const loc = currentFilters.location.trim().toLowerCase();
+      result = result.filter(item => 
+        item.location && item.location.toLowerCase().includes(loc)
+      );
+    }
+    
+    if (currentFilters.minPrice && parseFloat(currentFilters.minPrice) > 0) {
+      const min = parseFloat(currentFilters.minPrice);
+      result = result.filter(item => item.dynamicPrice >= min);
+    }
+    
+    // Sort Results using the AI-Recommended dynamic price
+    if (currentSort === "asc") {
+      result.sort((a, b) => a.dynamicPrice - b.dynamicPrice);
+    } else if (currentSort === "desc") {
+      result.sort((a, b) => b.dynamicPrice - a.dynamicPrice);
+    }
+    
+    setFilteredListings(result);
+    setTotalItems(result.length);
+    setTotalPages(Math.ceil(result.length / itemsPerPage) || 1);
   };
 
   const handleFilterChange = (e) => {
@@ -164,15 +204,14 @@ const Marketplace = () => {
   };
 
   const handleSortChange = (value) => {
-    console.log("Sort changed to:", value);
     setSortOrder(value);
-    setCurrentPage(1); // Reset to first page when sorting
+    setCurrentPage(1);
   };
 
   // Pagination Logic
-  const currentListings = filteredListings;
-  const indexOfFirstItem = (currentPage - 1) * itemsPerPage + 1;
   const indexOfLastItem = Math.min(currentPage * itemsPerPage, totalItems);
+  const indexOfFirstItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const currentListings = filteredListings.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const nextPage = () => {
     if (currentPage < totalPages) {
