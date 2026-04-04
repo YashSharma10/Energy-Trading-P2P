@@ -38,6 +38,13 @@ const Register = () => {
     }
   }, [searchParams]);
 
+  const passwordRequirements = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+    { label: "One lowercase letter", met: /[a-z]/.test(password) },
+    { label: "One number", met: /[0-9]/.test(password) },
+  ];
+
   const handleRegister = async () => {
     if (!agreed) {
       toast({
@@ -46,6 +53,12 @@ const Register = () => {
           "You must agree to the terms and conditions before registering.",
         variant: "destructive",
       });
+      return;
+    }
+
+    const isPasswordValid = passwordRequirements.every(req => req.met);
+    if (!isPasswordValid) {
+      setError("Please ensure your password meets all requirements.");
       return;
     }
 
@@ -189,16 +202,43 @@ const Register = () => {
                   />
                 </div>
 
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    type="password"
-                    className="h-12 rounded-xl border-border bg-background/[0.85] pl-11 text-foreground placeholder:text-muted-foreground"
-                    required
-                  />
+                <div className="flex flex-col space-y-2">
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      type="password"
+                      className="h-12 rounded-xl border-border bg-background/[0.85] pl-11 text-foreground placeholder:text-muted-foreground"
+                      required
+                    />
+                  </div>
+                  
+                  {password && (
+                    <div className="space-y-2 rounded-lg border border-border/50 bg-muted/20 p-3 pt-2">
+                      <p className="text-xs font-semibold text-foreground text-left">Password requirements:</p>
+                      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 text-left">
+                        {passwordRequirements.map((req, index) => (
+                          <div 
+                            key={index} 
+                            className={`flex items-center gap-2 text-xs transition-colors ${
+                              req.met 
+                                ? "text-emerald-600 dark:text-emerald-400 font-medium" 
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {req.met ? (
+                              <CheckCircle className="h-3.5 w-3.5" />
+                            ) : (
+                              <span className="h-1.5 w-1.5 rounded-full bg-primary/40 mx-[3px]" />
+                            )}
+                            <span>{req.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3">
