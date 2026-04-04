@@ -19,7 +19,6 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "../ui/button";
 import { useAuth } from "@/context/AuthContext";
-import ThemeToggle from "./ThemeToggle";
 import Logo from "./Logo";
 
 const DesktopNavLink = ({
@@ -219,12 +218,11 @@ const Navbar = () => {
             hoveredPath={hoveredPath}
             setHoveredPath={setHoveredPath}
           >
-            Contact Us
+            Meet the Team
           </DesktopNavLink>
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4">
-          <ThemeToggle />
 
           {/* Desktop Auth Actions */}
           <div className="hidden lg:flex items-center gap-3">
@@ -354,7 +352,7 @@ const Navbar = () => {
               </MobileNavLink>
 
               <MobileNavLink to="/contact" onClick={closeSheet} icon={Mail}>
-                Contact Us
+                Meet the Team
               </MobileNavLink>
               <div className="mt-2 border-t border-border pt-4">
                 {user ? (

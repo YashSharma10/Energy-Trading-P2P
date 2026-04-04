@@ -134,34 +134,33 @@ const ConsumerDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 pt-24 lg:pt-28">
-      <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-brandMainColor/5 to-emerald-500/5 dark:via-brandSubColor/5 dark:to-lime-400/5 pt-24 lg:pt-28 relative">
+      <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:20px_20px]" />
+      <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-10 relative z-10">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Consumer Dashboard
-              </h1>
-              <p className="mt-2 text-muted-foreground">
-                Welcome back, {user?.name || user?.email}! Browse and purchase clean energy.
-              </p>
-            </div>
-            <Button 
-              onClick={() => navigate("/marketplace")}
-              className="bg-brandMainColor hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:hover:bg-brandSubColor/90"
-            >
-              <Search className="mr-2 h-4 w-4" />
-              Browse Marketplace
-            </Button>
+        <div className="mb-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 rounded-3xl bg-card/60 backdrop-blur-xl border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+              Consumer Dashboard
+            </h1>
+            <p className="mt-1 text-sm font-medium text-muted-foreground">
+              Welcome back, <span className="text-brandMainColor dark:text-brandSubColor">{user?.name || user?.email}</span>! Browse and purchase clean energy.
+            </p>
           </div>
+          <Button 
+            onClick={() => navigate("/marketplace")}
+            className="h-11 rounded-xl bg-brandMainColor px-6 text-sm font-semibold shadow-md hover:bg-brandMainColor/90 hover:shadow-lg transition-all dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
+          >
+            <Search className="mr-2 h-4 w-4" />
+            Browse Marketplace
+          </Button>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid gap-6 mb-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 mb-10 md:grid-cols-2 lg:grid-cols-4">
           {loading ? (
             Array(4).fill(0).map((_, i) => (
-              <Card key={i} className="border-border/50">
+              <Card key={i} className="border-border/30 bg-card/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <div className="h-4 w-24 bg-muted animate-pulse rounded"></div>
                   <div className="h-8 w-8 bg-muted animate-pulse rounded-lg"></div>
@@ -176,18 +175,21 @@ const ConsumerDashboard = () => {
             statsCards.map((stat) => {
               const Icon = stat.icon;
               return (
-                <Card key={stat.title} className="border-border/50">
+                <Card key={stat.title} className="group overflow-hidden border border-border/30 bg-card/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 rounded-2xl relative">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
+                    <Icon className={`h-24 w-24 ${stat.color.split(' ')[0]}`} />
+                  </div>
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                    <CardTitle className="text-sm font-semibold text-muted-foreground">
                       {stat.title}
                     </CardTitle>
-                    <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                    <div className={`p-2 rounded-xl ${stat.bgColor} shadow-sm`}>
                       <Icon className={`h-4 w-4 ${stat.color}`} />
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                  <CardContent className="relative z-10">
+                    <div className="text-3xl font-extrabold text-foreground tracking-tight">{stat.value}</div>
+                    <p className="text-xs font-medium text-muted-foreground mt-1">
                       {stat.description}
                     </p>
                   </CardContent>
@@ -219,14 +221,14 @@ const ConsumerDashboard = () => {
           </TabsList>
 
           <TabsContent value="marketplace" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Available Energy Listings</CardTitle>
+            <Card className="border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-card/60 backdrop-blur-xl rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-border/30 bg-muted/20 pb-6">
+                <CardTitle className="text-lg font-bold">Available Energy Listings</CardTitle>
                 <CardDescription>
                   Browse and purchase clean energy from verified producers
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <div className="space-y-4">
                   {loading ? (
                     <div className="text-center py-8">
@@ -241,7 +243,7 @@ const ConsumerDashboard = () => {
                       {listings.slice(0, 3).map((listing) => (
                         <div
                           key={listing._id}
-                          className="flex items-center justify-between p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                          className="flex py-3 md:py-4 px-4 items-center justify-between border border-border/30 bg-background/40 rounded-xl hover:bg-card/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300"
                         >
                           <div className="flex items-center gap-4">
                             <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
@@ -277,7 +279,7 @@ const ConsumerDashboard = () => {
                       ))}
                       <Button 
                         variant="outline" 
-                        className="w-full"
+                        className="w-full h-11 rounded-xl border-border/50 text-sm font-semibold hover:bg-muted/50 transition-all"
                         onClick={() => navigate("/marketplace")}
                       >
                         View All Listings
@@ -290,14 +292,14 @@ const ConsumerDashboard = () => {
           </TabsContent>
 
           <TabsContent value="purchases" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Purchase History</CardTitle>
+            <Card className="border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-card/60 backdrop-blur-xl rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-border/30 bg-muted/20 pb-6">
+                <CardTitle className="text-lg font-bold">Purchase History</CardTitle>
                 <CardDescription>
                   Your recent energy purchases
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <div className="space-y-4">
                   {loading ? (
                     <div className="text-center py-8">
@@ -312,7 +314,7 @@ const ConsumerDashboard = () => {
                       {transactions.slice(0, 3).map((purchase) => (
                         <div
                           key={purchase._id}
-                          className="flex items-center justify-between p-4 border border-border rounded-lg"
+                          className="flex py-3 md:py-4 px-4 items-center justify-between border border-border/30 bg-background/40 rounded-xl hover:bg-card/80 hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300"
                         >
                           <div>
                             <p className="font-semibold text-foreground">
@@ -339,7 +341,7 @@ const ConsumerDashboard = () => {
                       ))}
                       <Button 
                         variant="outline" 
-                        className="w-full"
+                        className="w-full h-11 rounded-xl border-border/50 text-sm font-semibold hover:bg-muted/50 transition-all"
                         onClick={() => navigate("/transaction-listing")}
                       >
                         View All Purchases
@@ -352,14 +354,14 @@ const ConsumerDashboard = () => {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Consumption Analytics</CardTitle>
+            <Card className="border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-card/60 backdrop-blur-xl rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-border/30 bg-muted/20 pb-6">
+                <CardTitle className="text-lg font-bold">Consumption Analytics</CardTitle>
                 <CardDescription>
                   Track your energy consumption and spending
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <div className="text-center py-12">
                   <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground mb-4">
@@ -377,14 +379,14 @@ const ConsumerDashboard = () => {
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Live Chat</CardTitle>
+            <Card className="border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-card/60 backdrop-blur-xl rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-border/30 bg-muted/20 pb-6">
+                <CardTitle className="text-lg font-bold">Live Chat</CardTitle>
                 <CardDescription>
                   Connect with producers in real time to finalize energy deals.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <LiveChatPanel />
               </CardContent>
             </Card>

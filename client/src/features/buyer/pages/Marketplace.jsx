@@ -509,45 +509,62 @@ const Marketplace = () => {
       <main className="mx-auto max-w-6xl px-6 py-6">
         <section className="grid gap-10 lg:grid-cols-[280px,1fr]">
           <div className="space-y-4">
-            <Card className="hidden lg:block border border-border/70 bg-card/90 shadow-xl">
-              <CardHeader className="space-y-1">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Search className="h-4 w-4" /> Refine results
+            <Card className="hidden lg:block border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-card/50 backdrop-blur-md overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brandMainColor/80 to-emerald-400 dark:from-brandSubColor/80" />
+              <CardHeader className="space-y-1 pb-4 pt-5">
+                <CardTitle className="flex items-center gap-2 text-base font-bold">
+                  <Filter className="h-4 w-4 text-brandMainColor dark:text-brandSubColor" /> 
+                  Refine Results
                 </CardTitle>
-                <CardDescription className="text-sm text-muted-foreground">
-                  Narrow listings by title, geography, and minimum price.
+                <CardDescription className="text-xs">
+                  Narrow down AI-priced credits
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Input
-                  name="title"
-                  value={filters.title}
-                  placeholder="Project or registry title"
-                  onChange={handleFilterChange}
-                />
-                <Input
-                  name="location"
-                  value={filters.location}
-                  placeholder="Location"
-                  onChange={handleFilterChange}
-                />
-                <Input
-                  name="minPrice"
-                  value={filters.minPrice}
-                  placeholder="Min price per credit"
-                  type="number"
-                  onChange={handleFilterChange}
-                />
-                <div className="flex flex-col gap-3">
+                <div className="space-y-3">
+                  <div className="relative group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-brandMainColor transition-colors" />
+                    <Input
+                      name="title"
+                      value={filters.title}
+                      placeholder="Keywords or title"
+                      className="pl-9 bg-background/50 border-border/50 focus-visible:ring-brandMainColor/30 rounded-xl"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                  <div className="relative group">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-brandMainColor transition-colors" />
+                    <Input
+                      name="location"
+                      value={filters.location}
+                      placeholder="Location"
+                      className="pl-9 bg-background/50 border-border/50 focus-visible:ring-brandMainColor/30 rounded-xl"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                  <div className="relative group">
+                    <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-brandMainColor transition-colors" />
+                    <Input
+                      name="minPrice"
+                      value={filters.minPrice}
+                      placeholder="Min AI Price"
+                      type="number"
+                      className="pl-9 bg-background/50 border-border/50 focus-visible:ring-brandMainColor/30 rounded-xl"
+                      onChange={handleFilterChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2">
                   <Button
-                    className="h-11 w-full rounded-xl bg-brandMainColor text-sm font-semibold text-white hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
+                    className="h-10 w-full rounded-xl bg-brandMainColor text-sm font-semibold text-white shadow-md hover:shadow-lg hover:bg-brandMainColor/90 transition-all dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
                     onClick={handleApplyFilters}
                   >
-                    <Search className="mr-2 h-4 w-4" /> Apply filters
+                    Apply filters
                   </Button>
                   <Button
-                    variant="outline"
-                    className="h-11 w-full rounded-xl border-border/70 text-sm font-semibold"
+                    variant="ghost"
+                    className="h-10 w-full rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground"
                     onClick={handleClearFilters}
                   >
                     Clear filters
@@ -556,78 +573,38 @@ const Marketplace = () => {
               </CardContent>
             </Card>
 
-            {/* Trending Section Below Filters */}
-            {!loading && trendingListings.length > 0 && (
-              <Card className="hidden lg:block border border-brandMainColor/40 dark:border-brandSubColor/40 bg-gradient-to-br from-brandMainColor/5 to-emerald-500/5 dark:from-brandSubColor/5 dark:to-lime-400/5 shadow-lg">
-                <CardHeader className="space-y-1">
-                  <CardTitle className="flex items-center gap-2 text-sm">
-                    <Sparkles className="h-4 w-4 text-brandMainColor dark:text-brandSubColor" /> Trending Now
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {trendingListings.map((listing) => (
-                    <div
-                      key={listing._id}
-                      className="p-3 rounded-lg border border-border/40 bg-background/50 hover:border-brandMainColor/60 dark:hover:border-brandSubColor/60 transition-colors cursor-pointer group"
-                      onClick={() => {
-                        setSelectedListing(listing);
-                        setPricingData(null);
-                        setShowDetailsModal(true);
-                      }}
-                    >
-                      <p className="text-xs font-bold text-brandMainColor dark:text-brandSubColor mb-1">★ Hot Deal</p>
-                      <p className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-brandMainColor dark:group-hover:text-brandSubColor transition-colors">
-                        {listing.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        ₹{listing.pricePerCredit.toFixed(0)} <span className="text-xs">{listing.quantity} credits</span>
-                      </p>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+
 
             <div className="flex items-center justify-between gap-3 lg:hidden">
               <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
+                  <Button variant="outline" className="flex items-center gap-2 rounded-xl bg-card border-border/50 shadow-sm">
                     <Filter size={16} /> Filters
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="space-y-4 p-6">
+                <SheetContent side="bottom" className="space-y-4 p-6 rounded-t-3xl border-border/50">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Filters</h2>
-                    <Button variant="ghost" onClick={handleClearFilters}>
+                    <h2 className="text-lg font-semibold">Refine Results</h2>
+                    <Button variant="ghost" size="sm" onClick={handleClearFilters} className="text-muted-foreground">
                       Reset
                     </Button>
                   </div>
                   <div className="flex flex-col gap-3">
-                    <Input
-                      name="title"
-                      value={filters.title}
-                      placeholder="Project or registry title"
-                      onChange={handleFilterChange}
-                    />
-                    <Input
-                      name="location"
-                      value={filters.location}
-                      placeholder="Location"
-                      onChange={handleFilterChange}
-                    />
-                    <Input
-                      name="minPrice"
-                      value={filters.minPrice}
-                      placeholder="Min price per credit"
-                      type="number"
-                      onChange={handleFilterChange}
-                    />
+                    <div className="relative group">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input name="title" value={filters.title} placeholder="Keywords or title" className="pl-9 rounded-xl bg-muted/50 border-border/50" onChange={handleFilterChange} />
+                    </div>
+                    <div className="relative group">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input name="location" value={filters.location} placeholder="Location" className="pl-9 rounded-xl bg-muted/50 border-border/50" onChange={handleFilterChange} />
+                    </div>
+                    <div className="relative group">
+                      <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input name="minPrice" value={filters.minPrice} placeholder="Min AI Price" type="number" className="pl-9 rounded-xl bg-muted/50 border-border/50" onChange={handleFilterChange} />
+                    </div>
                     <Button
-                      className="h-11 rounded-xl bg-brandMainColor text-sm font-semibold text-white hover:bg-brandMainColor/90 dark:bg-brandSubColor dark:text-slate-950 dark:hover:bg-brandSubColor/90"
-                      onClick={() => {
-                        handleApplyFilters();
-                        setIsSheetOpen(false);
-                      }}
+                      className="h-11 mt-2 rounded-xl bg-brandMainColor text-sm font-semibold text-white shadow-md w-full dark:bg-brandSubColor dark:text-slate-950"
+                      onClick={() => { handleApplyFilters(); setIsSheetOpen(false); }}
                     >
                       Apply filters
                     </Button>
@@ -636,36 +613,84 @@ const Marketplace = () => {
               </Sheet>
 
               <Select onValueChange={handleSortChange} value={sortOrder}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by price" />
+                <SelectTrigger className="w-[180px] rounded-xl bg-card border-border/50 shadow-sm focus:ring-brandMainColor/30">
+                  <SelectValue placeholder="Sort by AI price" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="asc">Price: low to high</SelectItem>
-                  <SelectItem value="desc">Price: high to low</SelectItem>
+                <SelectContent className="rounded-xl shadow-xl border-border/50">
+                  <SelectItem value="asc" className="rounded-lg my-1 cursor-pointer font-medium text-sm">AI Price: Low to High</SelectItem>
+                  <SelectItem value="desc" className="rounded-lg my-1 cursor-pointer font-medium text-sm">AI Price: High to Low</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <Card className="hidden lg:flex flex-col gap-4 border border-border/70 bg-card/90 p-6 shadow-xl">
+            <Card className="hidden lg:flex flex-col gap-3 border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-card/50 backdrop-blur-md p-5 rounded-2xl">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Sort results
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <RefreshCw className="h-3.5 w-3.5 text-brandMainColor dark:text-brandSubColor" />
+                  Sort By AI Price
                 </h3>
-                <RefreshCw className="h-4 w-4 text-muted-foreground" />
               </div>
               <Select onValueChange={handleSortChange} value={sortOrder}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sort by price" />
+                <SelectTrigger className="bg-background/50 border-border/50 rounded-xl shadow-sm focus:ring-brandMainColor/30">
+                  <SelectValue placeholder="Select sorting order" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="asc">Price: low to high</SelectItem>
-                  <SelectItem value="desc">Price: high to low</SelectItem>
+                <SelectContent className="rounded-xl border-border/50 shadow-xl">
+                  <SelectItem value="asc" className="rounded-lg cursor-pointer my-1 text-sm font-medium">Low to High</SelectItem>
+                  <SelectItem value="desc" className="rounded-lg cursor-pointer my-1 text-sm font-medium">High to Low</SelectItem>
                 </SelectContent>
               </Select>
             </Card>
           </div>
 
-          <section className="space-y-6">
+          <section className="space-y-8">
+            {/* Trending Section Above Listings */}
+            {!loading && trendingListings.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-brandMainColor dark:text-brandSubColor fill-brandMainColor/20" />
+                  Trending Now
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {trendingListings.map((listing) => (
+                    <Card
+                      key={listing._id}
+                      className="group cursor-pointer border border-brandMainColor/20 dark:border-brandSubColor/20 shadow-[0_8px_30px_rgb(0,0,0,0.06)] bg-gradient-to-br from-brandMainColor/5 to-transparent dark:from-brandSubColor/5 backdrop-blur-md rounded-2xl overflow-hidden hover:border-brandMainColor/50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                      onClick={() => {
+                        setSelectedListing(listing);
+                        setPricingData(null);
+                        setShowDetailsModal(true);
+                      }}
+                    >
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="inline-flex items-center rounded-full bg-brandMainColor/10 px-2.5 py-0.5 text-[10px] font-bold text-brandMainColor dark:bg-brandSubColor/10 dark:text-brandSubColor">
+                            HOT DEAL
+                          </span>
+                        </div>
+                        <p className="text-sm font-semibold text-foreground line-clamp-2 group-hover:text-brandMainColor dark:group-hover:text-brandSubColor transition-colors h-10">
+                          {listing.title}
+                        </p>
+                        <div className="flex items-end justify-between pt-1 border-t border-border/50">
+                          <div>
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5 font-medium">Price</p>
+                            <p className="text-sm font-bold text-foreground">
+                              ₹{listing.pricePerCredit.toFixed(0)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5 font-medium">Avail</p>
+                            <p className="text-sm font-semibold text-foreground">
+                              {listing.quantity > 1000 ? `${(listing.quantity/1000).toFixed(1)}k` : listing.quantity}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* All Listings Section */}
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
