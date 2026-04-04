@@ -95,7 +95,7 @@ const ConsumerDashboard = () => {
 
   // Format currency helper
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    return `₹${Number(amount).toLocaleString('en-IN')}`;
   };
 
   const statsCards = [

@@ -222,7 +222,7 @@ const ListingsPage = () => {
                   value={metrics.averagePrice}
                   className="text-3xl font-semibold"
                   decimalPlaces={0}
-                  prefix="$"
+                  prefix="₹"
                 />
               </CardContent>
             </Card>
@@ -330,7 +330,7 @@ const ListingsPage = () => {
                         <TableCell>
                           {Number(listing.quantity || 0).toLocaleString()}
                         </TableCell>
-                        <TableCell>${priceLabel}</TableCell>
+                        <TableCell>₹{priceLabel}</TableCell>
                         <TableCell>
                           <Badge variant={badgeVariant} className="capitalize">
                             {status.toLowerCase()}

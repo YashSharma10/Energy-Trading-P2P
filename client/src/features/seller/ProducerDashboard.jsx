@@ -77,7 +77,7 @@ const ProducerDashboard = () => {
   const statsCards = [
     {
       title: "Total Earnings",
-      value: `$${stats.totalEarnings.toFixed(2)}`,
+      value: `₹${stats.totalEarnings.toFixed(2)}`,
       description: "Last 30 days",
       icon: DollarSign,
       color: "text-green-600 dark:text-green-400",
@@ -126,7 +126,7 @@ const ProducerDashboard = () => {
 
   // Format currency helper
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    return `₹${Number(amount).toLocaleString('en-IN')}`;
   };
 
   return (

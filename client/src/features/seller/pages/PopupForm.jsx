@@ -26,7 +26,7 @@ import {
   Tag,
   MapPin,
   CheckCircle,
-  DollarSign,
+  IndianRupee,
   Link as LinkIcon,
   Loader2,
 } from "lucide-react";
@@ -217,9 +217,9 @@ const FormComponent = ({ isOpen, setIsOpen }) => {
                   </div>
                 </div>
                 <div className="grid gap-3">
-                  <Label htmlFor="pricePerCredit">Price per credit (USD)</Label>
+                  <Label htmlFor="pricePerCredit">Price per credit (₹)</Label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <IndianRupee className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="pricePerCredit"
                       name="pricePerCredit"

@@ -246,7 +246,7 @@ const CarbonEmissionCalculator = () => {
                     <>
                       <div className="flex items-baseline gap-2 mb-2">
                         <span className="text-3xl font-bold text-foreground">
-                          ${marketAveragePrice.toFixed(2)}
+                          ₹{marketAveragePrice.toFixed(2)}
                         </span>
                         <span className="text-sm text-muted-foreground">per credit</span>
                       </div>
@@ -257,14 +257,14 @@ const CarbonEmissionCalculator = () => {
                             <>
                               <TrendingUp className="h-3 w-3 text-green-600 dark:text-green-400" />
                               <span className="text-green-600 dark:text-green-400 font-medium">
-                                +${Math.abs(insights.averagePriceChange).toFixed(2)}
+                                +₹{Math.abs(insights.averagePriceChange).toFixed(2)}
                               </span>
                             </>
                           ) : (
                             <>
                               <TrendingDown className="h-3 w-3 text-red-600 dark:text-red-400" />
                               <span className="text-red-600 dark:text-red-400 font-medium">
-                                -${Math.abs(insights.averagePriceChange).toFixed(2)}
+                                -₹{Math.abs(insights.averagePriceChange).toFixed(2)}
                               </span>
                             </>
                           )}
@@ -312,7 +312,7 @@ const CarbonEmissionCalculator = () => {
                       htmlFor="custom-credit-cost"
                       className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
                     >
-                      Custom Cost per Credit (USD)
+                      Custom Cost per Credit (₹)
                     </Label>
                     <Input
                       id="custom-credit-cost"
@@ -370,7 +370,7 @@ const CarbonEmissionCalculator = () => {
                         Estimated offset cost
                       </p>
                       <p className="mt-1 text-2xl font-semibold text-foreground">
-                        ${(requiredCredits * creditCost).toFixed(2)}
+                        ₹{(requiredCredits * creditCost).toFixed(2)}
                       </p>
                     </div>
                   </div>
