@@ -1,90 +1,99 @@
-import { cn } from "@/lib/utils";
 import {
-  DollarSign,
-  MessageCircle,
-  Leaf,
   ShieldCheck,
+  Leaf,
+  DollarSign,
+  BarChart2,
   MapPin,
-  CreditCard,
+  Zap,
 } from "lucide-react";
+import { motion } from "motion/react";
 
-const notifications = [
+const features = [
   {
-    name: "Secure Transactions",
-    description: "Blockchain-backed verification. Every trade is recorded and traceable. No disputes, no reversals.",
-    icon: <ShieldCheck size={24} className="text-white" />,
-    gradient: "from-brandMainColor via-emerald-600 to-emerald-700",
+    icon: ShieldCheck,
+    title: "Verified credits only",
+    description:
+      "We accept Verra (VCS), Gold Standard, and ACR certified projects. No unverified credits ever reach the marketplace.",
   },
   {
-    name: "Verified Credits Only",
-    description: "All credits come from Verra, Gold Standard, or ACR certified projects. We check so you don't have to.",
-    icon: <Leaf size={24} className="text-white" />,
-    gradient: "from-emerald-500 via-brandMainColor to-emerald-700",
+    icon: Leaf,
+    title: "Aligned with India's CCTS",
+    description:
+      "Our platform supports India's Carbon Credit Trading Scheme (2023) and helps entities meet BEE-mandated emission intensity targets.",
   },
   {
-    name: "Direct P2P Trading",
-    description: "Cut out the middleman. Trade directly with buyers and sellers. Better prices, faster settlements.",
-    icon: <DollarSign size={24} className="text-white" />,
-    gradient: "from-brandSubColor via-brandMainColor to-emerald-600",
+    icon: DollarSign,
+    title: "Direct P2P pricing",
+    description:
+      "Sellers set prices, buyers make offers. No broker in the middle means 20–40% better value for both sides.",
   },
   {
-    name: "Live Price Feeds",
-    description: "Real-time market data. Know exactly what credits are trading for before you buy or sell.",
-    icon: <MessageCircle size={24} className="text-white" />,
-    gradient: "from-brandMainColor via-emerald-500 to-brandSubColor",
+    icon: BarChart2,
+    title: "Live market data",
+    description:
+      "Real-time price feeds by project type. Know exactly what the market is doing before you place an order.",
   },
   {
-    name: "Project Directory",
-    description: "Browse active renewable energy projects by type, location, and impact metrics. See where your money goes.",
-    icon: <MapPin size={24} className="text-white" />,
-    gradient: "from-emerald-700 via-brandMainColor to-emerald-900",
+    icon: MapPin,
+    title: "Project directory",
+    description:
+      "Browse renewable energy projects by type, location, and verified impact metrics before committing capital.",
   },
   {
-    name: "Instant Payouts",
-    description: "Multiple payment methods: card, UPI, bank transfer, or crypto. Withdraw anytime.",
-    icon: <CreditCard size={24} className="text-white" />,
-    gradient: "from-brandMainColor via-emerald-700 to-emerald-900",
+    icon: Zap,
+    title: "Same-day settlement",
+    description:
+      "UPI and crypto settle the same day. Bank transfers within 1–2 business days. No waiting weeks.",
   },
 ];
 
-const Notification = ({ name, description, icon, gradient }) => {
+const FeatureSection = () => {
   return (
-    <div className="group flex flex-col items-center rounded-2xl border border-border/70 bg-card/95 backdrop-blur-sm p-6 text-center shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-brandMainColor/50 dark:hover:border-brandSubColor/50">
-      <div
-        className={`mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br ${gradient} shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:shadow-xl`}
-      >
-        {icon}
-      </div>
-      <h3 className="text-lg font-semibold text-foreground group-hover:text-brandMainColor dark:group-hover:text-brandSubColor transition-colors">{name}</h3>
-      <p className="mt-2 text-sm text-muted-foreground dark:text-white/80">
-        {description}
-      </p>
-    </div>
-  );
-}
+    <section className="relative overflow-hidden border-t border-border/40 bg-background px-6 py-20">
+      <div className="pointer-events-none absolute right-[-7rem] top-16 h-56 w-56 rounded-full bg-brandMainColor/10 blur-3xl" />
+      <div className="mx-auto max-w-6xl">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+          className="mb-14"
+        >
+          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Built for serious traders
+          </h2>
+          <p className="mt-3 text-muted-foreground max-w-lg">
+            Everything you need to trade carbon credits with confidence —
+            nothing you don't.
+          </p>
+        </motion.div>
 
-function FeatureSection({ className }) {
-  return (
-    <section
-      className={cn(
-        "relative w-full py-20 px-6 md:px-20 bg-gradient-to-b from-cyan-50/20 via-emerald-50/30 to-lime-50/20 dark:from-cyan-950/5 dark:via-emerald-950/10 dark:to-lime-950/5 text-center",
-        className
-      )}
-    >
-      <h1 className="text-3xl md:text-4xl font-bold text-foreground dark:text-white">
-        What You Get
-      </h1>
-      <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground dark:text-white/80">
-        A platform built for energy traders. No complexity, no delays, no surprises.
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mt-12">
-        {notifications.map((item, idx) => (
-          <Notification {...item} key={idx} />
-        ))}
+        <div className="grid grid-cols-1 gap-px bg-border/50 sm:grid-cols-2 lg:grid-cols-3 rounded-2xl overflow-hidden border border-border/60">
+          {features.map(({ icon: Icon, title, description }, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -6 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
+              className="group flex flex-col gap-4 bg-card/95 p-8 transition-all duration-300 hover:bg-brandMainColor/5 hover:shadow-[0_18px_36px_-24px_rgba(92,179,56,0.6)]"
+            >
+              <div className="w-10 h-10 rounded-xl bg-brandMainColor/10 flex items-center justify-center transition-colors group-hover:bg-brandMainColor/20">
+                <Icon className="w-5 h-5 text-brandMainColor" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">{title}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                  {description}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
-}
+};
 
 export default FeatureSection;

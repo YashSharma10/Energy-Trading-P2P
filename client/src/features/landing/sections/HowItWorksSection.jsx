@@ -1,97 +1,98 @@
-import { ArrowRight, CheckCircle2, ShoppingBag, TrendingUp, Wallet } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { motion } from "motion/react";
 
 const steps = [
   {
-    icon: <Wallet className="w-8 h-8" />,
-    title: "Sign Up",
-    description: "Create an account in under 2 minutes. Verify your identity to start trading.",
-    color: "from-emerald-500 to-teal-500",
-    delay: "0ms",
+    number: "01",
+    title: "Create an account",
+    description:
+      "Sign up in under 2 minutes. Complete KYC verification to unlock trading.",
   },
   {
-    icon: <ShoppingBag className="w-8 h-8" />,
-    title: "Browse Listings",
-    description: "View active credit listings with prices, project details, and seller ratings.",
-    color: "from-teal-500 to-cyan-500",
-    delay: "150ms",
+    number: "02",
+    title: "Browse the marketplace",
+    description:
+      "Filter listings by project type, certification standard, price, and location.",
   },
   {
-    icon: <CheckCircle2 className="w-8 h-8" />,
-    title: "Buy or Sell",
-    description: "Place an offer or accept a listing. Payment processed instantly via your preferred method.",
-    color: "from-cyan-500 to-blue-500",
-    delay: "300ms",
+    number: "03",
+    title: "Buy or list credits",
+    description:
+      "Accept a listing price or make an offer. Sellers can list credits in minutes.",
   },
   {
-    icon: <TrendingUp className="w-8 h-8" />,
-    title: "Track Trades",
-    description: "View your purchase history, portfolio value, and transaction receipts in one place.",
-    color: "from-blue-500 to-emerald-500",
-    delay: "450ms",
+    number: "04",
+    title: "Track your portfolio",
+    description:
+      "View transaction history, certificates, and portfolio value in one dashboard.",
   },
 ];
 
 const HowItWorksSection = () => {
   return (
-    <section className="relative py-20 px-6 md:px-20 bg-gradient-to-b from-background via-emerald-50/20 to-emerald-50/30 dark:from-background dark:via-emerald-950/5 dark:to-emerald-950/10 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(92,179,56,0.08),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(155,234,108,0.03),transparent_50%)]"></div>
-      
-      <div className="relative max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <span className="inline-block px-4 py-1.5 mb-4 text-sm font-semibold text-brandMainColor bg-brandMainColor/10 rounded-full border border-brandMainColor/20 dark:text-brandSubColor dark:bg-brandSubColor/10 dark:border-brandSubColor/20">
-            Get Started
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground dark:text-white mb-4">
-            Four steps to your first trade
-          </h2>
-          <p className="text-lg text-muted-foreground dark:text-white/80 max-w-2xl mx-auto">
-            Simple, straightforward process. No hidden steps or surprise fees.
-          </p>
-        </div>
-
-        {/* Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-          {/* Connecting line */}
-          <div className="hidden lg:block absolute top-1/4 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20"></div>
-          
-          {steps.map((step, index) => (
-            <Card 
-              key={index}
-              className="group relative bg-card/80 backdrop-blur-sm border-border/70 hover:border-brandMainColor/50 dark:hover:border-brandSubColor/50 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2"
-              style={{ animationDelay: step.delay }}
+    <section className="relative overflow-hidden border-t border-border/40 bg-background px-6 py-20">
+      <div className="pointer-events-none absolute left-[-6rem] top-20 h-52 w-52 rounded-full bg-brandMainColor/10 blur-3xl" />
+      <div className="mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center">
+          {/* Left */}
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              From sign-up to first trade
+              <br />
+              in four steps
+            </h2>
+            <p className="mt-4 text-muted-foreground max-w-md">
+              No complex onboarding. No hidden steps. Just a straightforward
+              path to trading verified carbon credits.
+            </p>
+            <Link
+              to="/register"
+              className="mt-8 inline-flex items-center gap-2 rounded-full bg-brandMainColor px-7 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_-16px_rgba(92,179,56,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-brandMainColor/90 hover:shadow-[0_16px_32px_-18px_rgba(92,179,56,0.8)]"
             >
-              <CardContent className="p-6 text-center">
-                {/* Step number */}
-                <div className="absolute -top-4 -right-4 w-10 h-10 bg-gradient-to-br from-brandMainColor to-emerald-600 dark:from-brandSubColor dark:to-lime-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                  {index + 1}
-                </div>
-                
-                {/* Icon */}
-                <div className={`mx-auto mb-4 w-16 h-16 bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
-                  {step.icon}
-                </div>
-                
-                {/* Content */}
-                <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-brandMainColor dark:group-hover:text-brandSubColor transition-colors">
-                  {step.title}
-                </h3>
-                <p className="text-sm text-muted-foreground dark:text-white/80">
-                  {step.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              Get started free <ArrowRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
 
-        {/* CTA */}
-        <div className="text-center mt-12">
-          <button className="group inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-brandMainColor to-emerald-600 dark:from-brandSubColor dark:to-lime-500 text-white font-semibold rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-            Get Started Now
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
+          {/* Right — steps */}
+          <div className="flex flex-col gap-0">
+            {steps.map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: 24 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                whileHover={{ x: 4 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="flex gap-6 group"
+              >
+                {/* Line + number */}
+                <div className="flex flex-col items-center">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-brandMainColor/25 bg-brandMainColor/5 text-sm font-bold text-brandMainColor group-hover:border-brandMainColor group-hover:bg-brandMainColor/10 transition-all">
+                    {step.number}
+                  </div>
+                  {i < steps.length - 1 && (
+                    <div className="mt-1 w-px flex-1 bg-border min-h-[2.5rem]" />
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="pb-8">
+                  <h3 className="font-semibold text-foreground">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

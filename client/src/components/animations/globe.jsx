@@ -33,12 +33,10 @@ const GLOBE_CONFIG = {
   ],
 };
 
-export function Globe({
-  className,
-  config = GLOBE_CONFIG
-}) {
-  let phi = 0;
-  let width = 0;
+export function Globe({ className, config = GLOBE_CONFIG }) {
+  // Use config.phi as the initial rotation so the globe starts centered on the right region
+  const phiRef = useRef(config.phi ?? 0);
+  const widthRef = useRef(0);
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const pointerInteracting = useRef(null);
@@ -62,18 +60,27 @@ export function Globe({
     }
   };
 
-  const onRender = useCallback((state) => {
-    if (!pointerInteracting.current) phi += 0.005;
-    state.phi = phi + r;
-    state.width = width * 2;
-    state.height = width * 2;
-  }, [r]);
+  const onRender = useCallback(
+    (state) => {
+      if (!pointerInteracting.current) {
+        phiRef.current += config.rotationSpeed ?? 0.0035;
+      }
+      state.phi = phiRef.current + r;
+      state.width = widthRef.current * 2;
+      state.height = widthRef.current * 2;
+    },
+    [config.rotationSpeed, r],
+  );
 
   const onResize = () => {
     if (canvasRef.current) {
-      width = canvasRef.current.offsetWidth;
+      widthRef.current = canvasRef.current.offsetWidth;
     }
   };
+
+  useEffect(() => {
+    phiRef.current = config.phi ?? 0;
+  }, [config.phi]);
 
   // Intersection Observer to detect when globe is visible
   useEffect(() => {
@@ -85,8 +92,8 @@ export function Globe({
       },
       {
         threshold: 0.1, // Trigger when 10% of the element is visible
-        rootMargin: '50px', // Start loading slightly before it comes into view
-      }
+        rootMargin: "50px", // Start loading slightly before it comes into view
+      },
     );
 
     if (containerRef.current) {
@@ -109,8 +116,8 @@ export function Globe({
 
     globeInstanceRef.current = createGlobe(canvasRef.current, {
       ...config,
-      width: width * 2,
-      height: width * 2,
+      width: widthRef.current * 2,
+      height: widthRef.current * 2,
       onRender,
     });
 
@@ -130,23 +137,30 @@ export function Globe({
   }, [isVisible, onRender]);
 
   return (
-    (<div
+    <div
       ref={containerRef}
-      className={cn("absolute inset-0 mx-auto aspect-[1/1] w-full max-w-[600px]", className)}>
+      className={cn(
+        "absolute inset-0 mx-auto aspect-[1/1] w-full max-w-[600px]",
+        className,
+      )}
+    >
       <canvas
         className={cn(
-          "size-full opacity-0 transition-opacity duration-500 [contain:layout_paint_size]"
+          "size-full opacity-0 transition-opacity duration-500 [contain:layout_paint_size]",
         )}
         ref={canvasRef}
         onPointerDown={(e) =>
-          updatePointerInteraction(e.clientX - pointerInteractionMovement.current)
+          updatePointerInteraction(
+            e.clientX - pointerInteractionMovement.current,
+          )
         }
         onPointerUp={() => updatePointerInteraction(null)}
         onPointerOut={() => updatePointerInteraction(null)}
         onMouseMove={(e) => updateMovement(e.clientX)}
         onTouchMove={(e) =>
           e.touches[0] && updateMovement(e.touches[0].clientX)
-        } />
-    </div>)
+        }
+      />
+    </div>
   );
 }

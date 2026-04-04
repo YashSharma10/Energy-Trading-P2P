@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import {
   LineChart,
   Line,
@@ -5,109 +6,216 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
+import { ExternalLink } from "lucide-react";
 
-const data = [
-  { year: "2015", emissions: 35.9 },
-  { year: "2016", emissions: 36.2 },
-  { year: "2017", emissions: 36.5 },
-  { year: "2018", emissions: 36.6 },
-  { year: "2019", emissions: 36.7 },
-  { year: "2020", emissions: 34.7 },
-  { year: "2021", emissions: 36.3 },
-  { year: "2022", emissions: 37.1 },
-  { year: "2023", emissions: 37.4 },
-  { year: "2024", emissions: 37.8 },
-  { year: "2025", emissions: 38.2 },
+// Source: IEA / Global Carbon Project — real published data
+const emissionsData = [
+  { year: "2015", gt: 36.3 },
+  { year: "2016", gt: 36.4 },
+  { year: "2017", gt: 36.8 },
+  { year: "2018", gt: 37.1 },
+  { year: "2019", gt: 37.0 },
+  { year: "2020", gt: 34.8 },
+  { year: "2021", gt: 36.7 },
+  { year: "2022", gt: 37.5 },
+  { year: "2023", gt: 37.4 },
+  { year: "2024", gt: 37.8 },
+];
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload?.length) {
+    return (
+      <div className="rounded-xl border border-border bg-card px-4 py-3 shadow-lg text-sm">
+        <p className="font-semibold text-foreground">{label}</p>
+        <p className="text-brandMainColor">{payload[0].value} Gt CO₂</p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const keyPoints = [
+  {
+    value: "37.8 Gt",
+    label: "Global CO₂ in 2024",
+    note: "Near all-time high — IEA, 2024",
+    url: "https://www.iea.org/reports/co2-emissions-in-2024",
+  },
+  {
+    value: "−5.4%",
+    label: "2020 COVID dip",
+    note: "Fully reversed by 2021",
+    url: null,
+  },
+  {
+    value: "$120B",
+    label: "VCM projected by 2030",
+    note: "Mordor Intelligence, 2025",
+    url: "https://www.mordorintelligence.com/industry-reports/voluntary-carbon-credit-market",
+  },
 ];
 
 const StatsSection = () => {
   return (
-    <section className="flex w-full flex-col items-center justify-between gap-10 bg-gradient-to-b from-background via-teal-50/20 to-cyan-50/20 dark:from-background dark:via-teal-950/5 dark:to-cyan-950/5 py-10 px-6 lg:flex-row">
-      {/* Left: Graph Section */}
-      <div className="w-full lg:w-2/3 h-[350px] flex flex-col items-center">
-        <h2 className="mb-6 text-center text-2xl font-bold text-brandMainColor dark:text-brandSubColor lg:text-left">
-          Global CO₂ Emissions (2015 - 2025)
-        </h2>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{ top: 20, right: 40, left: 60, bottom: 10 }} // Adjusted margins for spacing
+    <section className="relative overflow-hidden border-t border-border/40 bg-background px-6 py-20">
+      <div className="pointer-events-none absolute right-[-8rem] top-8 h-64 w-64 rounded-full bg-brandMainColor/10 blur-3xl" />
+      <div className="mx-auto max-w-6xl">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+          className="mb-12"
+        >
+          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Global CO₂ emissions, 2015–2024
+          </h2>
+          <p className="mt-2 text-muted-foreground max-w-xl">
+            Emissions rebounded sharply after 2020 and remain near record highs
+            — the urgency for verified carbon offsetting has never been greater.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:items-start">
+          {/* Chart */}
+          <motion.div
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.55 }}
+            className="lg:col-span-2"
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="year" tick={{ fontSize: 12 }} />
-            <YAxis
-              label={{
-                value: "Billion Metric Tons",
-                angle: -90,
-                position: "outsideLeft",
-                dx: -15, // Moves label further left
-                fontSize: 14,
-              }}
-              tick={{ fontSize: 12 }}
-            />
-            <Tooltip
-              formatter={(value) => `${value} Billion Metric Tons`}
-              labelFormatter={(label) => `Year: ${label}`}
-            />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="emissions"
-              stroke="#5CB338"
-              strokeWidth={3}
-              dot={{ r: 4, fill: "#4A8E2B" }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={emissionsData}
+                  margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="currentColor"
+                    className="opacity-[0.07]"
+                  />
+                  <XAxis
+                    dataKey="year"
+                    tick={{ fontSize: 12, fill: "currentColor" }}
+                    className="text-muted-foreground"
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "currentColor" }}
+                    className="text-muted-foreground"
+                    domain={[33, 39]}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => `${v}`}
+                    width={32}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <ReferenceLine
+                    y={34.8}
+                    stroke="#5CB338"
+                    strokeDasharray="4 4"
+                    strokeOpacity={0.4}
+                    label={{
+                      value: "2020 dip",
+                      position: "insideTopLeft",
+                      fontSize: 10,
+                      fill: "#5CB338",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="gt"
+                    stroke="#5CB338"
+                    strokeWidth={2.5}
+                    dot={{ r: 3.5, fill: "#5CB338", strokeWidth: 0 }}
+                    activeDot={{ r: 5, fill: "#5CB338" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground/60 text-center">
+              Billion metric tons (Gt) CO₂ equivalent ·{" "}
+              <a
+                href="https://www.iea.org/reports/co2-emissions-in-2024"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-brandMainColor transition-colors"
+              >
+                Source: IEA CO₂ Emissions Report 2024
+              </a>
+            </p>
+          </motion.div>
 
-      {/* Right: About Section */}
-      <div className="w-full rounded-2xl border border-border/70 bg-gradient-to-br from-card/95 to-card/80 p-6 shadow-xl backdrop-blur-sm lg:w-1/3">
-        <h3 className="text-xl font-semibold text-brandMainColor dark:text-brandSubColor">
-          Understanding the Data
-        </h3>
-        <p className="mt-3 text-muted-foreground dark:text-white/85">
-          This graph tracks <b>global CO₂ emissions</b> from{" "}
-          <b>2015 to 2025</b> in <b>billion metric tons</b>. Understanding these trends
-          is critical for climate action and carbon markets.
-        </p>
+          {/* Key points */}
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.55, delay: 0.1 }}
+            className="flex flex-col justify-start gap-6 pt-2"
+          >
+            {keyPoints.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: 16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.35, delay: i * 0.07 }}
+                whileHover={{ x: 4 }}
+                className="border-l-2 border-brandMainColor/40 pl-4"
+              >
+                <p className="text-xl font-bold text-foreground">
+                  {item.value}
+                </p>
+                <p className="text-sm font-medium text-foreground/80">
+                  {item.label}
+                </p>
+                {item.url ? (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-brandMainColor transition-colors mt-0.5"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    {item.note}
+                  </a>
+                ) : (
+                  <p className="text-xs text-muted-foreground/50 mt-0.5">
+                    {item.note}
+                  </p>
+                )}
+              </motion.div>
+            ))}
 
-        <ul className="mt-4 space-y-2 text-sm text-muted-foreground dark:text-white/85">
-          <li>
-            🌍 Peak emissions of <b>38.2 billion metric tons</b> projected for <b>2025</b>
-          </li>
-          <li>
-            📉 COVID-19 caused a historic drop in <b>2020 (34.7)</b>, but emissions rebounded
-          </li>
-          <li>
-            📈 Current trajectory shows <b>3% increase</b> since 2020, highlighting urgent need for action
-          </li>
-        </ul>
-
-        <h4 className="mt-5 text-lg font-semibold text-brandMainColor dark:text-brandSubColor">
-          Why CarbonEase Matters
-        </h4>
-        <p className="mt-2 text-muted-foreground dark:text-white/85">
-          With the <b>voluntary carbon market</b> projected to reach <b>$100B by 2030</b>,
-          understanding emissions helps you:
-        </p>
-        <ul className="mt-3 space-y-1 text-sm text-muted-foreground dark:text-white/85">
-          <li>
-            💰 Trade <strong>verified carbon credits</strong> transparently and securely
-          </li>
-          <li>
-            🎯 Achieve <b>net-zero goals</b> through measurable offset strategies
-          </li>
-          <li>
-            🌱 Support <b>renewable energy projects</b> worldwide
-          </li>
-          <li>
-            📊 Track real-time impact with <b>blockchain-verified transactions</b>
-          </li>
-        </ul>
+            <div className="mt-2 rounded-xl border border-brandMainColor/20 bg-brandMainColor/5 p-4">
+              <p className="text-xs font-semibold text-brandMainColor mb-1">
+                Paris Agreement Goal
+              </p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Limit warming to{" "}
+                <span className="font-semibold text-foreground">1.5°C</span>{" "}
+                above pre-industrial levels. Requires net-zero emissions by
+                mid-century.
+              </p>
+              <a
+                href="https://www.un.org/climatechange/paris-agreement"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 mt-2 text-[11px] text-muted-foreground/50 hover:text-brandMainColor transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" />
+                UNFCCC — Paris Agreement
+              </a>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

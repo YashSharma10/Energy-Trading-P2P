@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "../ui/button";
 import { useAuth } from "@/context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
-import logo from "../../../public/logo.png";
+import Logo from "./Logo";
 
 const DesktopNavLink = ({ to, children, isGreen = false, exact = false, hoveredPath, setHoveredPath }) => {
   const location = useLocation();
@@ -75,8 +75,8 @@ const Navbar = () => {
     <div className="fixed inset-x-0 top-0 z-50 p-2 sm:p-4 transition-all duration-300">
       <nav className="mx-auto flex h-16 sm:h-[4.5rem] w-full max-w-7xl items-center justify-between rounded-2xl border border-white/20 dark:border-white/10 bg-white/70 dark:bg-black/40 px-4 sm:px-6 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
         {/* Logo */}
-        <Link to="/" className="text-xl font-bold text-foreground transition-transform hover:scale-[1.02]">
-          <img src={logo} alt="CarbonEase logo" width={140} className="object-contain drop-shadow-sm" />
+        <Link to="/" className="text-xl font-bold text-foreground transition-transform hover:scale-[1.02] flex items-center">
+          <Logo className="h-11 w-auto object-contain" />
         </Link>
 
         <div className="hidden lg:flex items-center gap-1" onMouseLeave={() => setHoveredPath(null)}>
@@ -179,9 +179,9 @@ const Navbar = () => {
                 <Link
                   to="/"
                   onClick={closeSheet}
-                  className="text-xl font-bold text-foreground"
+                  className="text-xl font-bold text-foreground flex items-center"
                 >
-                  <img src={logo} alt="CarbonEase logo" width={140} />
+                  <Logo className="h-10 w-auto object-contain" />
                 </Link>
               </div>
 

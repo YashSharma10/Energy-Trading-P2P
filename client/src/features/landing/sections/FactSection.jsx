@@ -1,120 +1,110 @@
 import { Marquee } from "@/components/animations/marquee";
-import { cn } from "@/lib/utils";
-import {
-  FaLeaf,
-  FaTemperatureHigh,
-  FaRecycle,
-  FaTree,
-  FaGlobeAmericas,
-} from "react-icons/fa"; // Adding icons
+import { motion } from "motion/react";
 
-const reviews = [
+// All data sourced from cited authoritative sources
+const facts = [
   {
-    name: "Carbon Market Size",
-    username: "@market_trends",
-    body: "Voluntary carbon market hit $2B in 2023 and growing. Average credit prices: $8-30 depending on project type and verification.",
-    img: <FaGlobeAmericas className="text-3xl text-emerald-600" />,
-    bgClass: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20",
-    textClass: "text-emerald-900 dark:text-emerald-100",
+    stat: "$15.83B",
+    label: "Global voluntary carbon market in 2025",
+    sub: "Projected to reach $120B by 2030",
+    cite: "Mordor Intelligence, 2025",
+    citeUrl:
+      "https://www.mordorintelligence.com/industry-reports/voluntary-carbon-credit-market",
   },
   {
-    name: "India's Solar Growth",
-    username: "@renewable_india",
-    body: "India's renewable capacity crossed 180 GW in 2025. Solar is now the dominant generation source. Credits flowing into local and global markets.",
-    img: <FaTemperatureHigh className="text-3xl text-orange-600" />,
-    bgClass: "bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20",
-    textClass: "text-orange-900 dark:text-orange-100",
+    stat: "234 GW",
+    label: "India's renewable energy capacity",
+    sub: "50% of total installed power — ahead of 2030 target",
+    cite: "Ministry of Power, PIB 2025",
+    citeUrl:
+      "https://www.pib.gov.in/PressNoteDetails.aspx?ModuleId=3&NoteId=155063",
   },
   {
-    name: "Corporate Demand",
-    username: "@esg_track",
-    body: "5000+ companies committed to net-zero by 2030. They need verified credits. Demand > Supply creates pricing efficiency.",
-    img: <FaRecycle className="text-3xl text-green-600" />,
-    bgClass: "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20",
-    textClass: "text-green-900 dark:text-green-100",
+    stat: "500 GW",
+    label: "India's non-fossil energy target by 2030",
+    sub: "Committed at COP26, aligned with Paris Agreement NDC",
+    cite: "WRI India / Govt. of India",
+    citeUrl:
+      "https://wri-india.org/blogs/cop26-unpacking-indias-major-new-climate-targets",
   },
   {
-    name: "End-to-End Trading",
-    username: "@peer2peer",
-    body: "P2P eliminates broker markups (typically 20-40%). Direct price discovery. Faster settlements. Better value for all participants.",
-    img: <FaTree className="text-3xl text-lime-600" />,
-    bgClass: "bg-gradient-to-br from-lime-50 to-lime-100 dark:from-lime-900/20 dark:to-lime-800/20",
-    textClass: "text-lime-900 dark:text-lime-100",
+    stat: "1,300+",
+    label: "Carbon credit projects in India",
+    sub: "India leads globally in voluntary carbon project count",
+    cite: "CarbonHQ / Energy Institute, 2024",
+    citeUrl:
+      "https://carbonhq.earth/insights/voluntary-carbon-market-developer-overview-2024-2025",
   },
   {
-    name: "Energy Credits Volume",
-    username: "@renewable_projects",
-    body: "Wind, solar, and hydro projects generating 2M+ credits annually in India alone. Limited trading infrastructure = price inefficiency.",
-    img: <FaLeaf className="text-3xl text-teal-600" />,
-    bgClass: "bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/20 dark:to-teal-800/20",
-    textClass: "text-teal-900 dark:text-teal-100",
+    stat: "₹4.17B",
+    label: "India carbon credit market in 2025",
+    sub: "Expected to reach $48.24B by 2032 at 41% CAGR",
+    cite: "Coherent Market Insights, 2025",
+    citeUrl:
+      "https://www.coherentmarketinsights.com/industry-reports/india-carbon-credit-market",
   },
   {
-    name: "Blockchain Adoption",
-    username: "@dlt_energy",
-    body: "Distributed ledger tech for energy trading reduces fraud, settles instantly, and creates auditable trail. Already live in Nordic countries.",
-    img: <FaLeaf className="text-3xl text-emerald-700" />,
-    bgClass: "bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-900/30 dark:to-emerald-800/30",
-    textClass: "text-emerald-950 dark:text-emerald-50",
+    stat: "45%",
+    label: "India's carbon intensity reduction target by 2030",
+    sub: "From 2005 levels — India's NDC under Paris Agreement",
+    cite: "Govt. of India NDC / Tribune India",
+    citeUrl:
+      "https://www.tribuneindia.com/news/haryana/india-targets-500-gw-renewable-energy-capacity-by-2030-vij/",
   },
 ];
 
-const firstRow = reviews.slice(0, reviews.length / 2);
-const secondRow = reviews.slice(reviews.length / 2);
-
-const ReviewCard = ({ img, name, username, body, bgClass, textClass }) => {
-  return (
-    <figure
-      className={cn(
-        "relative w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
-        "border-gray-950/[.1] bg-gray-950/[.01] hover:bg-gray-950/[.05]",
-        "dark:border-gray-50/[.1] dark:bg-gray-50/[.10] dark:hover:bg-gray-50/[.15]",
-        bgClass
-      )}
+const FactCard = ({ stat, label, sub, cite, citeUrl }) => (
+  <motion.div
+    whileHover={{ y: -6, scale: 1.01 }}
+    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+    className="mx-3 flex w-72 flex-col gap-2 rounded-2xl border border-border/60 bg-card/95 px-6 py-5 shadow-sm transition-all duration-300 hover:border-brandMainColor/35 hover:shadow-[0_18px_40px_-26px_rgba(92,179,56,0.65)]"
+  >
+    <span className="text-2xl font-bold text-brandMainColor">{stat}</span>
+    <span className="text-sm font-semibold text-foreground leading-snug">
+      {label}
+    </span>
+    <span className="text-xs text-muted-foreground leading-relaxed">{sub}</span>
+    <a
+      href={citeUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-1 text-[10px] text-muted-foreground/50 hover:text-brandMainColor transition-colors underline underline-offset-2"
     >
-      <div className="flex flex-row items-center gap-2">
-        <div className="flex items-center justify-center rounded-full p-2 bg-white">
-          {img}
-        </div>
-        <div className="flex flex-col">
-          <figcaption className={`text-sm font-medium ${textClass}`}>
-            {name}
-          </figcaption>
-          <p className="text-xs font-medium text-gray-500 dark:text-white/40">
-            {username}
-          </p>
-        </div>
-      </div>
-      <blockquote className={`mt-2 text-sm ${textClass}`}>{body}</blockquote>
-    </figure>
-  );
-};
+      Source: {cite}
+    </a>
+  </motion.div>
+);
 
 function FactSection() {
   return (
-    <div className="relative flex h-[600px] w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-brandMainColor/5 to-background">
-      <div className="absolute top-8 z-10 text-center px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground dark:text-white mb-2">
-          Market & industry insights
+    <section className="relative overflow-hidden border-t border-border/40 bg-background py-20">
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-brandMainColor/10 blur-3xl" />
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5 }}
+        className="mb-12 text-center px-6"
+      >
+        <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          The market opportunity
         </h2>
-        <p className="text-muted-foreground dark:text-white/70 max-w-2xl mx-auto">Trends driving demand for direct trading
+        <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+          Real data from government bodies, UN agencies, and market research
+          firms
         </p>
-      </div>
+      </motion.div>
 
-      {/* Marquee content below */}
-      <Marquee pauseOnHover className="[--duration:25s] mt-24">
-        {firstRow.map((review, index) => (
-          <ReviewCard key={index} {...review} />
-        ))}
-      </Marquee>
-      <Marquee reverse pauseOnHover className="[--duration:20s]">
-        {secondRow.map((review, index) => (
-          <ReviewCard key={index} {...review} />
-        ))}
-      </Marquee>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white dark:from-background"></div>
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-white dark:from-background"></div>
-    </div>
+      <div className="relative">
+        <Marquee pauseOnHover className="[--duration:35s]">
+          {facts.map((f, i) => (
+            <FactCard key={i} {...f} />
+          ))}
+        </Marquee>
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-background" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-28 bg-gradient-to-l from-background" />
+      </div>
+    </section>
   );
 }
 
