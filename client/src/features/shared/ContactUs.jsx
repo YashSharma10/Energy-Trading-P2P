@@ -11,7 +11,7 @@ import {
   FaMagic,
 } from "react-icons/fa";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Sparkle positions fixed per card (no random on render)
 const SPARKLES = [
@@ -94,17 +94,19 @@ const WizardCard = ({ name, role, initials, linkedin, index }) => {
   const [hovered, setHovered] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [showWand, setShowWand] = useState(false);
+  const timerRef = useRef(null);
 
   const handleHoverStart = () => {
     setHovered(true);
     setShowWand(true);
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setShowWand(false);
       setRevealed(true);
     }, 750);
   };
 
   const handleHoverEnd = () => {
+    clearTimeout(timerRef.current);
     setHovered(false);
     setRevealed(false);
     setShowWand(false);
@@ -270,6 +272,22 @@ const teamMembers = [
 ];
 
 
+// landscape: 37dc6af8, 1729176083457, 1739023134261, 1739248410190, 1774962895025
+// portrait:  1739075998001, 1774849958904
+const teamPhotos = {
+  hero: "/team/37dc6af8-4338-405b-8c3b-e45e38850504.jpg",
+  portraits: [
+    "/team/1739075998001.jpg",
+    "/team/1774849958904.jpg",
+  ],
+  landscapes: [
+    "/team/1729176083457.jpg",
+    "/team/1739023134261.jpg",
+    "/team/1739248410190.jpg",
+    "/team/1774962895025.jpg",
+  ],
+};
+
 const ContactUs = () => {
   return (
     <div className="bg-gradient-to-br from-background via-brandMainColor/5 to-emerald-500/5 dark:via-brandSubColor/5 dark:to-lime-400/5 min-h-screen relative font-sans pt-20 pb-16 flex flex-col overflow-hidden">
@@ -279,14 +297,127 @@ const ContactUs = () => {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brandMainColor/10 dark:bg-brandSubColor/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 dark:bg-lime-400/10 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="mx-auto flex max-w-2xl flex-col px-6 relative z-10 w-full flex-1 justify-center py-10">
+      {/* Team Photos Gallery */}
+      <div className="mx-auto w-full max-w-3xl px-6 relative z-10 mt-4 pb-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-center mb-8"
+        >
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-brandMainColor dark:text-brandSubColor mb-2"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            Behind the Scenes
+          </p>
+          <h2 className="text-2xl font-black tracking-tight text-foreground"
+            style={{ fontFamily: "'Outfit', sans-serif" }}>
+            Our Moments
+          </h2>
+        </motion.div>
+
+        <div className="flex flex-col gap-4">
+          {/* Hero — landscape */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
+            className="group relative overflow-hidden rounded-3xl border border-border/20 shadow-2xl w-full bg-black/5 dark:bg-white/5"
+          >
+            <motion.img
+              src={teamPhotos.hero}
+              alt="Team"
+              loading="lazy"
+              className="w-full h-auto block"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-r from-violet-900/20 via-transparent to-emerald-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+              <p className="text-white/60 text-[10px] font-bold tracking-[0.3em] uppercase mb-1"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}>The Team</p>
+              <div className="flex items-end justify-between">
+                <h3 className="text-white text-2xl sm:text-3xl font-black tracking-tight"
+                  style={{ fontFamily: "'Outfit', sans-serif", textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>
+                  Building something real.
+                </h3>
+                <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white/80 text-[12px] font-semibold"
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  4 Members
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Portraits row — 2 tall photos side by side */}
+          <div className="grid grid-cols-2 gap-4">
+            {teamPhotos.portraits.map((src, i) => (
+              <motion.div
+                key={src}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 + i * 0.1 }}
+                className="group relative overflow-hidden rounded-2xl border border-border/20 shadow-md bg-black/5 dark:bg-white/5"
+              >
+                <img
+                  src={src}
+                  alt={`Team portrait ${i + 1}`}
+                  loading="lazy"
+                  className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 rounded-2xl" />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Landscapes row — 4 wide photos in a 2x2 grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {teamPhotos.landscapes.map((src, i) => (
+              <motion.div
+                key={src}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 + i * 0.08 }}
+                className="group relative overflow-hidden rounded-2xl border border-border/20 shadow-md bg-black/5 dark:bg-white/5"
+              >
+                <img
+                  src={src}
+                  alt={`Team landscape ${i + 1}`}
+                  loading="lazy"
+                  className="w-full h-auto block transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 rounded-2xl" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Team Member Profiles */}
+      <div className="mx-auto flex max-w-5xl flex-col px-6 relative z-10 w-full justify-center py-10">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="text-center mb-8"
+        >
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase text-brandMainColor dark:text-brandSubColor mb-2"
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            The People
+          </p>
+          <h2 className="text-2xl font-black tracking-tight text-foreground"
+            style={{ fontFamily: "'Outfit', sans-serif" }}>
+            Meet the Team
+          </h2>
+        </motion.div>
         <motion.div
            initial={{ opacity: 0, scale: 0.95 }}
            animate={{ opacity: 1, scale: 1 }}
-           transition={{ duration: 0.6, delay: 0.2 }}
+           transition={{ duration: 0.6, delay: 0.5 }}
            className="w-full"
         >
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {teamMembers.map(({ name, role, initials, linkedin }, index) => {
               const isMukul = name === "Mukul Yadav";
               if (isMukul) {
@@ -297,10 +428,10 @@ const ContactUs = () => {
                   key={name}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                  transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
                   className="relative group h-full"
                 >
-                  <Card className="h-full max-w-[280px] mx-auto rounded-[1.5rem] border border-border/30 bg-card/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-500 overflow-hidden relative z-10 group-hover:border-foreground/20 group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)]">
+                  <Card className="h-full mx-auto rounded-[1.5rem] border border-border/30 bg-card/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-500 overflow-hidden relative z-10 group-hover:border-foreground/20 group-hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)]">
                     <CardContent className="flex h-full flex-col items-center justify-center gap-6 py-10 px-6 text-center relative z-20 font-sans">
                       <div className="flex h-20 w-20 items-center justify-center rounded-[1.25rem] bg-muted/30 text-foreground/80 shadow-inner group-hover:scale-110 transition-all duration-700 border border-transparent group-hover:bg-brandMainColor/10 dark:group-hover:bg-brandSubColor/10 group-hover:text-brandMainColor dark:group-hover:text-brandSubColor group-hover:border-brandMainColor/20"
                         style={{ fontFamily: "'Space Grotesk', sans-serif" }}>

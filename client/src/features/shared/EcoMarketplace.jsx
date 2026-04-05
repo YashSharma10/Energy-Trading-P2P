@@ -40,6 +40,10 @@ import {
   X,
   CreditCard,
   Wind,
+  Info,
+  Car,
+  Lightbulb,
+  TreePine,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
@@ -57,6 +61,42 @@ const parseTags = (tags) => {
   return tagsArray
     .flatMap((t) => (typeof t === "string" ? t.split(",").map((s) => s.trim()) : []))
     .filter(Boolean);
+};
+
+// Translate grams CO₂ prevented into relatable real-world equivalents
+const getImpactEquivalents = (grams) => {
+  if (!grams || grams <= 0) return null;
+  const kg = grams / 1000;
+
+  // Driving: ~4 km per kg → convert to meters (× 1000)
+  const meters = Math.round(kg * 4 * 1000);
+
+  // LED bulb: ~1.2 hrs per kg → convert to minutes (× 60)
+  const minutes = Math.round(kg * 1.2 * 60);
+
+  // Tree absorption: ~21 kg/year → convert fraction to hours (× 365 × 24)
+  const treeHours = Math.round((kg / 21) * 365 * 24);
+
+  return [
+    {
+      Icon: Car,
+      iconColor: "text-sky-500",
+      label: `${meters.toLocaleString()} m`,
+      detail: "driving avoided",
+    },
+    {
+      Icon: Lightbulb,
+      iconColor: "text-amber-500",
+      label: `${minutes} min`,
+      detail: "LED energy saved",
+    },
+    {
+      Icon: TreePine,
+      iconColor: "text-emerald-500",
+      label: `${treeHours} hrs`,
+      detail: "tree absorption",
+    },
+  ];
 };
 
 const EcoMarketplace = () => {
@@ -85,6 +125,8 @@ const EcoMarketplace = () => {
   // Payment success dialog
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successOrderDetails, setSuccessOrderDetails] = useState(null);
+  // Impact info dialog
+  const [impactProduct, setImpactProduct] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -407,7 +449,7 @@ const EcoMarketplace = () => {
                 className="group flex flex-col overflow-hidden rounded-3xl border-2 border-border/40 bg-card hover:border-brandMainColor/50 hover:shadow-[0_0_30px_-5px_rgba(92,179,56,0.15)] transition-all duration-500"
               >
                 {/* ── Image Section ── */}
-                <div className="relative h-52 overflow-hidden bg-muted/20">
+                <div className="relative h-44 overflow-hidden bg-muted/20">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
@@ -430,20 +472,7 @@ const EcoMarketplace = () => {
                     </Badge>
                   </div>
 
-                  {/* Top Right: Carbon Impact */}
-                  {product.carbonEmissionSaved != null && (
-                    <div className="absolute right-3 top-3">
-                      <div className="flex items-center gap-1.5 rounded-full bg-background/95 backdrop-blur-md px-2.5 py-1 border border-emerald-500/30 shadow-sm pointer-events-none">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <span className="text-[10px] font-bold text-foreground tracking-wide">
-                          {product.carbonEmissionSaved} kg CO₂ <span className="text-emerald-600 dark:text-emerald-400 uppercase">Offset</span>
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  {/* Top Right: Carbon Impact — removed, shown in card body instead */}
 
                   {/* Bottom Left: Category */}
                   <div className="absolute bottom-3 left-3 pointer-events-none">
@@ -454,18 +483,20 @@ const EcoMarketplace = () => {
                 </div>
 
                 {/* ── Content Section ── */}
-                <CardContent className="flex flex-1 flex-col p-5">
-                  <div className="mb-3">
-                    <h3 className="line-clamp-1 text-xl font-bold text-foreground group-hover:text-brandMainColor transition-colors duration-300">
+                <CardContent className="flex flex-1 flex-col p-4">
+                  {/* Title & Description */}
+                  <div className="mb-2">
+                    <h3 className="line-clamp-1 text-lg font-bold text-foreground group-hover:text-brandMainColor transition-colors duration-300">
                       {product.name}
                     </h3>
-                    <p className="line-clamp-2 mt-1.5 text-sm text-muted-foreground leading-snug">
+                    <p className="line-clamp-2 mt-1 text-[13px] text-muted-foreground leading-snug">
                       {product.description}
                     </p>
                   </div>
 
+                  {/* Tags */}
                   {parseTags(product.tags).length > 0 && (
-                    <div className="mt-auto mb-5 flex flex-wrap gap-1.5">
+                    <div className="mb-3 flex flex-wrap gap-1">
                       {parseTags(product.tags)
                         .slice(0, 3)
                         .map((tag, i) => (
@@ -479,38 +510,87 @@ const EcoMarketplace = () => {
                     </div>
                   )}
 
-                  {/* ── Bottom Action Row ── */}
-                  <div className="mt-auto pt-4 border-t border-border/40 flex items-center justify-between">
+                  {/* Environmental Impact — Compact */}
+                  {product.carbonEmissionSaved != null && (
+                    <button
+                      onClick={() => setImpactProduct(product)}
+                      className="group/impact relative w-full mb-3 rounded-xl overflow-hidden text-left transition-all duration-300 border border-border/30 bg-card/60 backdrop-blur-xl hover:shadow-[0_4px_20px_rgba(92,179,56,0.1)] hover:border-brandMainColor/40"
+                    >
+                      <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-brandMainColor/40 to-transparent opacity-0 group-hover/impact:opacity-100 transition-opacity duration-500" />
+                      
+                      <div className="relative px-3 py-2.5">
+                        {/* Row 1: Icon + Value + Arrow */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2.5">
+                            <div className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center bg-brandMainColor/10">
+                              <Leaf className="h-4 w-4 text-brandMainColor" />
+                            </div>
+                            <div>
+                              <p className="flex items-baseline gap-1">
+                                <span className="text-xl font-black text-foreground tracking-tight tabular-nums leading-none">
+                                  {product.carbonEmissionSaved?.toLocaleString()}
+                                </span>
+                                <span className="text-xs font-bold text-brandMainColor">g</span>
+                                <span className="text-[10px] font-semibold text-muted-foreground">CO₂ prevented</span>
+                              </p>
+                            </div>
+                          </div>
+                          <Wind className="h-3.5 w-3.5 text-muted-foreground/50 group-hover/impact:text-brandMainColor transition-colors shrink-0" />
+                        </div>
+                        
+                        {/* Row 2: Three equivalents inline */}
+                        {(() => {
+                          const kg = product.carbonEmissionSaved / 1000;
+                          const meters = Math.round(kg * 4 * 1000);
+                          const minutes = Math.round(kg * 1.2 * 60);
+                          const treeHours = Math.round((kg / 21) * 365 * 24);
+                          return (
+                            <div className="flex items-center gap-1">
+                              <div className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg bg-muted/40 text-sky-600 dark:text-sky-400">
+                                <Car className="h-3 w-3" />
+                                <span className="text-[10px] font-extrabold">{meters.toLocaleString()}m</span>
+                              </div>
+                              <div className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg bg-muted/40 text-amber-600 dark:text-amber-400">
+                                <Lightbulb className="h-3 w-3" />
+                                <span className="text-[10px] font-extrabold">{minutes}min</span>
+                              </div>
+                              <div className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg bg-muted/40 text-emerald-600 dark:text-emerald-400">
+                                <TreePine className="h-3 w-3" />
+                                <span className="text-[10px] font-extrabold">{treeHours}hrs</span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </button>
+                  )}
+
+                  {/* Price + Buy — Compact footer */}
+                  <div className="mt-auto pt-3 border-t border-border/40 flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-1">
-                        Price
-                      </p>
-                      <p className="text-2xl font-black text-foreground">
+                      <p className="text-2xl font-black text-foreground leading-none">
                         ₹{product.price?.toLocaleString()}
                       </p>
-                    </div>
-
-                    <div className="flex flex-col items-end">
-                      <Button
-                        size="sm"
-                        className="rounded-full bg-brandMainColor text-white font-semibold transition-all duration-300 hover:scale-105 hover:bg-brandMainColor/90 disabled:opacity-50 h-9 px-5 shadow-sm hover:shadow-[0_0_15px_-3px_rgba(92,179,56,0.5)]"
-                        onClick={() => {
-                          setPurchaseProduct(product);
-                          setPurchaseQty(1);
-                        }}
-                        disabled={product.stock === 0}
-                      >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        {product.stock === 0 ? "Sold Out" : "Buy Now"}
-                      </Button>
-                      <p className="text-[10px] mt-1.5 font-medium text-muted-foreground">
+                      <p className="text-[10px] mt-1 font-medium text-muted-foreground">
                         {product.stock > 0 ? (
-                          <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">{product.stock} in stock</span>
+                          <span className="text-emerald-600 dark:text-emerald-400">{product.stock} in stock</span>
                         ) : (
-                          <span className="text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">Unavailable</span>
+                          <span className="text-destructive">Unavailable</span>
                         )}
                       </p>
                     </div>
+                    <Button
+                      size="sm"
+                      className="rounded-full bg-brandMainColor text-white font-semibold transition-all duration-300 hover:scale-105 hover:bg-brandMainColor/90 disabled:opacity-50 h-9 px-5 shadow-sm hover:shadow-[0_0_15px_-3px_rgba(92,179,56,0.5)]"
+                      onClick={() => {
+                        setPurchaseProduct(product);
+                        setPurchaseQty(1);
+                      }}
+                      disabled={product.stock === 0}
+                    >
+                      <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+                      {product.stock === 0 ? "Sold Out" : "Buy"}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -726,6 +806,101 @@ const EcoMarketplace = () => {
         }}
         orderDetails={successOrderDetails}
       />
+
+      {/* Environmental Impact Info Dialog */}
+      <Dialog open={!!impactProduct} onOpenChange={() => setImpactProduct(null)}>
+        <DialogContent className="max-w-md overflow-hidden p-0 border-0 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.4),0_0_20px_rgba(92,179,56,0.1)] rounded-[2rem] gap-0 [&>button]:hidden">
+          {/* Header — theme-consistent glassmorphic style */}
+          <div className="relative px-6 pt-7 pb-7 flex flex-col items-center justify-center overflow-hidden bg-muted/50 dark:bg-muted/30 border-b border-border/30">
+            {/* Custom Close Button */}
+            <button 
+              onClick={() => setImpactProduct(null)}
+              className="absolute top-4 right-4 z-50 p-2 rounded-xl bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all hover:scale-105 active:scale-95"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            {/* Soft brand glow */}
+            <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-64 bg-brandMainColor/8 rounded-full blur-[80px] pointer-events-none"></div>
+            
+            <DialogHeader className="relative z-10 w-full mb-4">
+              <DialogTitle className="flex items-center justify-center gap-2 text-muted-foreground text-[11px] uppercase tracking-[0.2em] font-bold">
+                <div className="p-1.5 rounded-lg bg-brandMainColor/10">
+                  <Leaf className="h-3 w-3 text-brandMainColor" />
+                </div>
+                Environmental Impact
+              </DialogTitle>
+            </DialogHeader>
+            {impactProduct && (
+              <div className="relative z-10 text-center flex flex-col items-center animate-in fade-in zoom-in duration-500">
+                <div className="flex items-baseline justify-center">
+                  <span className="text-6xl font-black text-foreground tracking-tighter leading-none">
+                    {impactProduct.carbonEmissionSaved?.toLocaleString()}
+                  </span>
+                  <span className="text-xl font-bold text-brandMainColor ml-2">g</span>
+                </div>
+                <p className="text-[10px] font-bold text-muted-foreground mt-3 bg-brandMainColor/10 text-brandMainColor px-4 py-1.5 rounded-full tracking-wide uppercase">
+                  CO₂ emission prevented per unit
+                </p>
+              </div>
+            )}
+          </div>
+
+          {impactProduct && (
+            <div className="px-6 py-5 space-y-4 bg-card">
+              <div className="text-center space-y-1">
+                <h4 className="text-base font-bold text-foreground">
+                  The <span className="text-brandMainColor">{impactProduct.name}</span> Effect
+                </h4>
+                <p className="text-[13px] text-muted-foreground leading-relaxed px-2 font-medium">
+                  Avoid emissions simply by making this sustainable choice.
+                </p>
+              </div>
+
+              {/* Equivalents */}
+              <div className="space-y-3 mt-1">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="h-px bg-border/60 flex-1"></div>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">Translation to real-world</p>
+                  <div className="h-px bg-border/60 flex-1"></div>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {getImpactEquivalents(impactProduct.carbonEmissionSaved).map((eq, i) => (
+                    <div key={i} className="group relative rounded-2xl flex flex-col items-center bg-muted/40 p-4 text-center hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10 transition-all duration-300 shadow-sm hover:shadow-md">
+                      <div className="absolute inset-0 bg-gradient-to-br from-brandMainColor/0 via-brandMainColor/0 to-brandMainColor/5 group-hover:via-brandMainColor/5 rounded-2xl transition-all"></div>
+                      <eq.Icon className={`h-6 w-6 mb-2 drop-shadow-sm group-hover:scale-110 transition-transform duration-300 ease-out ${eq.iconColor}`} />
+                      <p className="text-xs font-extrabold text-foreground mb-0.5">{eq.label}</p>
+                      <p className="text-[9px] font-semibold text-muted-foreground leading-tight px-0.5">{eq.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 transition-colors">
+                <div className="shrink-0 mt-0.5 bg-emerald-500/20 p-2 rounded-full">
+                  <Wind className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <p className="text-[11px] text-emerald-800/80 dark:text-emerald-300/80 leading-snug font-semibold">
+                  This contributes to India's 2070 net-zero targets and UN goals.
+                </p>
+              </div>
+
+              <Button
+                className="w-full text-white font-black uppercase tracking-wide shadow-[0_8px_20px_rgba(92,179,56,0.3)] hover:shadow-[0_12px_25px_rgba(92,179,56,0.4)] transition-all duration-300 hover:-translate-y-0.5 rounded-xl h-12 text-sm bg-brandMainColor hover:bg-brandMainColor/90 dark:text-black"
+                onClick={() => {
+                  setImpactProduct(null);
+                  setPurchaseProduct(impactProduct);
+                  setPurchaseQty(1);
+                }}
+                disabled={impactProduct.stock === 0}
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                {impactProduct.stock === 0 ? "Currently Unavailable" : "Buy & Prevent Emissions"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

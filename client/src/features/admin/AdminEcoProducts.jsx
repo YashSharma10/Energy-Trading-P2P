@@ -385,13 +385,13 @@ const AdminEcoProducts = () => {
                 </div>
                 <div>
                   <Label htmlFor="carbonEmissionSaved">
-                    CO₂ Emission Saved (kg per unit)
+                    CO₂ Emission Prevented (grams per unit)
                   </Label>
                   <Input
                     id="carbonEmissionSaved"
                     type="number"
                     min="0"
-                    step="0.01"
+                    step="1"
                     value={formData.carbonEmissionSaved}
                     onChange={(e) =>
                       setFormData({
@@ -399,10 +399,10 @@ const AdminEcoProducts = () => {
                         carbonEmissionSaved: e.target.value,
                       })
                     }
-                    placeholder="e.g. 12.5"
+                    placeholder="e.g. 250"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Estimated kg of CO₂ saved per unit purchased
+                    Estimated grams of CO₂ prevented per unit purchased
                   </p>
                 </div>
                 <Button
@@ -519,7 +519,7 @@ const AdminEcoProducts = () => {
                       <TableHead>Price</TableHead>
                       <TableHead>Stock</TableHead>
                       <TableHead>Eco Rating</TableHead>
-                      <TableHead>CO₂ Saved</TableHead>
+                      <TableHead>CO₂ Prevented</TableHead>
                       <TableHead>Sold</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -574,7 +574,7 @@ const AdminEcoProducts = () => {
                           <TableCell>
                             {product.carbonEmissionSaved != null ? (
                               <span className="text-green-700 dark:text-green-400 font-medium text-sm">
-                                {product.carbonEmissionSaved} kg
+                                {product.carbonEmissionSaved} g
                               </span>
                             ) : (
                               <span className="text-muted-foreground text-xs">—</span>
