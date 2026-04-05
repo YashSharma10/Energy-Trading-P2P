@@ -13,7 +13,8 @@ import {
   Eye,
   Activity,
   BarChart3,
-  MessageCircle
+  MessageCircle,
+  Zap
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getPostedListings, getTransactionData } from "@/services/listingService";
