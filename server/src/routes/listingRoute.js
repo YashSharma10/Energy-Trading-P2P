@@ -11,6 +11,8 @@ import {
   makePayment,
   getTransactionData,
   getReceipt,
+  createCreditCheckoutSession,
+  getTransactionById,
 } from "../controllers/listingController.js";
 
 import authMiddleware from "../middlewares/authMiddleware.js";
@@ -26,7 +28,9 @@ const router = express.Router();
 router.post("/post", authMiddleware, validate(createListingSchema), createListing);
 router.get("/posted-data", authMiddleware, getPostedListingForUser);
 router.post("/payment", authMiddleware, validate(paymentSchema), makePayment);
+router.post("/create-checkout-session", authMiddleware, validate(paymentSchema), createCreditCheckoutSession);
 router.get("/payment-data", authMiddleware, getTransactionData);
+router.get("/transaction/:transactionId", authMiddleware, getTransactionById);
 router.get("/receipt/:transactionId", authMiddleware, getReceipt);
 
 // Public routes

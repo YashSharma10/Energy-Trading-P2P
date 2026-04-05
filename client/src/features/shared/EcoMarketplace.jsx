@@ -51,6 +51,14 @@ import {
 import { ECO_PRODUCT_CATEGORIES } from "@/constants/api";
 import api from "@/lib/api";
 
+const parseTags = (tags) => {
+  if (!tags) return [];
+  const tagsArray = Array.isArray(tags) ? tags : [tags];
+  return tagsArray
+    .flatMap((t) => (typeof t === "string" ? t.split(",").map((s) => s.trim()) : []))
+    .filter(Boolean);
+};
+
 const EcoMarketplace = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
@@ -97,23 +105,40 @@ const EcoMarketplace = () => {
   }, []);
 
   const fetchOrderDetails = async (orderId) => {
-    try {
-      const { data } = await api.get(`/eco-products/my-orders`);
-      const order = data.data?.find((o) => o._id === orderId);
-      if (order) {
-        setSuccessOrderDetails({
-          orderHash: order.orderHash,
-          productName: order.product?.name,
-          quantity: order.quantity,
-          totalAmount: order.totalAmount,
-        });
+    const maxAttempts = 12;
+    let attempts = 0;
+
+    const check = async () => {
+      try {
+        const { data } = await api.get(`/eco-products/order/${orderId}`);
+        const order = data.data;
+
+        if (order?.paymentStatus === "completed") {
+          setSuccessOrderDetails({
+            orderHash: order.orderHash,
+            productName: order.product?.name,
+            quantity: order.quantity,
+            totalAmount: order.totalAmount,
+          });
+          setShowSuccessDialog(true);
+          fetchProducts();
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to fetch order details:", err);
+      }
+
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(check, 2500);
+      } else {
+        // Show dialog anyway after timeout
         setShowSuccessDialog(true);
-        // Refresh products to update stock
         fetchProducts();
       }
-    } catch (err) {
-      console.error("Failed to fetch order details:", err);
-    }
+    };
+
+    check();
   };
 
   const fetchProducts = async () => {
@@ -375,107 +400,118 @@ const EcoMarketplace = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-1">
             {products.map((product) => (
               <Card
                 key={product._id}
-                className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group"
+                className="group flex flex-col overflow-hidden rounded-3xl border-2 border-border/40 bg-card hover:border-brandMainColor/50 hover:shadow-[0_0_30px_-5px_rgba(92,179,56,0.15)] transition-all duration-500"
               >
-                {/* Image */}
-                <div className="relative h-48 bg-green-50 dark:bg-green-950 overflow-hidden">
+                {/* ── Image Section ── */}
+                <div className="relative h-52 overflow-hidden bg-muted/20">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Leaf className="h-16 w-16 text-green-300 dark:text-green-700" />
+                    <div className="flex h-full w-full items-center justify-center bg-green-50 dark:bg-green-900/20">
+                      <Leaf className="h-16 w-16 text-green-300 dark:text-green-700/50" />
                     </div>
                   )}
-                  {/* Eco badge */}
-                  <div className="absolute top-2 right-2">
-                    <Badge className="bg-green-600 text-white text-xs">
-                      {"★".repeat(product.ecoRating || 3)} Eco
+
+                  {/* Gradient Overlay for Bottom Text Context */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+
+                  {/* Top Left: Stars (Eco Rating) */}
+                  <div className="absolute left-3 top-3">
+                    <Badge className="bg-background/95 text-yellow-500 backdrop-blur-sm shadow-sm border-border/50 text-[10px] tracking-widest pointer-events-none px-2.5 py-0.5">
+                      {"★".repeat(product.ecoRating || 3)}
                     </Badge>
                   </div>
-                  {product.stock <= 5 && product.stock > 0 && (
-                    <div className="absolute top-2 left-2">
-                      <Badge variant="destructive" className="text-xs">
-                        Only {product.stock} left!
-                      </Badge>
+
+                  {/* Top Right: Carbon Impact */}
+                  {product.carbonEmissionSaved != null && (
+                    <div className="absolute right-3 top-3">
+                      <div className="flex items-center gap-1.5 rounded-full bg-background/95 backdrop-blur-md px-2.5 py-1 border border-emerald-500/30 shadow-sm pointer-events-none">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span className="text-[10px] font-bold text-foreground tracking-wide">
+                          {product.carbonEmissionSaved} kg CO₂ <span className="text-emerald-600 dark:text-emerald-400 uppercase">Offset</span>
+                        </span>
+                      </div>
                     </div>
                   )}
+
+                  {/* Bottom Left: Category */}
+                  <div className="absolute bottom-3 left-3 pointer-events-none">
+                    <Badge variant="secondary" className="bg-background/90 backdrop-blur-md border-border/50 text-xs font-medium text-foreground px-2.5 py-0.5 shadow-sm">
+                      {product.category}
+                    </Badge>
+                  </div>
                 </div>
 
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-base line-clamp-1">
+                {/* ── Content Section ── */}
+                <CardContent className="flex flex-1 flex-col p-5">
+                  <div className="mb-3">
+                    <h3 className="line-clamp-1 text-xl font-bold text-foreground group-hover:text-brandMainColor transition-colors duration-300">
                       {product.name}
-                    </CardTitle>
-                  </div>
-                  <Badge variant="outline" className="w-fit text-xs">
-                    {product.category}
-                  </Badge>
-                </CardHeader>
-
-                <CardContent className="pt-0">
-                  <CardDescription className="text-sm line-clamp-2 mb-3">
-                    {product.description}
-                  </CardDescription>
-
-                  {product.tags && product.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {product.tags.slice(0, 3).map((tag, i) => (
-                        <Badge
-                          key={i}
-                          variant="secondary"
-                          className="text-[10px] px-1.5 py-0"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Carbon emission saved */}
-                  {product.carbonEmissionSaved != null && (
-                    <div className="flex items-center gap-1.5 mb-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg px-2.5 py-1.5">
-                      <Wind className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                        Saves {product.carbonEmissionSaved} kg CO₂
-                      </span>
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
-                        per unit
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="mb-3 text-right">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">Price</p>
-                    <p className="text-xl font-bold text-primary">
-                      ₹{product.price?.toLocaleString()}
+                    </h3>
+                    <p className="line-clamp-2 mt-1.5 text-sm text-muted-foreground leading-snug">
+                      {product.description}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4">
-                    <Button
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => {
-                        setPurchaseProduct(product);
-                        setPurchaseQty(1);
-                      }}
-                      disabled={product.stock === 0}
-                    >
-                      <ShoppingCart className="h-4 w-4 mr-1" />
-                      {product.stock === 0 ? "Sold Out" : "Buy"}
-                    </Button>
+                  {parseTags(product.tags).length > 0 && (
+                    <div className="mt-auto mb-5 flex flex-wrap gap-1.5">
+                      {parseTags(product.tags)
+                        .slice(0, 3)
+                        .map((tag, i) => (
+                          <span
+                            key={i}
+                            className="rounded-md bg-muted px-2 py-0.5 text-[10px] text-muted-foreground border border-border/40 font-medium"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+
+                  {/* ── Bottom Action Row ── */}
+                  <div className="mt-auto pt-4 border-t border-border/40 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-1">
+                        Price
+                      </p>
+                      <p className="text-2xl font-black text-foreground">
+                        ₹{product.price?.toLocaleString()}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-end">
+                      <Button
+                        size="sm"
+                        className="rounded-full bg-brandMainColor text-white font-semibold transition-all duration-300 hover:scale-105 hover:bg-brandMainColor/90 disabled:opacity-50 h-9 px-5 shadow-sm hover:shadow-[0_0_15px_-3px_rgba(92,179,56,0.5)]"
+                        onClick={() => {
+                          setPurchaseProduct(product);
+                          setPurchaseQty(1);
+                        }}
+                        disabled={product.stock === 0}
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        {product.stock === 0 ? "Sold Out" : "Buy Now"}
+                      </Button>
+                      <p className="text-[10px] mt-1.5 font-medium text-muted-foreground">
+                        {product.stock > 0 ? (
+                          <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">{product.stock} in stock</span>
+                        ) : (
+                          <span className="text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">Unavailable</span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {product.stock} in stock
-                  </p>
                 </CardContent>
               </Card>
             ))}

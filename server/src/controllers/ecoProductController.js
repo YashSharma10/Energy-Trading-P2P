@@ -40,16 +40,25 @@ export const createEcoProduct = async (req, res) => {
 // ==============================
 export const updateEcoProduct = async (req, res) => {
   try {
+    const updates = { ...req.body, updatedAt: Date.now() };
+
+    // If admin is restocking (stock > 0), reset status to Active automatically
+    if (updates.stock != null && Number(updates.stock) > 0 && !updates.status) {
+      updates.status = "Active";
+    }
+    // If stock is being set to 0, mark OutOfStock
+    if (updates.stock != null && Number(updates.stock) === 0 && !updates.status) {
+      updates.status = "OutOfStock";
+    }
+
     const updated = await EcoProduct.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedAt: Date.now() },
+      updates,
       { new: true, runValidators: true },
     );
 
     if (!updated) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Product not found" });
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
 
     res.status(200).json({
@@ -606,3 +615,55 @@ async function handlePaymentFailed(paymentIntent) {
     logger.error("Error handling payment failure:", error);
   }
 }
+
+// ✅ Get a single eco order by ID — completes it via Stripe if webhook hasn't fired
+export const getEcoOrderById = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.user.userId;
+
+    const order = await EcoOrder.findById(orderId).populate("product", "name category price imageUrl");
+
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+    if (order.buyer.toString() !== userId) return res.status(403).json({ success: false, message: "Access denied" });
+
+    // If still pending, verify with Stripe and complete atomically
+    if (order.paymentStatus === "pending" && order.stripeSessionId) {
+      try {
+        const session = await stripe.checkout.sessions.retrieve(order.stripeSessionId);
+        if (session.payment_status === "paid") {
+          const updated = await EcoOrder.findOneAndUpdate(
+            { _id: orderId, paymentStatus: "pending" },
+            {
+              paymentStatus: "completed",
+              stripePaymentIntentId: session.payment_intent,
+              completedAt: new Date(),
+            },
+            { new: true }
+          );
+
+          if (updated) {
+            const product = await EcoProduct.findById(order.product._id || order.product);
+            if (product) {
+              const newStock = product.stock - order.quantity;
+              await EcoProduct.findByIdAndUpdate(product._id, {
+                $inc: { stock: -order.quantity, totalSold: order.quantity },
+                status: newStock <= 0 ? "OutOfStock" : "Active",
+                updatedAt: new Date(),
+              });
+            }
+            logger.info(`Eco order completed via poll: ${orderId}`);
+          }
+        }
+      } catch (stripeErr) {
+        logger.warn("Could not verify Stripe session for eco order:", stripeErr.message);
+      }
+    }
+
+    const fresh = await EcoOrder.findById(orderId).populate("product", "name category price imageUrl");
+    res.json({ success: true, data: fresh });
+  } catch (error) {
+    logger.error("Error fetching eco order:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch order" });
+  }
+};

@@ -11,6 +11,7 @@ import {
   getEcoStats,
   createCheckoutSession,
   handleStripeWebhook,
+  getEcoOrderById,
 } from "../controllers/ecoProductController.js";
 
 import authMiddleware from "../middlewares/authMiddleware.js";
@@ -50,6 +51,7 @@ router.post(
   createCheckoutSession,
 );
 router.get("/my-orders", authMiddleware, getMyEcoOrders);
+router.get("/order/:orderId", authMiddleware, getEcoOrderById);
 
 // ─── Admin routes ────────────────────────────────────────
 router.post(

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Zap, 
+  Leaf, 
   DollarSign, 
   TrendingUp, 
   Grid, 
@@ -28,7 +28,7 @@ const ProducerDashboard = () => {
   const [stats, setStats] = useState({
     totalEarnings: 0,
     activeListings: 0,
-    energySold: 0,
+    creditsSold: 0,
     totalTransactions: 0
   });
   const [listings, setListings] = useState([]);
@@ -57,13 +57,13 @@ const ProducerDashboard = () => {
 
       // Calculate stats from real data
       const totalEarnings = sellerTransactions.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
-      const energySold = sellerTransactions.reduce((sum, t) => sum + (t.quantity || 0), 0);
+      const creditsSold = sellerTransactions.reduce((sum, t) => sum + (t.quantity || 0), 0);
       const activeListings = userListings.filter(l => l.status === "Available").length;
 
       setStats({
         totalEarnings,
         activeListings,
-        energySold,
+        creditsSold,
         totalTransactions: sellerTransactions.length
       });
     } catch (error) {
@@ -78,7 +78,7 @@ const ProducerDashboard = () => {
     {
       title: "Total Earnings",
       value: `₹${stats.totalEarnings.toFixed(2)}`,
-      description: "Last 30 days",
+      description: "From completed sales",
       icon: DollarSign,
       color: "text-green-600 dark:text-green-400",
       bgColor: "bg-green-100 dark:bg-green-900/20"
@@ -92,10 +92,10 @@ const ProducerDashboard = () => {
       bgColor: "bg-blue-100 dark:bg-blue-900/20"
     },
     {
-      title: "Energy Sold",
-      value: `${stats.energySold} kWh`,
-      description: "This month",
-      icon: Zap,
+      title: "Credits Sold",
+      value: `${stats.creditsSold} credits`,
+      description: "Total carbon credits sold",
+      icon: Leaf,
       color: "text-yellow-600 dark:text-yellow-400",
       bgColor: "bg-yellow-100 dark:bg-yellow-900/20"
     },
@@ -140,7 +140,7 @@ const ProducerDashboard = () => {
                 Producer Dashboard
               </h1>
               <p className="mt-2 text-muted-foreground">
-                Welcome back, {user?.name || user?.email}! Manage your energy listings and track your earnings.
+                Welcome back, {user?.name || user?.email}! Manage your carbon credit listings and track your earnings.
               </p>
             </div>
             <Button 
@@ -219,7 +219,7 @@ const ProducerDashboard = () => {
               <CardHeader>
                 <CardTitle>Active Listings</CardTitle>
                 <CardDescription>
-                  Your currently available energy listings
+                  Your currently available carbon credit listings
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -263,7 +263,7 @@ const ProducerDashboard = () => {
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground mb-1">
-                                {listing.projectType || "Energy"} · {listing.quantity} {listing.unit || "credits"}
+                                {listing.projectType || "Carbon Credit"} · {listing.quantity} {listing.unit || "credits"}
                               </p>
                               {listing.location && (
                                 <p className="text-xs text-muted-foreground">{listing.location}</p>
@@ -309,7 +309,7 @@ const ProducerDashboard = () => {
               <CardHeader>
                 <CardTitle>Recent Transactions</CardTitle>
                 <CardDescription>
-                  Your latest energy sales
+                  Your latest carbon credit sales
                 </CardDescription>
               </CardHeader>
               <CardContent>

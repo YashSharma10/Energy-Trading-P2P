@@ -34,6 +34,8 @@ const transactionSchema = new mongoose.Schema({
     default: "other",
   },
   transactionHash: { type: String },
+  stripeSessionId: { type: String },
+  stripePaymentIntentId: { type: String },
   purchaseDate: { type: Date, default: Date.now, index: true },
   completedAt: { type: Date },
 });

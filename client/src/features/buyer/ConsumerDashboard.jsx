@@ -7,10 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { 
   ShoppingCart, 
   DollarSign, 
-  Zap, 
+  Leaf, 
   History, 
   TrendingDown,
-  BarChart3,
   Search,
   MessageCircle
 } from "lucide-react";
@@ -55,7 +54,8 @@ const ConsumerDashboard = () => {
       setListings(availableListings);
 
       // Get buyer transactions (where user is the buyer)
-      const buyerTransactions = transactionsData?.data?.transactions || [];
+      const buyerTransactions = (transactionsData?.data?.transactions || [])
+        .sort((a, b) => new Date(b.purchaseDate) - new Date(a.purchaseDate));
       setTransactions(buyerTransactions);
 
       // Calculate stats from real data
@@ -102,23 +102,23 @@ const ConsumerDashboard = () => {
     {
       title: "Total Spent",
       value: formatCurrency(stats.totalSpent),
-      description: "Last 30 days",
+      description: "All-time spending",
       icon: DollarSign,
       color: "text-red-600 dark:text-red-400",
       bgColor: "bg-red-100 dark:bg-red-900/20"
     },
     {
-      title: "Energy Purchased",
-      value: `${stats.energyPurchased} kWh`,
-      description: "This month",
-      icon: Zap,
+      title: "Credits Purchased",
+      value: `${stats.energyPurchased} credits`,
+      description: "Carbon credits bought",
+      icon: Leaf,
       color: "text-blue-600 dark:text-blue-400",
       bgColor: "bg-blue-100 dark:bg-blue-900/20"
     },
     {
-      title: "Active Purchases",
+      title: "Available Listings",
       value: stats.activePurchases,
-      description: "Pending delivery",
+      description: "Open on marketplace",
       icon: ShoppingCart,
       color: "text-green-600 dark:text-green-400",
       bgColor: "bg-green-100 dark:bg-green-900/20"
@@ -144,7 +144,7 @@ const ConsumerDashboard = () => {
               Consumer Dashboard
             </h1>
             <p className="mt-1 text-sm font-medium text-muted-foreground">
-              Welcome back, <span className="text-brandMainColor dark:text-brandSubColor">{user?.name || user?.email}</span>! Browse and purchase clean energy.
+              Welcome back, <span className="text-brandMainColor dark:text-brandSubColor">{user?.name || user?.email}</span>! Browse and purchase carbon credits.
             </p>
           </div>
           <Button 
@@ -201,14 +201,10 @@ const ConsumerDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="purchases" className="space-y-6">
-          <TabsList className="grid w-full max-w-xl grid-cols-3">
+          <TabsList className="grid w-full max-w-sm grid-cols-2">
             <TabsTrigger value="purchases">
               <History className="mr-2 h-4 w-4" />
               Purchases
-            </TabsTrigger>
-            <TabsTrigger value="analytics">
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Analytics
             </TabsTrigger>
             <TabsTrigger value="chat">
               <MessageCircle className="mr-2 h-4 w-4" />
@@ -227,7 +223,7 @@ const ConsumerDashboard = () => {
                   Purchase History
                 </CardTitle>
                 <CardDescription className="text-sm mt-1 text-muted-foreground">
-                  Your recent clean energy transactions
+                  Your recent carbon credit transactions
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8 relative z-10">
@@ -243,7 +239,7 @@ const ConsumerDashboard = () => {
                         <ShoppingCart className="h-10 w-10 text-muted-foreground/50" />
                       </div>
                       <p className="text-xl font-bold text-foreground mb-2">No purchases yet</p>
-                      <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">Head over to the marketplace to make your first clean energy purchase from verified producers.</p>
+                      <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">Head over to the marketplace to make your first carbon credit purchase from verified project developers.</p>
                       <Button onClick={() => navigate("/marketplace")} className="h-12 px-8 rounded-xl bg-brandMainColor hover:bg-brandMainColor/90 font-bold shadow-lg transition-all">
                         Browse Marketplace
                       </Button>
@@ -257,25 +253,28 @@ const ConsumerDashboard = () => {
                         >
                           <div className="absolute top-0 right-0 w-32 h-32 bg-brandMainColor/5 dark:bg-brandSubColor/5 rounded-bl-[120px] -z-10 group-hover:scale-110 group-hover:bg-brandMainColor/10 transition-transform duration-500"></div>
                           
-                          <div className="flex justify-between items-start mb-8 z-10">
-                            <div>
-                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 text-xs font-bold text-muted-foreground mb-4 backdrop-blur-sm shadow-sm">
+                          <div className="flex flex-col gap-3 mb-6 z-10">
+                            <div className="flex items-center justify-between">
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 text-xs font-bold text-muted-foreground backdrop-blur-sm shadow-sm">
                                 <History className="w-3.5 h-3.5" /> {formatDate(purchase.purchaseDate || purchase.createdAt)}
                               </div>
-                              <h4 className="text-xl font-extrabold text-foreground line-clamp-1">
-                                {purchase.seller?.name || purchase.seller?.email || 'Verified Seller'}
-                              </h4>
+                              <Badge variant="outline" className={`capitalize font-bold border-2 rounded-xl py-1 px-3 ${purchase.paymentStatus === 'completed' ? 'text-green-600 border-green-600/30 bg-green-500/10 dark:text-green-400' : 'text-amber-600 border-amber-600/30 bg-amber-500/10 dark:text-amber-400'}`}>
+                                {purchase.paymentStatus || 'completed'}
+                              </Badge>
                             </div>
-                            <Badge variant="outline" className={`capitalize font-bold border-2 rounded-xl py-1 px-3 ${purchase.paymentStatus === 'completed' ? 'text-green-600 border-green-600/30 bg-green-500/10 dark:text-green-400' : 'text-amber-600 border-amber-600/30 bg-amber-500/10 dark:text-amber-400'}`}>
-                              {purchase.paymentStatus || 'completed'}
-                            </Badge>
+                            <h4
+                              className="text-xl font-extrabold text-foreground"
+                              title={purchase.listing?.title || "Carbon Credit"}
+                            >
+                              {purchase.listing?.title || "Carbon Credit"}
+                            </h4>
                           </div>
                           
                           <div className="flex items-end justify-between z-10 mt-2 bg-card/40 p-4 rounded-2xl border border-border/30 backdrop-blur-md">
                             <div>
-                              <p className="text-xs font-bold text-muted-foreground mb-1 uppercase tracking-wider">Energy Amount</p>
-                              <div className="flex items-center gap-1.5 font-black text-xl text-blue-600 dark:text-blue-400">
-                                <Zap className="w-5 h-5" /> {purchase.quantity} <span className="text-sm text-muted-foreground font-semibold">kWh</span>
+                              <p className="text-xs font-bold text-muted-foreground mb-1 uppercase tracking-wider">Credits</p>
+                              <div className="flex items-center gap-1.5 font-black text-xl text-green-600 dark:text-green-400">
+                                <Leaf className="w-5 h-5" /> {purchase.quantity} <span className="text-sm text-muted-foreground font-semibold">credits</span>
                               </div>
                             </div>
                             <div className="text-right">
@@ -305,57 +304,6 @@ const ConsumerDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-4 mt-6">
-            <Card className="border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-                <BarChart3 className="w-64 h-64 text-brandMainColor dark:text-brandSubColor" />
-              </div>
-              <CardHeader className="border-b border-border/20 bg-muted/10 pb-6 px-8 rounded-t-3xl relative z-10">
-                <CardTitle className="text-2xl font-extrabold flex items-center gap-3">
-                  <BarChart3 className="w-7 h-7 text-brandMainColor dark:text-brandSubColor" />
-                  Consumption Analytics
-                </CardTitle>
-                <CardDescription className="text-sm mt-1 text-muted-foreground">
-                  Track your environmental impact and spending trends over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-8 relative z-10">
-                <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-background/40">
-                  {/* Subtle abstract background */}
-                  <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-brandMainColor/10 dark:from-brandSubColor/10 to-transparent pointer-events-none"></div>
-                  <div className="absolute bottom-0 left-0 w-full flex items-end justify-between px-8 opacity-20 pointer-events-none pb-4 gap-2">
-                    <div className="w-full bg-blue-500 rounded-t-md h-16"></div>
-                    <div className="w-full bg-purple-500 rounded-t-md h-32"></div>
-                    <div className="w-full bg-emerald-500 rounded-t-md h-24"></div>
-                    <div className="w-full bg-brandMainColor rounded-t-md h-40"></div>
-                    <div className="w-full bg-rose-500 rounded-t-md h-28"></div>
-                    <div className="w-full bg-amber-500 rounded-t-md h-36"></div>
-                  </div>
-                  
-                  {/* Blur overlay */}
-                  <div className="backdrop-blur-md absolute inset-0 z-0 bg-background/20"></div>
-
-                  <div className="relative z-10 text-center py-24 px-6 flex flex-col items-center">
-                    <div className="inline-flex items-center justify-center w-24 h-24 rounded-[30px] bg-background/80 shadow-[0_8px_30px_rgb(0,0,0,0.1)] border border-border/50 mb-8 backdrop-blur-xl transform -rotate-6">
-                      <BarChart3 className="h-12 w-12 text-brandMainColor dark:text-brandSubColor rotate-6" />
-                    </div>
-                    <h3 className="text-3xl font-extrabold mb-4 text-foreground tracking-tight">Advanced Analytics Dashboard</h3>
-                    <p className="text-muted-foreground mb-10 max-w-lg mx-auto text-base leading-relaxed">
-                      Unlock detailed insights into your energy consumption patterns, cost savings, and monitor the total carbon footprint reduced through your purchases.
-                    </p>
-                    <Button 
-                      onClick={() => navigate("/buyer-analytics")}
-                      className="h-14 px-10 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-bold shadow-[0_8px_30px_rgb(0,0,0,0.15)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.25)] transition-all hover:-translate-y-1"
-                    >
-                      <BarChart3 className="w-5 h-5 mr-3" />
-                      Open Full Analytics
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="chat" className="space-y-4 mt-6">
             <Card className="border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-card/60 backdrop-blur-xl rounded-3xl overflow-hidden relative">
               <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
@@ -364,10 +312,10 @@ const ConsumerDashboard = () => {
               <CardHeader className="border-b border-border/20 bg-muted/10 pb-6 px-8 rounded-t-3xl relative z-10">
                 <CardTitle className="text-2xl font-extrabold flex items-center gap-3">
                   <MessageCircle className="w-7 h-7 text-brandMainColor dark:text-brandSubColor" />
-                  Producer Messages
+                  Seller Messages
                 </CardTitle>
                 <CardDescription className="text-sm mt-1 text-muted-foreground">
-                  Connect with energy producers directly to negotiate rates and finalize your deals.
+                  Connect with carbon credit sellers directly to negotiate and finalize your deals.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-8 relative z-10 bg-background/20">

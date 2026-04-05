@@ -6,6 +6,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("authToken");
 
   useEffect(() => {
@@ -15,14 +16,20 @@ export const AuthProvider = ({ children }) => {
         setUser(data.user);
       } catch {
         logoutUser();
+      } finally {
+        setLoading(false);
       }
     };
-    if (token) fetchUser();
+    if (token) {
+      fetchUser();
+    } else {
+      setLoading(false);
+    }
   }, [token]);
 
   const value = useMemo(
-    () => ({ user, setUser, logoutUser, token }),
-    [user, token]
+    () => ({ user, setUser, logoutUser, token, loading }),
+    [user, token, loading]
   );
 
   return (

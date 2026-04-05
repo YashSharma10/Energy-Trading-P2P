@@ -10,6 +10,19 @@ import initSocket from "./src/socket/index.js";
 // Initialize Express app
 const app = express();
 
+// ─── Stripe webhook MUST use raw body — register BEFORE express.json() ───────
+import ecoProductRoutes from "./src/routes/ecoProductRoute.js";
+import carbonCreditRoutes from "./src/routes/listingRoute.js";
+
+app.use("/api/eco-products/webhook",
+  express.raw({ type: "application/json" }),
+  (await import("./src/controllers/ecoProductController.js")).handleStripeWebhook
+);
+app.use("/api/credits/webhook",
+  express.raw({ type: "application/json" }),
+  (await import("./src/controllers/listingController.js")).handleCreditStripeWebhook
+);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -17,11 +30,9 @@ app.use(passport.initialize());
 
 // import routes
 import userRoutes from "./src/routes/authRoute.js";
-import carbonCreditRoutes from "./src/routes/listingRoute.js";
 import adminRoutes from "./src/routes/adminRoute.js";
 import analyticsRoutes from "./src/routes/analyticsRoute.js";
 import chatbotRoutes from "./src/routes/chatbotRoute.js";
-import ecoProductRoutes from "./src/routes/ecoProductRoute.js";
 import pricingRoutes from "./src/routes/pricingRoute.js";
 import blogRoutes from "./src/routes/blogRoute.js";
 import chatRoutes from "./src/routes/chatRoute.js";
