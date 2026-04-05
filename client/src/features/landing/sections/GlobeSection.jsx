@@ -56,6 +56,14 @@ function GlobeSection() {
             ? "/admin"
             : "/profile";
 
+  const ctaLabel = !user
+    ? "Get Started"
+    : user.role === "PRODUCER"
+      ? "List Your Credits"
+      : user.role === "CONSUMER"
+        ? "Browse Carbon Credits"
+        : "Go to Dashboard";
+
   return (
     <section className="relative flex min-h-screen flex-col justify-start overflow-hidden bg-background">
       {/* Radial fade at center so globe shows through */}
@@ -111,7 +119,7 @@ function GlobeSection() {
             to={startTradingPath}
             className="group relative inline-flex items-center gap-2 rounded-full bg-brandMainColor px-8 py-3.5 text-sm font-semibold text-white shadow-[0_10px_28px_-12px_rgba(92,179,56,0.7)] ring-1 ring-brandMainColor/40 transition-all duration-300 hover:-translate-y-0.5 hover:bg-brandMainColor/90 hover:shadow-[0_16px_34px_-14px_rgba(92,179,56,0.85)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandMainColor focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0"
           >
-            <span>Start Trading</span>
+            <span>{ctaLabel}</span>
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
           <Link
