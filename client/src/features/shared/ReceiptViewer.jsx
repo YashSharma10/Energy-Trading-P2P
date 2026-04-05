@@ -59,7 +59,7 @@ const ReceiptViewer = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-background p-8 pt-24 lg:pt-28">
         <div className="mx-auto max-w-4xl space-y-6">
           <Skeleton className="h-12 w-64" />
           <Skeleton className="h-96 w-full" />
@@ -69,7 +69,7 @@ const ReceiptViewer = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-24 lg:pt-28">
       <div className="print:hidden sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-4">
           <Button variant="ghost" onClick={() => navigate("/transaction-listing")}>

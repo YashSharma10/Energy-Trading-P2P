@@ -63,6 +63,7 @@ const emptyForm = {
   ecoRating: "3",
   tags: "",
   specifications: "",
+  carbonEmissionSaved: "",
 };
 
 const AdminEcoProducts = () => {
@@ -124,6 +125,7 @@ const AdminEcoProducts = () => {
       ecoRating: String(product.ecoRating || 3),
       tags: (product.tags || []).join(", "),
       specifications: product.specifications || "",
+      carbonEmissionSaved: product.carbonEmissionSaved != null ? String(product.carbonEmissionSaved) : "",
     });
     setFormOpen(true);
   };
@@ -147,6 +149,7 @@ const AdminEcoProducts = () => {
               .filter(Boolean)
           : [],
         specifications: formData.specifications,
+        carbonEmissionSaved: formData.carbonEmissionSaved !== "" ? Number(formData.carbonEmissionSaved) : undefined,
       };
 
       if (editingProduct) {
@@ -204,7 +207,7 @@ const AdminEcoProducts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-24 lg:pt-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
@@ -380,6 +383,28 @@ const AdminEcoProducts = () => {
                     placeholder="Weight, dimensions, materials..."
                   />
                 </div>
+                <div>
+                  <Label htmlFor="carbonEmissionSaved">
+                    CO₂ Emission Saved (kg per unit)
+                  </Label>
+                  <Input
+                    id="carbonEmissionSaved"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.carbonEmissionSaved}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        carbonEmissionSaved: e.target.value,
+                      })
+                    }
+                    placeholder="e.g. 12.5"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Estimated kg of CO₂ saved per unit purchased
+                  </p>
+                </div>
                 <Button
                   type="submit"
                   disabled={submitting}
@@ -494,6 +519,7 @@ const AdminEcoProducts = () => {
                       <TableHead>Price</TableHead>
                       <TableHead>Stock</TableHead>
                       <TableHead>Eco Rating</TableHead>
+                      <TableHead>CO₂ Saved</TableHead>
                       <TableHead>Sold</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -503,7 +529,7 @@ const AdminEcoProducts = () => {
                     {products.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={8}
+                          colSpan={9}
                           className="text-center py-8 text-muted-foreground"
                         >
                           No products yet. Click "Add Product" to create one.
@@ -544,6 +570,15 @@ const AdminEcoProducts = () => {
                               {"★".repeat(product.ecoRating || 0)}
                               {"☆".repeat(5 - (product.ecoRating || 0))}
                             </span>
+                          </TableCell>
+                          <TableCell>
+                            {product.carbonEmissionSaved != null ? (
+                              <span className="text-green-700 dark:text-green-400 font-medium text-sm">
+                                {product.carbonEmissionSaved} kg
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">—</span>
+                            )}
                           </TableCell>
                           <TableCell>{product.totalSold}</TableCell>
                           <TableCell>

@@ -11,7 +11,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock3,
-  Filter,
+  ArrowLeft,
   Loader2,
   RefreshCw,
   Shield,
@@ -145,14 +145,19 @@ const AdminListings = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-4">
+    <div className="min-h-screen bg-background pt-24 lg:pt-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Shield className="h-5 w-5 text-primary" />
+            <Button variant="outline" size="icon" onClick={() => navigate("/admin")}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">Listing Approvals</h1>
-              <p className="text-xs text-muted-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+                <Shield className="h-7 w-7 text-primary" />
+                Listing Approvals
+              </h1>
+              <p className="text-muted-foreground mt-1">
                 Review seller submissions and approve only verified listings.
               </p>
             </div>
@@ -160,16 +165,11 @@ const AdminListings = () => {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="sm"
               onClick={() => fetchPendingListings({ silent: true })}
               disabled={refreshing}
             >
               {refreshing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               Refresh
-            </Button>
-            <Button size="sm" onClick={() => navigate("/admin")}>
-              <Filter className="mr-2 h-4 w-4" />
-              Back to Admin
             </Button>
           </div>
         </div>

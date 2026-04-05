@@ -30,6 +30,7 @@ const EcoProductSchema = new mongoose.Schema({
   },
   tags: [{ type: String }],
   specifications: { type: String, default: "" },
+  carbonEmissionSaved: { type: Number, min: 0, default: null },
   addedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

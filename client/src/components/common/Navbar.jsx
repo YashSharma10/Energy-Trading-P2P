@@ -131,14 +131,30 @@ const Navbar = () => {
           )}
 
           {user?.role === "admin" && (
-            <DesktopNavLink
-              to="/admin/eco-products"
-              isGreen
-              hoveredPath={hoveredPath}
-              setHoveredPath={setHoveredPath}
-            >
-              Manage Eco Products
-            </DesktopNavLink>
+            <>
+              <DesktopNavLink
+                to="/admin/eco-products"
+                isGreen
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              >
+                Manage Eco Products
+              </DesktopNavLink>
+              <DesktopNavLink
+                to="/admin/listings"
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              >
+                Approve Listings
+              </DesktopNavLink>
+              <DesktopNavLink
+                to="/admin/blogs"
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              >
+                Manage Blogs
+              </DesktopNavLink>
+            </>
           )}
 
           {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
@@ -180,46 +196,50 @@ const Navbar = () => {
               </DesktopNavLink>
             )}
 
-          <DesktopNavLink
-            to="/eco-marketplace"
-            isGreen
-            hoveredPath={hoveredPath}
-            setHoveredPath={setHoveredPath}
-          >
-            <Leaf className="h-3.5 w-3.5" /> Eco Shop
-          </DesktopNavLink>
+          {user?.role !== "admin" && (
+            <>
+              <DesktopNavLink
+                to="/eco-marketplace"
+                isGreen
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              >
+                <Leaf className="h-3.5 w-3.5" /> Eco Shop
+              </DesktopNavLink>
 
-          <DesktopNavLink
-            to="/calculator"
-            hoveredPath={hoveredPath}
-            setHoveredPath={setHoveredPath}
-          >
-            Calculator
-          </DesktopNavLink>
+              <DesktopNavLink
+                to="/calculator"
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              >
+                Calculator
+              </DesktopNavLink>
 
-          <DesktopNavLink
-            to="/blog"
-            hoveredPath={hoveredPath}
-            setHoveredPath={setHoveredPath}
-          >
-            Blog
-          </DesktopNavLink>
+              <DesktopNavLink
+                to="/blog"
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              >
+                Blog
+              </DesktopNavLink>
 
-          <DesktopNavLink
-            to="/about"
-            hoveredPath={hoveredPath}
-            setHoveredPath={setHoveredPath}
-          >
-            About Us
-          </DesktopNavLink>
+              <DesktopNavLink
+                to="/about"
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              >
+                About Us
+              </DesktopNavLink>
 
-          <DesktopNavLink
-            to="/contact"
-            hoveredPath={hoveredPath}
-            setHoveredPath={setHoveredPath}
-          >
-            Meet the Team
-          </DesktopNavLink>
+              <DesktopNavLink
+                to="/contact"
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              >
+                Meet the Team
+              </DesktopNavLink>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-2 lg:gap-4">
@@ -281,14 +301,30 @@ const Navbar = () => {
               )}
 
               {user?.role === "admin" && (
-                <MobileNavLink
-                  to="/admin/eco-products"
-                  onClick={closeSheet}
-                  icon={Settings}
-                  isGreen
-                >
-                  Manage Eco Products
-                </MobileNavLink>
+                <>
+                  <MobileNavLink
+                    to="/admin/eco-products"
+                    onClick={closeSheet}
+                    icon={Settings}
+                    isGreen
+                  >
+                    Manage Eco Products
+                  </MobileNavLink>
+                  <MobileNavLink
+                    to="/admin/listings"
+                    onClick={closeSheet}
+                    icon={Settings}
+                  >
+                    Approve Listings
+                  </MobileNavLink>
+                  <MobileNavLink
+                    to="/admin/blogs"
+                    onClick={closeSheet}
+                    icon={Settings}
+                  >
+                    Manage Blogs
+                  </MobileNavLink>
+                </>
               )}
 
               {(user?.role === "PRODUCER" || user?.role === "BOTH") && (
@@ -326,34 +362,38 @@ const Navbar = () => {
                   </MobileNavLink>
                 )}
 
-              <MobileNavLink
-                to="/eco-marketplace"
-                onClick={closeSheet}
-                icon={Leaf}
-                isGreen
-              >
-                Eco Shop
-              </MobileNavLink>
+              {user?.role !== "admin" && (
+                <>
+                  <MobileNavLink
+                    to="/eco-marketplace"
+                    onClick={closeSheet}
+                    icon={Leaf}
+                    isGreen
+                  >
+                    Eco Shop
+                  </MobileNavLink>
 
-              <MobileNavLink
-                to="/calculator"
-                onClick={closeSheet}
-                icon={Calculator}
-              >
-                Calculator
-              </MobileNavLink>
+                  <MobileNavLink
+                    to="/calculator"
+                    onClick={closeSheet}
+                    icon={Calculator}
+                  >
+                    Calculator
+                  </MobileNavLink>
 
-              <MobileNavLink to="/blog" onClick={closeSheet} icon={BookOpen}>
-                Blog
-              </MobileNavLink>
+                  <MobileNavLink to="/blog" onClick={closeSheet} icon={BookOpen}>
+                    Blog
+                  </MobileNavLink>
 
-              <MobileNavLink to="/about" onClick={closeSheet} icon={Info}>
-                About Us
-              </MobileNavLink>
+                  <MobileNavLink to="/about" onClick={closeSheet} icon={Info}>
+                    About Us
+                  </MobileNavLink>
 
-              <MobileNavLink to="/contact" onClick={closeSheet} icon={Mail}>
-                Meet the Team
-              </MobileNavLink>
+                  <MobileNavLink to="/contact" onClick={closeSheet} icon={Mail}>
+                    Meet the Team
+                  </MobileNavLink>
+                </>
+              )}
               <div className="mt-2 border-t border-border pt-4">
                 {user ? (
                   <Button

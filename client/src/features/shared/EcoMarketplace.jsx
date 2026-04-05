@@ -25,7 +25,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
-import DynamicPriceDisplay from "@/components/DynamicPriceDisplay";
 import PaymentSuccessDialog from "@/components/common/PaymentSuccessDialog";
 import {
   Search,
@@ -40,6 +39,7 @@ import {
   RefreshCw,
   X,
   CreditCard,
+  Wind,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
@@ -439,12 +439,24 @@ const EcoMarketplace = () => {
                     </div>
                   )}
 
-                  <div className="mb-3">
-                    <DynamicPriceDisplay
-                      itemId={product._id}
-                      isProduct={true}
-                      basePrice={product.price}
-                    />
+                  {/* Carbon emission saved */}
+                  {product.carbonEmissionSaved != null && (
+                    <div className="flex items-center gap-1.5 mb-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg px-2.5 py-1.5">
+                      <Wind className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                        Saves {product.carbonEmissionSaved} kg CO₂
+                      </span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">
+                        per unit
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="mb-3 text-right">
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">Price</p>
+                    <p className="text-xl font-bold text-primary">
+                      ₹{product.price?.toLocaleString()}
+                    </p>
                   </div>
 
                   <div className="flex items-center justify-between mt-4">

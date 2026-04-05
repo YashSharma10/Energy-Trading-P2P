@@ -50,6 +50,9 @@ export const createEcoProductSchema = Joi.object({
   }),
   tags: Joi.array().items(Joi.string().max(50)).max(10).optional(),
   specifications: Joi.string().max(3000).allow("").optional(),
+  carbonEmissionSaved: Joi.number().min(0).max(100000).allow(null).optional().messages({
+    "number.min": "Carbon emission saved must be a positive number",
+  }),
   status: Joi.string()
     .valid("Active", "OutOfStock", "Discontinued")
     .default("Active")
@@ -78,6 +81,7 @@ export const updateEcoProductSchema = Joi.object({
   ecoRating: Joi.number().integer().min(1).max(5).optional(),
   tags: Joi.array().items(Joi.string().max(50)).max(10).optional(),
   specifications: Joi.string().max(3000).allow("").optional(),
+  carbonEmissionSaved: Joi.number().min(0).max(100000).allow(null).optional(),
   status: Joi.string().valid("Active", "OutOfStock", "Discontinued").optional(),
 });
 

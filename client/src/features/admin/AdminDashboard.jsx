@@ -176,49 +176,19 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b border-border bg-muted/40 dark:bg-muted/20">
-        <div className="mx-auto max-w-7xl px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary shrink-0" />
+    <div className="min-h-screen bg-background pt-24 lg:pt-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-lg font-semibold text-foreground leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2">
+                <Shield className="h-7 w-7 text-primary" />
                 Admin Dashboard
               </h1>
-              <p className="text-xs text-muted-foreground">
-                Manage users, monitor transactions, and oversee platform
-                operations
+              <p className="text-muted-foreground mt-1">
+                Manage users, monitor transactions, and oversee platform operations
               </p>
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Link to="/admin/listings">
-              <Button
-                size="sm"
-                className="bg-amber-600 hover:bg-amber-700 text-white"
-              >
-                <ClipboardCheck className="h-4 w-4 mr-2" />
-                Approve Listings
-              </Button>
-            </Link>
-            <Link to="/admin/blogs">
-              <Button
-                size="sm"
-                className="bg-brandMainColor hover:bg-brandMainColor/90 text-white"
-              >
-                <BookOpen className="h-4 w-4 mr-2" />
-                Manage Blogs
-              </Button>
-            </Link>
-            <Link to="/admin/eco-products">
-              <Button
-                size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Leaf className="h-4 w-4 mr-2" />
-                Manage Eco Products
-              </Button>
-            </Link>
           </div>
         </div>
       </div>
