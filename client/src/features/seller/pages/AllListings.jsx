@@ -370,23 +370,6 @@ const ListingsPage = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Select
-                              value={status}
-                              onValueChange={(value) =>
-                                handleStatusChange(listing._id, value)
-                              }
-                            >
-                              <SelectTrigger className="w-[120px] rounded-xl border-border/50">
-                                <SelectValue placeholder="Status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Available">
-                                  Available
-                                </SelectItem>
-                                <SelectItem value="Pending">Pending</SelectItem>
-                                <SelectItem value="Sold">Sold</SelectItem>
-                              </SelectContent>
-                            </Select>
                             <Button
                               variant="outline"
                               size="sm"
