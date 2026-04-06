@@ -2,7 +2,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { NumberTicker } from "@/components/magicui/number-ticker";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -198,7 +204,6 @@ const ListingsPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-brandMainColor/5 to-emerald-500/5 dark:via-brandSubColor/5 dark:to-lime-400/5 pt-24 lg:pt-28 relative">
       <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:20px_20px]" />
       <div className="mx-auto max-w-7xl px-6 py-8 sm:px-8 lg:px-10 relative z-10">
-
         {/* Header */}
         <div className="mb-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 rounded-3xl bg-card/60 backdrop-blur-xl border border-border/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div>
@@ -207,7 +212,8 @@ const ListingsPage = () => {
               Manage Listings
             </h1>
             <p className="mt-1 text-sm font-medium text-muted-foreground">
-              Keep your projects accurate and up to date so buyers can quickly discover your credits.
+              Keep your projects accurate and up to date so buyers can quickly
+              discover your credits.
             </p>
           </div>
           <Button
@@ -224,9 +230,12 @@ const ListingsPage = () => {
           {statsCards.map((stat) => {
             const Icon = stat.icon;
             return (
-              <Card key={stat.title} className="group overflow-hidden border border-border/30 bg-card/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 rounded-2xl relative">
+              <Card
+                key={stat.title}
+                className="group overflow-hidden border border-border/30 bg-card/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 rounded-2xl relative"
+              >
                 <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500">
-                  <Icon className={`h-24 w-24 ${stat.color.split(' ')[0]}`} />
+                  <Icon className={`h-24 w-24 ${stat.color.split(" ")[0]}`} />
                 </div>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-semibold text-muted-foreground">
@@ -237,13 +246,15 @@ const ListingsPage = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="relative z-10">
-                  {typeof stat.value === 'number' ? (
+                  {typeof stat.value === "number" ? (
                     <NumberTicker
                       value={stat.value}
                       className="text-3xl font-extrabold tracking-tight"
                     />
                   ) : (
-                    <div className="text-3xl font-extrabold text-foreground tracking-tight">{stat.value}</div>
+                    <div className="text-3xl font-extrabold text-foreground tracking-tight">
+                      {stat.value}
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -301,25 +312,34 @@ const ListingsPage = () => {
             <Table>
               <TableHeader>
                 <TableRow className="border-border/30 hover:bg-transparent">
-                  <TableHead className="font-bold text-foreground">Project</TableHead>
+                  <TableHead className="font-bold text-foreground">
+                    Project
+                  </TableHead>
                   <TableHead className="hidden lg:table-cell font-bold text-foreground">
                     Description
                   </TableHead>
-                  <TableHead className="font-bold text-foreground">Quantity</TableHead>
-                  <TableHead className="font-bold text-foreground">Price / Credit</TableHead>
-                  <TableHead className="font-bold text-foreground">Status</TableHead>
-                  <TableHead className="text-right font-bold text-foreground">Actions</TableHead>
+                  <TableHead className="font-bold text-foreground">
+                    Quantity
+                  </TableHead>
+                  <TableHead className="font-bold text-foreground">
+                    Price / Credit
+                  </TableHead>
+                  <TableHead className="font-bold text-foreground">
+                    Status
+                  </TableHead>
+                  <TableHead className="text-right font-bold text-foreground">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="py-16 text-center"
-                    >
+                    <TableCell colSpan={6} className="py-16 text-center">
                       <div className="h-8 w-8 animate-spin rounded-full border-4 border-brandMainColor border-t-transparent mx-auto mb-4"></div>
-                      <p className="text-muted-foreground font-medium">Loading your listings...</p>
+                      <p className="text-muted-foreground font-medium">
+                        Loading your listings...
+                      </p>
                     </TableCell>
                   </TableRow>
                 ) : filteredListings.length ? (
@@ -340,7 +360,10 @@ const ListingsPage = () => {
                       : "0";
 
                     return (
-                      <TableRow key={listing._id} className="last:border-0 border-border/20 hover:bg-muted/30 transition-colors">
+                      <TableRow
+                        key={listing._id}
+                        className="last:border-0 border-border/20 hover:bg-muted/30 transition-colors"
+                      >
                         <TableCell className="font-semibold text-foreground">
                           <div className="flex flex-col">
                             <span className="font-bold">{listing.title}</span>
@@ -361,10 +384,15 @@ const ListingsPage = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="font-bold text-foreground">₹{priceLabel}</span>
+                          <span className="font-bold text-foreground">
+                            ₹{priceLabel}
+                          </span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className={`capitalize font-bold border-2 rounded-xl py-1 px-3 ${badgeClasses}`}>
+                          <Badge
+                            variant="outline"
+                            className={`capitalize font-bold border-2 rounded-xl py-1 px-3 ${badgeClasses}`}
+                          >
                             {status.toLowerCase()}
                           </Badge>
                         </TableCell>
@@ -387,15 +415,16 @@ const ListingsPage = () => {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="py-16 text-center"
-                    >
+                    <TableCell colSpan={6} className="py-16 text-center">
                       <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                         <Grid className="h-10 w-10 text-muted-foreground/50" />
                       </div>
-                      <p className="text-xl font-bold text-foreground mb-2">No listings match your filters</p>
-                      <p className="text-sm text-muted-foreground">Try adjusting your search or status filter.</p>
+                      <p className="text-xl font-bold text-foreground mb-2">
+                        No listings match your filters
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Try adjusting your search or status filter.
+                      </p>
                     </TableCell>
                   </TableRow>
                 )}
