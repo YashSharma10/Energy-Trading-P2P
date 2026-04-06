@@ -6,7 +6,7 @@ import {
   getChatMessages,
   getChatableUsers,
   getOrCreateChat,
-  getUserChats
+  getUserChats,
 } from "@/services/chatService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,12 +31,12 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
 
   const socket = useMemo(() => {
     if (!token) return null;
-    
+
     console.log("🔌 Connecting to socket:", SOCKET_BASE_URL);
-    
+
     const socketInstance = io(SOCKET_BASE_URL, {
       auth: { token },
-      transports: ["websocket", "polling"]
+      transports: ["websocket", "polling"],
     });
 
     // Add connection event handlers for debugging
@@ -72,7 +72,7 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
         setLoading(true);
         const [chatList, userList] = await Promise.all([
           getUserChats(),
-          getChatableUsers()
+          getChatableUsers(),
         ]);
         setChats(chatList.data || []);
         setUsers(userList.data || []);
@@ -95,17 +95,17 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
 
     const handleMessage = ({ chatId, message }) => {
       console.log("📨 Received message:", { chatId, message });
-      
+
       setChats((previous) =>
         previous.map((chat) =>
           chat._id === chatId
             ? {
                 ...chat,
                 lastMessage: message.content,
-                lastMessageTime: message.timestamp
+                lastMessageTime: message.timestamp,
               }
-            : chat
-        )
+            : chat,
+        ),
       );
 
       if (activeChatRef.current?._id === chatId) {
@@ -138,7 +138,7 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
 
   useEffect(() => {
     if (!socket || !activeChat?._id) return;
-    
+
     console.log("🔗 Joining chat:", activeChat._id);
     socket.emit("chat:join", { chatId: activeChat._id });
 
@@ -199,26 +199,33 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
       return;
     }
 
-    console.log("📤 Sending message:", { chatId: activeChat._id, content: trimmed });
-
-    socket.emit("chat:message", { chatId: activeChat._id, content: trimmed }, (response) => {
-      if (response) {
-        if (response.success) {
-          console.log("✅ Message sent successfully");
-        } else {
-          console.error("❌ Message failed:", response.message);
-          toast.error(response.message || "Failed to send message");
-        }
-      }
+    console.log("📤 Sending message:", {
+      chatId: activeChat._id,
+      content: trimmed,
     });
+
+    socket.emit(
+      "chat:message",
+      { chatId: activeChat._id, content: trimmed },
+      (response) => {
+        if (response) {
+          if (response.success) {
+            console.log("✅ Message sent successfully");
+          } else {
+            console.error("❌ Message failed:", response.message);
+            toast.error(response.message || "Failed to send message");
+          }
+        }
+      },
+    );
   };
 
   const currentUserId = getUserId(user);
 
   return (
-    <div className="grid gap-6 md:grid-cols-[300px_1fr] h-[600px] bg-background/50 backdrop-blur-xl rounded-[32px] border border-border/40 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+    <div className="grid gap-6 md:grid-cols-[300px_1fr] h-[600px] min-h-0 bg-background/50 backdrop-blur-xl rounded-[32px] border border-border/40 overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
       {/* Sidebar: Chat List */}
-      <div className="flex flex-col border-r border-border/40 bg-card/40">
+      <div className="flex min-h-0 flex-col border-r border-border/40 bg-card/40">
         <div className="p-5 border-b border-border/40 bg-muted/10">
           <div className="flex items-center gap-2 mb-1">
             <MessageCircle className="h-5 w-5 text-brandMainColor dark:text-brandSubColor" />
@@ -236,7 +243,7 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
             )}
           </div>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-3 space-y-6 custom-scrollbar">
           {loading ? (
             <div className="flex justify-center items-center h-32">
@@ -251,11 +258,13 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                 </p>
                 <div className="space-y-1">
                   {chats.length === 0 && (
-                    <p className="text-sm text-muted-foreground px-2 italic">No chats yet.</p>
+                    <p className="text-sm text-muted-foreground px-2 italic">
+                      No chats yet.
+                    </p>
                   )}
                   {chats.map((chat) => {
                     const otherParticipant = chat.participants?.find(
-                      (participant) => participant._id !== currentUserId
+                      (participant) => participant._id !== currentUserId,
                     );
                     const isActive = activeChat?._id === chat._id;
                     return (
@@ -264,20 +273,34 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                         type="button"
                         onClick={() => handleChatSelect(chat)}
                         className={`w-full rounded-2xl px-4 py-3 text-left text-sm transition-all duration-200 border border-transparent ${
-                          isActive 
-                            ? "bg-brandMainColor/10 dark:bg-brandSubColor/10 border-brandMainColor/20 dark:border-brandSubColor/20 shadow-sm" 
+                          isActive
+                            ? "bg-brandMainColor/10 dark:bg-brandSubColor/10 border-brandMainColor/20 dark:border-brandSubColor/20 shadow-sm"
                             : "hover:bg-muted/50 hover:border-border/50"
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${isActive ? 'bg-brandMainColor text-white dark:bg-brandSubColor dark:text-slate-900' : 'bg-muted text-muted-foreground'}`}>
-                            {(otherParticipant?.name || otherParticipant?.email || "U").charAt(0).toUpperCase()}
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${isActive ? "bg-brandMainColor text-white dark:bg-brandSubColor dark:text-slate-900" : "bg-muted text-muted-foreground"}`}
+                          >
+                            {(
+                              otherParticipant?.name ||
+                              otherParticipant?.email ||
+                              "U"
+                            )
+                              .charAt(0)
+                              .toUpperCase()}
                           </div>
                           <div className="flex-1 overflow-hidden">
-                            <p className={`font-bold line-clamp-1 ${isActive ? 'text-brandMainColor dark:text-brandSubColor' : 'text-foreground'}`}>
-                              {otherParticipant?.name || otherParticipant?.email || "Producer"}
+                            <p
+                              className={`font-bold line-clamp-1 ${isActive ? "text-brandMainColor dark:text-brandSubColor" : "text-foreground"}`}
+                            >
+                              {otherParticipant?.name ||
+                                otherParticipant?.email ||
+                                "Producer"}
                             </p>
-                            <p className={`text-xs line-clamp-1 mt-0.5 ${isActive ? 'text-foreground/80' : 'text-muted-foreground'}`}>
+                            <p
+                              className={`text-xs line-clamp-1 mt-0.5 ${isActive ? "text-foreground/80" : "text-muted-foreground"}`}
+                            >
                               {chat.lastMessage || "Start a conversation"}
                             </p>
                           </div>
@@ -287,7 +310,7 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                   })}
                 </div>
               </div>
-              
+
               {/* Available Users */}
               <div className="space-y-3">
                 <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground px-2">
@@ -295,7 +318,9 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                 </p>
                 <div className="space-y-1">
                   {users.length === 0 && (
-                    <p className="text-sm text-muted-foreground px-2 italic">No producers found.</p>
+                    <p className="text-sm text-muted-foreground px-2 italic">
+                      No producers found.
+                    </p>
                   )}
                   {users.map((participant) => (
                     <button
@@ -305,7 +330,9 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                       className="w-full rounded-2xl px-4 py-2.5 text-left transition-all duration-200 hover:bg-muted/50 border border-transparent hover:border-border/50 flex items-center gap-3"
                     >
                       <div className="w-8 h-8 rounded-full bg-secondary/80 flex items-center justify-center text-xs font-bold text-secondary-foreground">
-                        {(participant.name || participant.email || "P").charAt(0).toUpperCase()}
+                        {(participant.name || participant.email || "P")
+                          .charAt(0)
+                          .toUpperCase()}
                       </div>
                       <div className="flex-1 overflow-hidden">
                         <p className="text-sm font-semibold text-foreground line-clamp-1">
@@ -325,9 +352,9 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex flex-col bg-card/60 relative">
+      <div className="relative flex min-h-0 flex-col bg-card/60">
         <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-[size:16px_16px] pointer-events-none z-0" />
-        
+
         {/* Chat Header */}
         <div className="p-5 border-b border-border/40 bg-muted/5 backdrop-blur-md relative z-10 flex items-center justify-between shadow-sm">
           {activeChat ? (
@@ -336,21 +363,26 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                 <MessageCircle className="w-5 h-5 text-brandMainColor dark:text-brandSubColor" />
               </div>
               <div>
-                <h3 className="font-bold text-lg tracking-tight">Active Negotiation</h3>
+                <h3 className="font-bold text-lg tracking-tight">
+                  Active Negotiation
+                </h3>
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Connected securely
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>{" "}
+                  Connected securely
                 </p>
               </div>
             </div>
           ) : (
             <div>
-              <h3 className="font-bold text-lg text-muted-foreground">No Chat Selected</h3>
+              <h3 className="font-bold text-lg text-muted-foreground">
+                No Chat Selected
+              </h3>
             </div>
           )}
         </div>
 
         {/* Messages */}
-        <div className="flex-1 p-6 overflow-y-auto relative z-10 space-y-6 custom-scrollbar flex flex-col">
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col space-y-6 overflow-y-scroll p-6 custom-scrollbar">
           {!activeChat ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center opacity-50 space-y-4">
               <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
@@ -358,7 +390,9 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
               </div>
               <div>
                 <h4 className="text-xl font-bold">Select a conversation</h4>
-                <p className="text-sm">Choose a contact from the sidebar to chat</p>
+                <p className="text-sm">
+                  Choose a contact from the sidebar to chat
+                </p>
               </div>
             </div>
           ) : (
@@ -369,15 +403,25 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                     <MessageCircle className="w-8 h-8 text-brandMainColor dark:text-brandSubColor -rotate-12" />
                   </div>
                   <div className="max-w-xs">
-                    <p className="text-foreground tracking-tight font-bold">Start a new negotiation</p>
-                    <p className="text-xs text-muted-foreground mt-1">Say hello and discuss clean energy rates</p>
+                    <p className="text-foreground tracking-tight font-bold">
+                      Start a new negotiation
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Say hello and discuss clean energy rates
+                    </p>
                   </div>
                 </div>
               ) : (
                 messages.map((message, idx) => {
-                  const isMe = message.sender?._id === currentUserId || message.sender === currentUserId;
-                  const showAvatar = idx === 0 || (isMe !== (messages[idx-1].sender?._id === currentUserId || messages[idx-1].sender === currentUserId));
-                  
+                  const isMe =
+                    message.sender?._id === currentUserId ||
+                    message.sender === currentUserId;
+                  const showAvatar =
+                    idx === 0 ||
+                    isMe !==
+                      (messages[idx - 1].sender?._id === currentUserId ||
+                        messages[idx - 1].sender === currentUserId);
+
                   return (
                     <div
                       key={`${message._id || message.timestamp || idx}`}
@@ -388,8 +432,10 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                           P
                         </div>
                       )}
-                      {!isMe && !showAvatar && <div className="w-8 shrink-0"></div>}
-                      
+                      {!isMe && !showAvatar && (
+                        <div className="w-8 shrink-0"></div>
+                      )}
+
                       <div
                         className={`max-w-[75%] rounded-[24px] px-5 py-3 text-[15px] shadow-[0_2px_10px_rgb(0,0,0,0.04)] font-medium ${
                           isMe
@@ -399,13 +445,15 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                       >
                         {message.content}
                       </div>
-                      
+
                       {isMe && showAvatar && (
                         <div className="w-8 h-8 rounded-full bg-primary/20 text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0 mt-auto border border-primary/30 shadow-sm">
                           Me
                         </div>
                       )}
-                      {isMe && !showAvatar && <div className="w-8 shrink-0"></div>}
+                      {isMe && !showAvatar && (
+                        <div className="w-8 shrink-0"></div>
+                      )}
                     </div>
                   );
                 })
@@ -422,13 +470,17 @@ const LiveChatPanel = ({ initialParticipantId = null }) => {
                 <Input
                   value={messageInput}
                   onChange={(event) => setMessageInput(event.target.value)}
-                  placeholder={socketConnected ? "Type your message..." : "Waiting for connection..."}
+                  placeholder={
+                    socketConnected
+                      ? "Type your message..."
+                      : "Waiting for connection..."
+                  }
                   disabled={!socketConnected}
                   className="h-14 rounded-2xl border-border/50 bg-background pl-6 pr-4 focus-visible:ring-brandMainColor/50 shadow-inner"
                 />
               </div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="h-14 w-14 rounded-2xl bg-brandMainColor hover:bg-brandMainColor/90 shadow-md transition-transform active:scale-95 shrink-0"
                 disabled={!socketConnected || !messageInput.trim()}
               >
