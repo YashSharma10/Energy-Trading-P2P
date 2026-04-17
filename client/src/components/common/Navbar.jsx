@@ -26,6 +26,7 @@ const DesktopNavLink = ({
   children,
   isGreen = false,
   exact = false,
+  external = false,
   hoveredPath,
   setHoveredPath,
 }) => {
@@ -40,9 +41,12 @@ const DesktopNavLink = ({
     : "text-brandMainColor";
   const baseInactive = "text-foreground/80";
 
+  const LinkComponent = external ? "a" : Link;
+  const linkProps = external ? { href: to } : { to };
+
   return (
-    <Link
-      to={to}
+    <LinkComponent
+      {...linkProps}
       onMouseEnter={() => setHoveredPath(to)}
       className={`relative rounded-xl px-3 py-2 text-sm font-medium transition-colors ${active ? baseActive : baseInactive} hover:${isGreen ? "text-green-600 dark:text-green-400" : "text-foreground"}`}
     >
@@ -57,7 +61,7 @@ const DesktopNavLink = ({
         />
       )}
       <div className="relative z-10 flex items-center gap-1.5">{children}</div>
-    </Link>
+    </LinkComponent>
   );
 };
 
@@ -68,6 +72,7 @@ const MobileNavLink = ({
   icon: Icon,
   isGreen = false,
   exact = false,
+  external = false,
 }) => {
   const location = useLocation();
   const active = exact
@@ -79,9 +84,12 @@ const MobileNavLink = ({
     : "text-brandMainColor";
   const inactiveColor = "text-foreground/70";
 
+  const LinkComponent = external ? "a" : Link;
+  const linkProps = external ? { href: to } : { to };
+
   return (
-    <Link
-      to={to}
+    <LinkComponent
+      {...linkProps}
       onClick={onClick}
       className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
         active
@@ -93,7 +101,7 @@ const MobileNavLink = ({
         <Icon className={`h-4 w-4 ${active ? "opacity-100" : "opacity-70"}`} />
       )}
       {children}
-    </Link>
+    </LinkComponent>
   );
 };
 
@@ -229,6 +237,15 @@ const Navbar = () => {
                 setHoveredPath={setHoveredPath}
               >
                 About Us
+              </DesktopNavLink>
+
+              <DesktopNavLink
+                to="/pitch/index.html"
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+                external
+              >
+                Pitch Deck
               </DesktopNavLink>
 
               <DesktopNavLink
@@ -387,6 +404,10 @@ const Navbar = () => {
 
                   <MobileNavLink to="/about" onClick={closeSheet} icon={Info}>
                     About Us
+                  </MobileNavLink>
+
+                  <MobileNavLink to="/pitch/index.html" onClick={closeSheet} icon={Zap} external>
+                    Pitch Deck
                   </MobileNavLink>
 
                   <MobileNavLink to="/contact" onClick={closeSheet} icon={Mail}>
