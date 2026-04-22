@@ -239,14 +239,14 @@ const Navbar = () => {
                 About Us
               </DesktopNavLink>
 
-              <DesktopNavLink
+              {/* <DesktopNavLink
                 to="/pitch/index.html"
                 hoveredPath={hoveredPath}
                 setHoveredPath={setHoveredPath}
                 external
               >
                 Pitch Deck
-              </DesktopNavLink>
+              </DesktopNavLink> */}
 
               <DesktopNavLink
                 to="/contact"
