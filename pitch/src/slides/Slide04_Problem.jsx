@@ -1,11 +1,42 @@
 import { motion } from 'framer-motion';
-import { Clock, Banknote, Wrench, X } from 'lucide-react';
+import { TrendingUp, Target, Layers, Search, AlertTriangle } from 'lucide-react';
 
 const stagger = { animate: { transition: { staggerChildren: 0.15 } } };
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
+
+const problems = [
+  {
+    icon: TrendingUp,
+    number: '01',
+    title: 'Rising Global Carbon Emissions',
+    desc: 'Industrial growth is accelerating emissions faster than reduction efforts can keep pace.',
+    color: '#ef4444',
+  },
+  {
+    icon: Target,
+    number: '02',
+    title: 'Net-Zero Difficult to Achieve',
+    desc: 'Companies lack the tools, data, and marketplace access to realistically hit net-zero targets.',
+    color: '#f59e0b',
+  },
+  {
+    icon: Layers,
+    number: '03',
+    title: 'Complex Carbon Credit Systems',
+    desc: 'Fragmented, opaque markets make buying and selling credits slow, expensive, and unreliable.',
+    color: '#f87171',
+  },
+  {
+    icon: Search,
+    number: '04',
+    title: 'Lack of Transparency & Analytics',
+    desc: 'No real-time visibility into emission data, credit validity, or compliance status.',
+    color: '#fbbf24',
+  },
+];
 
 export default function Slide04_Problem() {
   return (
@@ -26,166 +57,73 @@ export default function Slide04_Problem() {
         animate="animate"
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
-        <motion.div variants={fadeUp} className="slide-label">
-          Chapter 3 — The Real Problem
+        <motion.div variants={fadeUp} className="badge badge-red mb-24">
+          <AlertTriangle size={14} /> MARKET PROBLEM &amp; MISSION
         </motion.div>
 
         <motion.h2 variants={fadeUp} className="slide-title lg">
-          They <span className="text-gradient-red">cannot</span> change overnight
+          Enabling Net-Zero Through{' '}
+          <span className="text-gradient-red">Smart Carbon Markets</span>
         </motion.h2>
 
         <motion.p variants={fadeUp} className="slide-subtitle center-text mx-auto">
-          Sustainability is necessary — but the transition is expensive, slow, and operationally devastating.
+          Four systemic failures blocking the world from reaching net-zero.
         </motion.p>
 
-        <motion.div variants={fadeUp} className="mt-48 grid-2" style={{ maxWidth: 800, margin: '48px auto 0' }}>
-          {/* Time constraint */}
-          <motion.div
-            className="glass-card-red"
-            whileHover={{ y: -4 }}
-            style={{ textAlign: 'left' }}
-          >
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginBottom: 20,
-            }}>
-              <div className="icon-circle icon-circle-red">
-                <Clock size={24} />
-              </div>
-              <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fca5a5' }}>
-                  Time Constraint
-                </h3>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                  6 months is not enough
-                </p>
-              </div>
-            </div>
-            
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.7 }}>
-              <p>Replacing heavy machinery, redesigning processes, and building green infrastructure takes <strong style={{ color: '#f87171' }}>years, not months</strong>.</p>
-            </div>
-
+        <motion.div
+          variants={fadeUp}
+          className="mt-48 grid-2"
+          style={{ maxWidth: 860, width: '100%' }}
+        >
+          {problems.map(({ icon: Icon, number, title, desc, color }, i) => (
             <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + i * 0.18 }}
+              whileHover={{ y: -4 }}
               style={{
-                marginTop: 16,
                 display: 'flex',
-                alignItems: 'center',
-                gap: 8,
+                gap: 18,
+                padding: '22px 24px',
+                background: `${color}06`,
+                border: `1px solid ${color}22`,
+                borderRadius: 14,
+                textAlign: 'left',
               }}
             >
-              {['Planning', 'Procurement', 'Installation', 'Testing'].map((step, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: '4px 10px',
-                    background: 'rgba(239,68,68,0.08)',
-                    borderRadius: 6,
-                    fontSize: '0.7rem',
-                    color: 'var(--text-muted)',
-                    fontFamily: 'var(--font-mono)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 4,
-                  }}
-                >
-                  <X size={10} color="#ef4444" />
-                  {step}
+              <div style={{ flexShrink: 0 }}>
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  background: `${color}12`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <Icon size={22} color={color} />
                 </div>
-              ))}
-            </motion.div>
-          </motion.div>
-
-          {/* Financial constraint */}
-          <motion.div
-            className="glass-card-red"
-            whileHover={{ y: -4 }}
-            style={{ textAlign: 'left' }}
-          >
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginBottom: 20,
-            }}>
-              <div className="icon-circle icon-circle-amber">
-                <Banknote size={24} />
               </div>
               <div>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fcd34d' }}>
-                  Financial Constraint
+                <div style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.65rem',
+                  color,
+                  letterSpacing: 2,
+                  marginBottom: 6,
+                }}>
+                  {number}
+                </div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>
+                  {title}
                 </h3>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                  Budget already stretched
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                  {desc}
                 </p>
               </div>
-            </div>
-
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.7 }}>
-              <p>Green technology investment requires <strong style={{ color: '#fbbf24' }}>₹200+ Crore</strong> — capital they simply don't have available right now.</p>
-            </div>
-
-            <div style={{ marginTop: 16 }}>
-              {/* Cost bar */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 6 }}>
-                <span>Available Budget</span>
-                <span style={{ color: '#fbbf24' }}>₹30 Cr / ₹200 Cr needed</span>
-              </div>
-              <div style={{
-                height: 6,
-                background: 'rgba(255,255,255,0.05)',
-                borderRadius: 3,
-                overflow: 'hidden',
-              }}>
-                <motion.div
-                  style={{
-                    height: '100%',
-                    background: 'linear-gradient(90deg, #f59e0b, #ef4444)',
-                    borderRadius: 3,
-                  }}
-                  initial={{ width: 0 }}
-                  animate={{ width: '15%' }}
-                  transition={{ duration: 1.5, delay: 1 }}
-                />
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Central message */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
-          className="mt-48"
-          style={{
-            padding: '20px 40px',
-            background: 'rgba(255, 255, 255, 0.02)',
-            border: '1px solid var(--border-subtle)',
-            borderRadius: 12,
-            maxWidth: 600,
-          }}
-        >
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            justifyContent: 'center',
-          }}>
-            <Wrench size={20} color="var(--text-muted)" />
-            <p style={{
-              fontSize: '1.1rem',
-              fontWeight: 600,
-              fontFamily: 'var(--font-display)',
-              color: 'var(--text-secondary)',
-            }}>
-              "Sustainability is necessary, but transition is{' '}
-              <span style={{ color: '#f87171' }}>expensive</span> and{' '}
-              <span style={{ color: '#fbbf24' }}>slow</span>."
-            </p>
-          </div>
+            </motion.div>
+          ))}
         </motion.div>
       </motion.div>
     </div>

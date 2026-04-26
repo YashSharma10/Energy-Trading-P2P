@@ -1,6 +1,43 @@
 import { motion } from 'framer-motion';
 import { Factory, TrendingUp, Flame, Building2 } from 'lucide-react';
 
+// Inline CarbonEase logo — same SVG used on the main site
+function CarbonEaseLogo({ width = 220 }) {
+  return (
+    <svg
+      width={width}
+      height={width * 0.2}
+      viewBox="0 0 400 80"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id="ceLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#7CD957" />
+          <stop offset="100%" stopColor="#4EAF37" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(10, 15)">
+        <path
+          d="M 25 0 L 46 0 C 48.2 0 50 1.8 50 4 L 50 25 C 50 38.8 38.8 50 25 50 L 4 50 C 1.8 50 0 48.2 0 46 L 0 25 C 0 11.2 11.2 0 25 0 Z"
+          fill="url(#ceLogoGrad)"
+        />
+        <path d="M27 9 L11 28 H25 L23 41 L39 22 H25 L27 9 Z" fill="#ffffff" />
+      </g>
+      <text
+        x="75"
+        y="52"
+        fontFamily="'Outfit', 'Inter', system-ui, sans-serif"
+        fontSize="36"
+        letterSpacing="-0.5px"
+      >
+        <tspan fill="#f1f5f9" fontWeight="800">Carbon</tspan>
+        <tspan fill="#4ade80" fontWeight="500">Ease</tspan>
+      </text>
+    </svg>
+  );
+}
+
 const stagger = {
   animate: { transition: { staggerChildren: 0.15 } },
 };
@@ -41,11 +78,13 @@ export default function Slide02_Story() {
         animate="animate"
       >
         <motion.div variants={fadeUp} className="slide-label">
-          Chapter 1 — The Story Begins
+          The Story Begins
         </motion.div>
 
+        {/* CarbonEase logo removed */}
+
         <motion.h2 variants={fadeUp} className="slide-title lg">
-          Meet <span className="text-gradient-green">ABC Manufacturing Ltd.</span>
+          Meet <span className="text-gradient-green">Ease Manufacturing Pvt. Ltd.</span>
         </motion.h2>
 
         <motion.p variants={fadeUp} className="slide-subtitle">
@@ -127,7 +166,7 @@ export default function Slide02_Story() {
           style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap' }}
         >
           {[
-            { icon: Building2, label: 'HQ: Mumbai, India' },
+            { icon: Building2, label: 'HQ: Gurugram, India' },
             { icon: Factory, label: 'Sector: Heavy Manufacturing' },
             { icon: TrendingUp, label: 'Valued at ₹500 Cr' },
           ].map(({ icon: Icon, label }, i) => (

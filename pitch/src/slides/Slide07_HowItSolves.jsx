@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Factory, ArrowRight, ShieldCheck, BarChart3, CreditCard, Leaf } from 'lucide-react';
+import { Factory, ArrowRight, ShieldCheck, BarChart3, CreditCard, CheckCircle, X } from 'lucide-react';
 
 const stagger = { animate: { transition: { staggerChildren: 0.15 } } };
 const fadeUp = {
@@ -7,11 +7,20 @@ const fadeUp = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
+// Gap & Innovation comparison from poster
+const comparison = [
+  { label: 'Manual', existing: true, carbonease: false, ceLabel: 'Automated' },
+  { label: 'No-AI', existing: true, carbonease: false, ceLabel: 'AI Powered' },
+  { label: 'Complex', existing: true, carbonease: false, ceLabel: 'User-Friendly' },
+  { label: 'Fragmented', existing: true, carbonease: false, ceLabel: 'Integrated' },
+];
+
 const flowSteps = [
-  { icon: Factory, label: 'Calculate\nEmissions', color: '#f87171', bg: 'rgba(239,68,68,0.1)' },
-  { icon: BarChart3, label: 'Analyze on\nCarbonEase', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
-  { icon: CreditCard, label: 'Buy Carbon\nCredits', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
-  { icon: ShieldCheck, label: 'Achieve\nCompliance', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
+  { icon: Factory,     label: 'Emission\nReduction Projects', color: '#f87171', bg: 'rgba(239,68,68,0.1)' },
+  { icon: ShieldCheck, label: 'Verification\n& Certification',  color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
+  { icon: CreditCard,  label: 'Credits\nGenerated',             color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
+  { icon: BarChart3,   label: 'Trading on\nCarbonEase',         color: '#a855f7', bg: 'rgba(168,85,247,0.1)' },
+  { icon: CheckCircle, label: 'Impact &\nReporting',            color: '#22c55e', bg: 'rgba(34,197,94,0.15)' },
 ];
 
 export default function Slide07_HowItSolves() {
@@ -29,21 +38,17 @@ export default function Slide07_HowItSolves() {
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
         <motion.div variants={fadeUp} className="slide-label">
-          Chapter 6 — The Transformation
+          Gap &amp; Innovation
         </motion.div>
 
         <motion.h2 variants={fadeUp} className="slide-title lg">
-          How ABC <span className="text-gradient-green">Survived</span>
+          Carbon Credit <span className="text-gradient-green">Lifecycle</span>
         </motion.h2>
-
-        <motion.p variants={fadeUp} className="slide-subtitle center-text mx-auto">
-          From non-compliance to full regulatory compliance — without shutting down a single factory.
-        </motion.p>
 
         {/* Flow diagram */}
         <motion.div
           variants={fadeUp}
-          className="mt-48"
+          className="mt-32"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -57,37 +62,37 @@ export default function Slide07_HowItSolves() {
               key={i}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 + i * 0.3, duration: 0.6 }}
+              transition={{ delay: 0.6 + i * 0.25, duration: 0.5 }}
               style={{ display: 'flex', alignItems: 'center' }}
             >
               <motion.div
-                whileHover={{ y: -6, scale: 1.05 }}
+                whileHover={{ y: -5, scale: 1.05 }}
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  gap: 12,
-                  padding: '24px 28px',
+                  gap: 10,
+                  padding: '20px 22px',
                   background: 'rgba(255,255,255,0.02)',
                   border: `1px solid ${color}30`,
-                  borderRadius: 16,
-                  minWidth: 140,
+                  borderRadius: 14,
+                  minWidth: 120,
                   cursor: 'default',
                 }}
               >
                 <div style={{
-                  width: 52,
-                  height: 52,
-                  borderRadius: 14,
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
                   background: bg,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <Icon size={24} color={color} />
+                  <Icon size={22} color={color} />
                 </div>
                 <span style={{
-                  fontSize: '0.85rem',
+                  fontSize: '0.78rem',
                   fontWeight: 600,
                   color: 'var(--text-primary)',
                   textAlign: 'center',
@@ -98,7 +103,7 @@ export default function Slide07_HowItSolves() {
                 </span>
                 <span style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '0.65rem',
+                  fontSize: '0.6rem',
                   color: 'var(--text-muted)',
                 }}>
                   Step {i + 1}
@@ -109,75 +114,67 @@ export default function Slide07_HowItSolves() {
                 <motion.div
                   initial={{ opacity: 0, scaleX: 0 }}
                   animate={{ opacity: 1, scaleX: 1 }}
-                  transition={{ delay: 1.2 + i * 0.3, duration: 0.4 }}
-                  style={{ padding: '0 8px' }}
+                  transition={{ delay: 1 + i * 0.25 }}
+                  style={{ padding: '0 6px' }}
                 >
-                  <ArrowRight size={20} color="var(--green-400)" style={{ opacity: 0.5 }} />
+                  <ArrowRight size={18} color="var(--green-400)" style={{ opacity: 0.5 }} />
                 </motion.div>
               )}
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Result summary */}
+        {/* Gap & Innovation table */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.2, duration: 0.8 }}
-          className="mt-48"
+          variants={fadeUp}
+          className="mt-32"
           style={{
             display: 'flex',
-            gap: 40,
+            gap: 12,
             justifyContent: 'center',
             flexWrap: 'wrap',
           }}
         >
-          {[
-            { value: '12K', unit: 'tons', label: 'CO₂ Offset', color: '#22c55e' },
-            { value: '100%', unit: '', label: 'Compliance', color: '#22c55e' },
-            { value: '₹0', unit: '', label: 'Penalty Paid', color: '#fbbf24' },
-            { value: '0', unit: '', label: 'Jobs Lost', color: '#22c55e' },
-          ].map(({ value, unit, label, color }, i) => (
+          {comparison.map(({ label, ceLabel }, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 2.4 + i * 0.15 }}
-              style={{ textAlign: 'center' }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.8 + i * 0.12 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 18px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 100,
+                fontSize: '0.82rem',
+              }}
             >
-              <div style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '2rem',
-                fontWeight: 900,
-                color,
-              }}>
-                {value}
-                <span style={{ fontSize: '0.9rem', fontWeight: 500, marginLeft: 2 }}>{unit}</span>
-              </div>
-              <div style={{
-                fontSize: '0.8rem',
+              <span style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
                 color: 'var(--text-muted)',
-                marginTop: 4,
-                fontFamily: 'var(--font-mono)',
+                textDecoration: 'line-through',
               }}>
+                <X size={12} color="#ef4444" />
                 {label}
-              </div>
+              </span>
+              <ArrowRight size={12} color="var(--green-400)" />
+              <span style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                color: '#4ade80',
+                fontWeight: 600,
+              }}>
+                <CheckCircle size={12} color="#22c55e" />
+                {ceLabel}
+              </span>
             </motion.div>
           ))}
-        </motion.div>
-
-        {/* Leaf decoration */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.1 }}
-          transition={{ delay: 2 }}
-          style={{
-            position: 'absolute',
-            bottom: 60,
-            right: 60,
-          }}
-        >
-          <Leaf size={80} color="#22c55e" />
         </motion.div>
       </motion.div>
     </div>

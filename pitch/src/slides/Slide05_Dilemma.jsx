@@ -58,7 +58,7 @@ export default function Slide05_Dilemma() {
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
         <motion.div variants={fadeUp} className="slide-label">
-          Chapter 4 — The Dilemma
+          The Dilemma
         </motion.div>
 
         <motion.h2 variants={fadeUp} className="slide-title lg">
@@ -67,7 +67,7 @@ export default function Slide05_Dilemma() {
         </motion.h2>
 
         <motion.p variants={fadeUp} className="slide-subtitle center-text mx-auto">
-          ABC Manufacturing is trapped. Every traditional path leads to failure.
+          Ease Manufacturing is trapped. Every traditional path leads to failure.
         </motion.p>
 
         <motion.div
