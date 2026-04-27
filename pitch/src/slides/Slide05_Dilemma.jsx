@@ -159,31 +159,37 @@ export default function Slide05_Dilemma() {
 
         {/* Tension line */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2, duration: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2, duration: 0.8 }}
           className="mt-48"
-          style={{
-            padding: '16px 32px',
-            border: '1px solid rgba(239,68,68,0.15)',
-            borderRadius: 12,
-            background: 'rgba(239,68,68,0.03)',
-          }}
         >
-          <p style={{
-            fontSize: '1.15rem',
-            fontWeight: 600,
-            fontFamily: 'var(--font-display)',
-            color: 'var(--text-secondary)',
-          }}>
-            Is there <motion.span
-              style={{ color: '#fbbf24' }}
-              animate={{ opacity: [1, 0.5, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              another way?
-            </motion.span>
-          </p>
+          <motion.div
+            style={{
+              padding: '16px 36px',
+              border: '1px solid rgba(251, 191, 36, 0.3)',
+              borderRadius: 12,
+              background: 'rgba(251, 191, 36, 0.1)',
+            }}
+            animate={{ 
+              scale: [1, 1.05, 1],
+              boxShadow: [
+                '0 0 15px rgba(251, 191, 36, 0.15)',
+                '0 0 35px rgba(251, 191, 36, 0.45)',
+                '0 0 15px rgba(251, 191, 36, 0.15)'
+              ]
+            }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <p style={{
+              fontSize: '1.15rem',
+              fontWeight: 600,
+              fontFamily: 'var(--font-display)',
+              color: 'var(--text-secondary)',
+            }}>
+              Is there <span style={{ color: '#fbbf24' }}>another way?</span>
+            </p>
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>

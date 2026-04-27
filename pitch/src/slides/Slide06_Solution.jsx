@@ -133,15 +133,16 @@ export default function Slide06_Solution() {
           One platform. Seven powerful capabilities. Zero compromise on sustainability.
         </motion.p>
 
-        {/* 7-feature grid */}
+        {/* 7-feature layout */}
         <motion.div
           variants={fadeUp}
           className="mt-32"
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: 14,
-            maxWidth: 960,
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: 16,
+            maxWidth: 1100,
             width: '100%',
           }}
         >
@@ -151,57 +152,58 @@ export default function Slide06_Solution() {
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.5 + i * 0.1 }}
-              whileHover={{ y: -5, borderColor: `${color}44` }}
+              whileHover={{ y: -5, borderColor: `${color}55`, boxShadow: `0 10px 30px ${color}15` }}
               style={{
-                padding: '18px 16px',
+                padding: '20px',
                 background: 'rgba(255,255,255,0.02)',
                 border: '1px solid var(--border-subtle)',
-                borderRadius: 14,
+                borderRadius: 16,
                 textAlign: 'left',
                 position: 'relative',
                 overflow: 'hidden',
-                // span last item across 2 cols if odd
-                ...(i === 6 ? { gridColumn: 'span 2', maxWidth: '100%' } : {}),
+                flex: '0 0 calc(25% - 12px)',
+                minWidth: 230,
+                maxWidth: 260
               }}
             >
               <div style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0,
-                height: 2,
+                height: 3,
                 background: color,
-                opacity: 0.6,
+                opacity: 0.8,
               }} />
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 10,
-                marginBottom: 10,
+                gap: 12,
+                marginBottom: 12,
               }}>
                 <div style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 10,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
                   background: `${color}15`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  <Icon size={18} color={color} />
+                  <Icon size={20} color={color} />
                 </div>
                 <span style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '0.6rem',
+                  fontSize: '0.65rem',
                   color,
                   letterSpacing: 2,
                 }}>
                   {number.padStart(2, '0')}
                 </span>
               </div>
-              <h4 style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: 5, color: 'var(--text-primary)' }}>
+              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: 6, color: 'var(--text-primary)' }}>
                 {title}
               </h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', lineHeight: 1.5 }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: 1.5 }}>
                 {desc}
               </p>
             </motion.div>

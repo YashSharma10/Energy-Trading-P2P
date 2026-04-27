@@ -5,13 +5,10 @@ import './index.css';
 import Slide01_Hook from './slides/Slide01_Hook';
 import Slide02_Story from './slides/Slide02_Story';
 import Slide03_Conflict from './slides/Slide03_Conflict';
-import Slide04_Problem from './slides/Slide04_Problem';
 import Slide05_Dilemma from './slides/Slide05_Dilemma';
 import Slide06_Solution from './slides/Slide06_Solution';
 import Slide07_HowItSolves from './slides/Slide07_HowItSolves';
 import Slide08_Walkthrough from './slides/Slide08_Walkthrough';
-import Slide09_AIPower from './slides/Slide09_AIPower';
-import Slide10_TechStack from './slides/Slide10_TechStack';
 import Slide11_Impact from './slides/Slide11_Impact';
 import Slide12_MarketVision from './slides/Slide12_MarketVision';
 import Slide12b_BusinessModel from './slides/Slide12b_BusinessModel';
@@ -22,12 +19,9 @@ const slides = [
   { component: Slide02_Story,      label: 'The Story' },
   { component: Slide03_Conflict,   label: 'The Conflict' },
   { component: Slide05_Dilemma,    label: 'The Dilemma' },
-  { component: Slide04_Problem,    label: 'The Problem' },
   { component: Slide06_Solution,   label: 'CarbonEase' },
   { component: Slide07_HowItSolves,label: 'How It Works' },
   { component: Slide08_Walkthrough,label: 'Platform' },
-  { component: Slide09_AIPower,    label: 'AI Power' },
-  { component: Slide10_TechStack,  label: 'Tech Stack' },
   { component: Slide11_Impact,     label: 'Impact' },
   { component: Slide12_MarketVision,   label: 'Market'        },
   { component: Slide12b_BusinessModel, label: 'Business Model' },
