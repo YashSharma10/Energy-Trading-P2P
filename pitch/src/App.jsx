@@ -14,6 +14,7 @@ import Slide09_AIPower from './slides/Slide09_AIPower';
 import Slide10_TechStack from './slides/Slide10_TechStack';
 import Slide11_Impact from './slides/Slide11_Impact';
 import Slide12_MarketVision from './slides/Slide12_MarketVision';
+import Slide12b_BusinessModel from './slides/Slide12b_BusinessModel';
 import Slide14_Closing from './slides/Slide14_Closing';
 
 const slides = [
@@ -28,8 +29,9 @@ const slides = [
   { component: Slide09_AIPower,    label: 'AI Power' },
   { component: Slide10_TechStack,  label: 'Tech Stack' },
   { component: Slide11_Impact,     label: 'Impact' },
-  { component: Slide12_MarketVision,label: 'Market' },
-  { component: Slide14_Closing,    label: 'Closing' },
+  { component: Slide12_MarketVision,   label: 'Market'        },
+  { component: Slide12b_BusinessModel, label: 'Business Model' },
+  { component: Slide14_Closing,        label: 'Closing'        },
 ];
 
 // Story-flow transition: outgoing page drifts away softly,

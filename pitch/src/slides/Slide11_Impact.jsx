@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Target, TrendingUp, ShieldCheck, BarChart3, Users, Check } from 'lucide-react';
+import { Target, TrendingUp, ShieldCheck, BarChart3, Users, Check, Thermometer, Sun, Cpu, Recycle, Network } from 'lucide-react';
 
 const stagger = { animate: { transition: { staggerChildren: 0.15 } } };
 const fadeUp = {
@@ -46,13 +46,13 @@ const outcomes = [
   },
 ];
 
-// SDGs from poster
+// SDGs from poster — official UN colors
 const sdgs = [
-  { number: '13', label: 'Climate Action', color: '#3d7a3d', emoji: '🌍' },
-  { number: '7',  label: 'Affordable & Clean Energy', color: '#f5a623', emoji: '☀️' },
-  { number: '9',  label: 'Industry, Innovation & Infrastructure', color: '#e05c2a', emoji: '🏗️' },
-  { number: '12', label: 'Responsible Consumption', color: '#c4922a', emoji: '♻️' },
-  { number: '17', label: 'Partnerships for the Goals', color: '#1a5276', emoji: '🤝' },
+  { number: '13', label: 'Climate\nAction',             color: '#3F7E44', icon: Thermometer },
+  { number: '7',  label: 'Affordable &\nClean Energy',  color: '#FCC30B', icon: Sun         },
+  { number: '9',  label: 'Industry,\nInnovation',       color: '#FD6925', icon: Cpu         },
+  { number: '12', label: 'Responsible\nConsumption',    color: '#BF8B2E', icon: Recycle     },
+  { number: '17', label: 'Partnerships\nfor the Goals', color: '#19486A', icon: Network     },
 ];
 
 export default function Slide11_Impact() {
@@ -140,50 +140,92 @@ export default function Slide11_Impact() {
         {/* SDGs */}
         <motion.div variants={fadeUp} className="mt-32" style={{ width: '100%', maxWidth: 1000 }}>
           <div style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.65rem',
-            letterSpacing: 3,
-            textTransform: 'uppercase',
-            color: 'var(--text-muted)',
-            marginBottom: 14,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            marginBottom: 16,
+            justifyContent: 'center',
           }}>
-            SDGs Covered
+            <div style={{ flex: 1, maxWidth: 120, height: 1, background: 'linear-gradient(to right, transparent, rgba(34,197,94,0.3))' }} />
+            <div style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.7rem',
+              letterSpacing: '3px',
+              textTransform: 'uppercase',
+              color: 'rgba(74,222,128,0.8)',
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}>
+              SDGs Covered
+            </div>
+            <div style={{ flex: 1, maxWidth: 120, height: 1, background: 'linear-gradient(to left, transparent, rgba(34,197,94,0.3))' }} />
           </div>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {sdgs.map(({ number, label, color, emoji }, i) => (
+
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {sdgs.map(({ number, label, color, icon: Icon }, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.2 + i * 0.1 }}
-                whileHover={{ y: -4, scale: 1.05 }}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 1.1 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -6, scale: 1.04 }}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '8px 16px',
-                  background: `${color}18`,
-                  border: `1px solid ${color}40`,
-                  borderRadius: 10,
+                  width: 130,
+                  borderRadius: 14,
+                  overflow: 'hidden',
+                  border: `1px solid ${color}50`,
+                  boxShadow: `0 4px 24px ${color}18`,
                   cursor: 'default',
+                  flexShrink: 0,
                 }}
               >
-                <span style={{ fontSize: '1.1rem' }}>{emoji}</span>
-                <div style={{ textAlign: 'left' }}>
+                {/* Colored header block */}
+                <div style={{
+                  background: color,
+                  padding: '14px 12px 10px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                }}>
                   <div style={{
                     fontFamily: 'var(--font-display)',
-                    fontWeight: 800,
-                    fontSize: '1rem',
-                    color,
+                    fontWeight: 900,
+                    fontSize: '2rem',
+                    color: '#fff',
                     lineHeight: 1,
+                    letterSpacing: '-1px',
                   }}>
                     {number}
                   </div>
                   <div style={{
-                    fontSize: '0.62rem',
-                    color: 'var(--text-muted)',
-                    maxWidth: 100,
-                    lineHeight: 1.3,
+                    width: 34,
+                    height: 34,
+                    borderRadius: 9,
+                    background: 'rgba(255,255,255,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <Icon size={18} color="#fff" strokeWidth={2} />
+                  </div>
+                </div>
+
+                {/* Label block */}
+                <div style={{
+                  background: `${color}18`,
+                  padding: '10px 12px',
+                  minHeight: 52,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}>
+                  <div style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    color: '#e2e8f0',
+                    lineHeight: 1.4,
+                    whiteSpace: 'pre-line',
+                    textAlign: 'left',
                   }}>
                     {label}
                   </div>
