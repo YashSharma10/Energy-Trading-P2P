@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import http from "http";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import passport from "./src/config/passport.js";
 import connect from "./src/db/index.js";
 import logger from "./src/utils/logger.js";
@@ -9,6 +12,9 @@ import initSocket from "./src/socket/index.js";
 
 // Initialize Express app
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDistPath = path.resolve(__dirname, "../client/dist");
 
 // ─── Stripe webhook MUST use raw body — register BEFORE express.json() ───────
 import ecoProductRoutes from "./src/routes/ecoProductRoute.js";
@@ -52,6 +58,13 @@ app.use("/api/eco-products", ecoProductRoutes);
 app.use("/api/pricing", pricingRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/chat", chatRoutes);
+
+if (fs.existsSync(path.join(clientDistPath, "index.html"))) {
+  app.use(express.static(clientDistPath));
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(clientDistPath, "index.html"));
+  });
+}
 
 // Start Server
 const PORT = config.port;
