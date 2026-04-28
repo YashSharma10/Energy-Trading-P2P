@@ -14,9 +14,9 @@ fetch(`${API_BASE}/chatbot/context`)
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="carbonease-theme">
+    <ThemeProvider defaultTheme="light" storageKey="carbonease-theme">
       <App />
       <Toaster />
     </ThemeProvider>
-  </StrictMode>
+  </StrictMode>,
 );

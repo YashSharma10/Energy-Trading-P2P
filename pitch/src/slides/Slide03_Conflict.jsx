@@ -70,7 +70,7 @@ function GovernmentNotice() {
       {/* Notice text */}
       <div style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', lineHeight: 1.8 }}>
         <p style={{ marginBottom: 12 }}>
-          <strong style={{ color: '#f87171' }}>TO:</strong> ABC Manufacturing Ltd.
+          <strong style={{ color: '#f87171' }}>TO:</strong> Ease Manufacturing Pvt. Ltd.
         </p>
         <p style={{ marginBottom: 12 }}>
           Your facility has been found in <strong style={{ color: '#f87171' }}>violation of carbon emission standards</strong> under the Environment Protection Act.
@@ -154,7 +154,7 @@ export default function Slide03_Conflict() {
         </motion.h2>
 
         <motion.p variants={fadeUp} className="slide-subtitle center-text mx-auto">
-          A strict compliance notice arrives — threatening the very existence of ABC Manufacturing.
+          The conflict notice arrives — threatening the very existence of Ease Manufacturing.
         </motion.p>
 
         <motion.div variants={fadeUp} className="mt-48" style={{ width: '100%' }}>
